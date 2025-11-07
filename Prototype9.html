@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL | Explorateur Web Infini</title>
+    <style>
+        :root {
+            /* Color scheme - Dark mode (default) */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #7c4dff;
+            --accent-secondary: #4d1fd6;
+            --surface: #242424;
+            --error: #cf6679;
+            --success: #03dac6;
+            --warning: #ffb74d;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            
+            /* Glassmorphism */
+            --glass-bg: rgba(24, 24, 26, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-blur: 12px;
+            
+            /* Neumorphism */
+            --neu-light: #282828;
+            --neu-dark: #181818;
+            
+            /* Dimensions & Spacing */
+            --header-height: 64px;
+            --footer-height: 64px;
+            --padding-sm: 8px;
+            --padding-md: 16px;
+            --padding-lg: 24px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+            --radius-pill: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            
+            /* Bottom Sheet */
+            --bottom-sheet-height: 70vh;
+            --bottom-sheet-header-height: 48px;
+        }
+        
+        /* Light mode theme */
+        [data-theme="light"] {
+            --bg-primary: #f9f9f9;
+            --bg-secondary: #f1f1f1;
+            --bg-tertiary: #e6e6e6;
+            --text-primary: #121212;
+            --text-secondary: #5f5f5f;
+            --accent: #6200ee;
+            --accent-secondary: #3700b3;
+            --surface: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --neu-light: #ffffff;
+            --neu-dark: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            transition: background-color var(--transition-medium), color var(--transition-medium);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            margin-bottom: var(--padding-md);
+        }
+        
+        p {
+            margin-bottom: var(--padding-md);
+            color: var(--text-secondary);
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        
+        a:hover {
+            color: var(--accent-secondary);
+        }
+        
+        button, .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: var(--padding-sm) var(--padding-md);
+            border-radius: var(--radius-pill);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover, .btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+        
+        button:active, .btn:active {
+            transform: translateY(0);
+        }
+        
+        button.flat, .btn.flat {
+            background: transparent;
+            color: var(--accent);
+        }
+        
+        button.flat:hover, .btn.flat:hover {
+            background: rgba(124, 77, 255, 0.1);
+        }
+        
+        button.icon, .btn.icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        input, textarea, select {
+            background: var(--bg-secondary);
+            border: none;
+            border-bottom: 2px solid var(--text-secondary);
+            padding: var(--padding-sm) var(--padding-md);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            transition: border-color var(--transition-fast);
+            outline: none;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Layout Components */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        header {
+            height: var(--header-height);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--padding-md);
+            background: var(--bg-secondary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: var(--box-shadow);
+            transition: transform var(--transition-medium);
+        }
+        
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+        
+        .header-subtitle {
+            padding: 0 var(--padding-md);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            height: 48px;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            z-index: 99;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--padding-sm);
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--accent);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: var(--padding-sm);
+        }
+        
+        main {
+            padding: calc(var(--header-height) + 12px) var(--padding-md) var(--footer-height);
+            flex: 1;
+            overflow-y: auto;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        footer {
+            height: var(--footer-height);
+            background: var(--bg-secondary);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: flex;
+            height: 100%;
+        }
+        
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+            font-size: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bottom-nav-item.active {
+            color: var(--accent);
+        }
+        
+        .bottom-nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .bottom-nav-item i {
+            font-size: 24px;
+        }
+        
+        /* Cards & Containers */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--padding-md);
+            margin-bottom: var(--padding-md);
+            box-shadow: var(--box-shadow);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--glass-shadow);
+        }
+        
+        .neu-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
+        }
+        
+        .section {
+            margin-bottom: var(--padding-lg);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--padding-sm);
+            margin-bottom: var(--padding-md);
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+        
+        .section-title i {
+            color: var(--accent);
+        }
+        
+        /* Grid layout for items */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: var(--padding-md);
+        }
+        
+        /* List layout for items */
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        /* Drawer & Side Panel */
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: var(--surface);
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform var(--transition-medium);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .drawer.open {
+            transform: translateX(0);
+        }
+        
+        .drawer-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--padding-md);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--padding-md);
+        }
+        
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-medium);
+        }
+        
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform var(--transition-medium);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            box-shadow: var(--box-shadow);
+            max-height: var(--bottom-sheet-height);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+        
+        .bottom-sheet-drag-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text-secondary);
+            opacity: 0.3;
+            border-radius: 2px;
+            margin: var(--padding-sm) auto;
+        }
+        
+        .bottom-sheet-header {
+            height: var(--bottom-sheet-header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--padding-md);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .bottom-sheet-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--padding-md);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Accordion */
+        .accordion {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: var(--padding-md);
+        }
+        
+        .accordion-header {
+            padding: var(--padding-md);
+            background: var(--surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .accordion-header:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-medium);
+            background: var(--bg-secondary);
+        }
+        
+        .accordion-content-inner {
+            padding: var(--padding-md);
+        }
+        
+        .accordion.open .accordion-content {
+            max-height: 500px;
+        }
+        
+        .accordion-icon {
+            transition: transform var(--transition-fast);
+        }
+        
+        .accordion.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* File/Folder/Link Items */
+        .item {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--padding-md);
+            display: flex;
+            align-items: center;
+            gap: var(--padding-md);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-fast);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background: var(--bg-tertiary);
+        }
+        
+        .item.selected {
+            background: rgba(124, 77, 255, 0.1);
+            border: 2px solid var(--accent);
+        }
+        
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 24px;
+        }
+        
+        .item-content {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .item-title {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .grid .item {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            height: 130px;
+            justify-content: center;
+        }
+        
+        .grid .item-title {
+            max-width: 100%;
+            font-size: 14px;
+        }
+        
+        /* Path breadcrumb */
+        .path-breadcrumb {
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            padding: var(--padding-sm) 0;
+            margin-bottom: var(--padding-md);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            white-space: nowrap;
+        }
+        
+        .path-breadcrumb::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .path-item {
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .path-item:last-child {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .path-separator {
+            margin: 0 4px;
+            color: var(--text-secondary);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            margin-bottom: var(--padding-md);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab {
+            padding: var(--padding-md);
+            white-space: nowrap;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        
+        /* Search bar */
+        .search-bar {
+            position: relative;
+            margin-bottom: var(--padding-md);
+        }
+        
+        .search-bar input {
+            padding-left: 40px;
+            padding-right: 40px;
+            border-radius: var(--radius-pill);
+            background: var(--bg-tertiary);
+        }
+        
+        .search-bar i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        /* QR Code */
+        .qr-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--padding-md);
+            padding: var(--padding-lg);
+            background: white;
+            border-radius: var(--radius-md);
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: white;
+            padding: var(--padding-md);
+            border-radius: var(--radius-sm);
+        }
+        
+        /* Floating action button (FAB) */
+        .fab {
+            position: fixed;
+            bottom: calc(var(--footer-height) + var(--padding-md));
+            right: var(--padding-md);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--box-shadow);
+            z-index: 99;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .fab:hover {
+            transform: scale(1.05);
+            background: var(--accent-secondary);
+        }
+        
+        .fab-menu {
+            position: fixed;
+            bottom: calc(var(--footer-height) + 76px);
+            right: var(--padding-md);
+            display: flex;
+            flex-direction: column-reverse;
+            gap: var(--padding-md);
+            z-index: 98;
+            transition: all var(--transition-medium);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        
+        .fab-menu.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .fab-item {
+            display: flex;
+            align-items: center;
+            gap: var(--padding-md);
+        }
+        
+        .fab-item-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--box-shadow);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .fab-item-label {
+            background: var(--surface);
+            padding: var(--padding-sm) var(--padding-md);
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--bg-secondary);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--accent);
+            border-radius: 20px;
+        }
+        
+        /* Animation & Transitions */
+        .fade-in {
+            animation: fadeIn var(--transition-medium);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-up {
+            animation: slideUp var(--transition-medium);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Page transitions */
+        .page-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .page {
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all var(--transition-medium);
+            pointer-events: none;
+        }
+        
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+        
+        .page.prev {
+            transform: translateX(-100%);
+        }
+        
+        /* Tree view for directory structure */
+        .tree-view {
+            margin-left: var(--padding-sm);
+        }
+        
+        .tree-item {
+            display: flex;
+            align-items: center;
+            gap: var(--padding-sm);
+            padding: 6px 0;
+            cursor: pointer;
+        }
+        
+        .tree-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .tree-children {
+            margin-left: var(--padding-lg);
+            height: 0;
+            overflow: hidden;
+            transition: height var(--transition-medium);
+        }
+        
+        .tree-item.expanded + .tree-children {
+            height: auto;
+        }
+        
+        /* Responsive layouts */
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .drawer {
+                width: 320px;
+            }
+            
+            /* On larger screens, show sidebar permanently and push content */
+            .sidebar-layout {
+                display: flex;
+            }
+            
+            .sidebar {
+                width: 250px;
+                height: 100vh;
+                position: sticky;
+                top: 0;
+                background: var(--bg-secondary);
+                padding: var(--padding-md);
+                display: none; /* Initially hidden, will be shown with JS on larger screens */
+            }
+            
+            .sidebar-content {
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            /* Bottom sheet becomes side panel on larger screens */
+            @media (min-width: 1024px) {
+                .bottom-sheet {
+                    width: 400px;
+                    height: 100vh;
+                    max-height: 100vh;
+                    right: 0;
+                    left: auto;
+                    transform: translateX(100%);
+                    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+                }
+                
+                .bottom-sheet.open {
+                    transform: translateX(0);
+                }
+            }
+        }
+        
+        /* Light/Dark toggle styles */
+        .theme-toggle {
+            width: 50px;
+            height: 26px;
+            background: var(--bg-tertiary);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all var(--transition-medium);
+            padding: 0 4px;
+        }
+        
+        .theme-toggle-thumb {
+            position: absolute;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            transition: all var(--transition-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        [data-theme="light"] .theme-toggle-thumb {
+            left: calc(100% - 23px);
+        }
+        
+        .theme-toggle-icons {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(124, 77, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease infinite;
+            margin: var(--padding-lg) auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: calc(var(--header-height) + var(--padding-md));
+            right: var(--padding-md);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--padding-sm);
+        }
+        
+        .toast {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--padding-md);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: var(--padding-sm);
+            min-width: 200px;
+            max-width: 320px;
+            animation: slideInRight var(--transition-medium), fadeOut 0.3s var(--transition-medium) 3s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--error);
+        }
+        
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            animation: progress 3s linear;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+        
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* Context menu */
+        .context-menu {
+            position: fixed;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--box-shadow);
+            padding: var(--padding-sm) 0;
+            min-width: 180px;
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+            display: none;
+        }
+        
+        .context-menu-item {
+            padding: var(--padding-sm) var(--padding-md);
+            display: flex;
+            align-items: center;
+            gap: var(--padding-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .context-menu-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .context-menu-divider {
+            height: 1px;
+            background: var(--bg-tertiary);
+            margin: 4px 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="custom-scrollbar">
+    <div id="app-container">
+        <!-- Header -->
+        <header id="app-header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z"/>
+                </svg>
+                Projet.JL
+            </div>
+            <div class="header-actions">
+                <button class="btn icon search-toggle">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div class="theme-toggle" id="theme-toggle">
+                    <div class="theme-toggle-icons">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="theme-toggle-thumb">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main content area -->
+        <main id="main-content">
+            <div class="page-container">
+                <!-- Home Page -->
+                <section id="home-page" class="page active">
+                    <div class="glass-card" style="padding: var(--padding-lg); margin-bottom: var(--padding-lg);">
+                        <h1>Bienvenue dans Projet.JL</h1>
+                        <p>Votre gestionnaire de liens et de ressources web à capacité infinie ♾️</p>
+                        <button class="btn">
+                            <i class="fas fa-rocket"></i>
+                            Commencer l'exploration
+                        </button>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            À propos du Projet JL
+                        </div>
+                        <div class="card">
+                            <p>Le projet JL est un concept inventé par Jean-Louis LIKULA pour résoudre un problème fondamental : comment préserver et organiser efficacement les ressources web infinies que nous découvrons chaque jour.</p>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <div>Mes motivations</div>
+                                    <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-content-inner">
+                                        <ul>
+                                            <li>L'infinité du monde web, selon moi, représente l'infini dans ce monde</li>
+                                            <li>Il existe un nombre incalculable de ressources à découvrir, à explorer</li>
+                                            <li>Chaque ressource est accessible via un simple lien</li>
+                                            <li>J'ai découvert d'innombrables merveilles grâce à de simples URLs</li>
+                                            <li>Mais j'en ai aussi perdu beaucoup, faute d'un système adéquat pour les conserver</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <div>La solution recherchée</div>
+                                    <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-content-inner">
+                                        <p>Je devais créer un système qui serait à la fois :</p>
+                                        <ul>
+                                            <li>Toujours accessible (n'importe où, n'importe quand)</li>
+                                            <li>Non limité, indépendant d'un système spécifique</li>
+                                            <li>Hors-ligne quand nécessaire</li>
+                                            <li>Contrôlé entièrement par l'utilisateur</li>
+                                            <li>Sans limites, à l'image de l'infinité du web</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-book"></i>
+                            Comment utiliser ce projet
+                        </div>
+                        <div class="card">
+                            <p>Voici comment tirer le meilleur parti de Projet.JL pour organiser vos ressources web :</p>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <div>Commencer avec Projet.JL</div>
+                                    <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-content-inner">
+                                        <ol>
+                                            <li>Créez votre premier dossier ou ajoutez votre premier lien</li>
+                                            <li>Explorez l'interface intuitive et adaptative</li>
+                                            <li>Organisez vos ressources selon vos besoins</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <div>Sauvegarde et portabilité</div>
+                                    <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-content-inner">
+                                        <p><strong>Important :</strong> Pour conserver vos données, vous devez exporter régulièrement un fichier JSON.</p>
+                                        <p>Ce fichier agit comme votre "base de données" et vous permet de retrouver toutes vos données sur n'importe quel appareil.</p>
+                                        
+                                        <div class="neu-card" style="padding: var(--padding-md); margin-top: var(--padding-md);">
+                                            <div style="font-weight: 500; margin-bottom: 8px;">Structure du projet :</div>
+                                            <div class="tree-view">
+                                                <div class="tree-item">
+                                                    <i class="fas fa-folder"></i>
+                                                    <span>votre-projet</span>
+                                                </div>
+                                                <div class="tree-children">
+                                                    <div class="tree-item">
+                                                        <i class="fas fa-folder"></i>
+                                                        <span>data</span>
+                                                    </div>
+                                                    <div class="tree-children">
+                                                        <div class="tree-item">
+                                                            <i class="fas fa-file-code"></i>
+                                                            <span>backup_2025-11-07_10-30-45.json</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tree-item">
+                                                        <i class="fas fa-file-code"></i>
+                                                        <span>index.html</span>
+                                                    </div>
+                                                    <div class="tree-item">
+                                                        <i class="fas fa-file-code"></i>
+                                                        <span>styles.css</span>
+                                                    </div>
+                                                    <div class="tree-item">
+                                                        <i class="fas fa-file-code"></i>
+                                                        <span>scripts.js</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <div>Format des fichiers de sauvegarde</div>
+                                    <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-content-inner">
+                                        <p>Les sauvegardes sont enregistrées au format :</p>
+                                        <code>backup_YYYY-MM-DD_HH-MM-SS.json</code>
+                                        <p>Par exemple : <code>backup_2025-11-07_10-30-45.json</code></p>
+                                        <p>Ce format inclut la date et l'heure pour vous aider à identifier facilement vos sauvegardes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Explorer Page -->
+                <section id="explorer-page" class="page">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Rechercher des dossiers, liens ou textes...">
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active">Tous</div>
+                        <div class="tab">Dossiers</div>
+                        <div class="tab">Liens</div>
+                        <div class="tab">Textes</div>
+                    </div>
+                    
+                    <div class="path-breadcrumb">
+                        <div class="path-item">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="path-separator">/</div>
+                        <div class="path-item">Projets Web</div>
+                        <div class="path-separator">/</div>
+                        <div class="path-item">Ressources</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-folder"></i>
+                            Éléments
+                        </div>
+                        
+                        <div class="grid">
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">Frameworks JS</div>
+                                    <div class="item-subtitle">5 éléments</div>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">CSS Avancé</div>
+                                    <div class="item-subtitle">3 éléments</div>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">MDN Web Docs</div>
+                                    <div class="item-subtitle">developer.mozilla.org</div>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">CSS Tricks</div>
+                                    <div class="item-subtitle">css-tricks.com</div>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">Notes React</div>
+                                    <div class="item-subtitle">Modifié il y a 2 jours</div>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <div class="item-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title">GitHub</div>
+                                    <div class="item-subtitle">github.com</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Action Button -->
+                    <div class="fab" id="fab">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    
+                    <div class="fab-menu" id="fab-menu">
+                        <div class="fab-item">
+                            <div class="fab-item-label">Ajouter un dossier</div>
+                            <div class="fab-item-button">
+                                <i class="fas fa-folder-plus"></i>
+                            </div>
+                        </div>
+                        <div class="fab-item">
+                            <div class="fab-item-label">Ajouter un lien</div>
+                            <div class="fab-item-button">
+                                <i class="fas fa-link"></i>
+                            </div>
+                        </div>
+                        <div class="fab-item">
+                            <div class="fab-item-label">Ajouter du texte</div>
+                            <div class="fab-item-button">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+                        <div class="fab-item">
+                            <div class="fab-item-label">Importer JSON</div>
+                            <div class="fab-item-button">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                        </div>
+                        <div class="fab-item">
+                            <div class="fab-item-label">Exporter JSON</div>
+                            <div class="fab-item-button">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Project Page -->
+                <section id="project-page" class="page">
+                    <div class="glass-card" style="padding: var(--padding-lg); margin-bottom: var(--padding-lg);">
+                        <h2>Espace Projet</h2>
+                        <p>Préservez et partagez votre projet pour un accès universel</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Sécurité et Accessibilité
+                        </div>
+                        <div class="card">
+                            <p><strong>Conseil de sécurité :</strong> Pour une meilleure préservation de votre projet, nous vous recommandons de :</p>
+                            <ul>
+                                <li>Uploader régulièrement votre projet en ligne sur une plateforme de stockage cloud</li>
+                                <li>Rendre votre projet public dans les plateformes où il est stocké pour y avoir toujours accès</li>
+                                <li>Mettre à jour régulièrement vos fichiers JSON de sauvegarde</li>
+                                <li>Conserver le QR code de votre projet dans un endroit sûr pour y accéder rapidement depuis n'importe quel appareil</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Enregistrez votre projet en ligne
+                        </div>
+                        <div class="card">
+                            <div class="search-bar">
+                                <i class="fas fa-link"></i>
+                                <input type="text" id="project-url" placeholder="Entrez le lien où votre projet est stocké...">
+                            </div>
+                            <button class="btn" id="generate-qr">
+                                <i class="fas fa-qrcode"></i>
+                                Générer QR Code
+                            </button>
+                            
+                            <div id="qr-result" style="display:none; margin-top: var(--padding-lg);">
+                                <div class="qr-code-container">
+                                    <div class="qr-code" id="qr-code">
+                                        <!-- QR code will be generated here -->
+                                    </div>
+                                    <p>Conservez ce QR code précieusement. Il vous permettra d'accéder à votre projet depuis n'importe quel appareil, même sans vos identifiants.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-server"></i>
+                            Plateformes de stockage recommandées
+                        </div>
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <div>GitHub</div>
+                                <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    <p>Idéal pour les projets de développement avec contrôle de version. Les dépôts publics sont accessibles sans authentification.</p>
+                                    <a href="https://github.com" target="_blank" class="btn flat">
+                                        <i class="fab fa-github"></i>
+                                        Visiter GitHub
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <div>Plateformes IPFS</div>
+                                <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    <p>IPFS (InterPlanetary File System) est un protocole décentralisé pour stocker et partager des données. Vos fichiers y sont distribués sur le réseau et accessibles via des liens immuables.</p>
+                                    <div style="display: flex; flex-wrap: wrap; gap: var(--padding-sm);">
+                                        <a href="https://ipfs.io" target="_blank" class="btn flat">
+                                            <i class="fas fa-network-wired"></i>
+                                            IPFS.io
+                                        </a>
+                                        <a href="https://web3.storage" target="_blank" class="btn flat">
+                                            <i class="fas fa-cube"></i>
+                                            Web3.storage
+                                        </a>
+                                        <a href="https://nft.storage" target="_blank" class="btn flat">
+                                            <i class="fas fa-cubes"></i>
+                                            NFT.storage
+                                        </a>
+                                        <a href="https://pinata.cloud" target="_blank" class="btn flat">
+                                            <i class="fas fa-cloud"></i>
+                                            Pinata Cloud
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <div>Google Drive</div>
+                                <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    <p>Solution simple et populaire pour le stockage cloud avec 15 Go gratuits et l'intégration avec d'autres services Google.</p>
+                                    <a href="https://drive.google.com" target="_blank" class="btn flat">
+                                        <i class="fab fa-google-drive"></i>
+                                        Visiter Google Drive
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <div>MEGA</div>
+                                <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    <p>Offre 20 Go de stockage gratuit avec chiffrement de bout en bout pour une meilleure confidentialité.</p>
+                                    <a href="https://mega.nz" target="_blank" class="btn flat">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        Visiter MEGA
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <div>MediaFire</div>
+                                <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    <p>Solution simple avec 10 Go gratuits et des liens de partage directs.</p>
+                                    <a href="https://mediafire.com" target="_blank" class="btn flat">
+                                        <i class="fas fa-fire"></i>
+                                        Visiter MediaFire
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation Bar -->
+        <footer>
+            <nav class="bottom-nav">
+                <a href="#home" class="bottom-nav-item active" data-page="home-page">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+                <a href="#explorer" class="bottom-nav-item" data-page="explorer-page">
+                    <i class="fas fa-folder"></i>
+                    <span>Explorateur</span>
+                </a>
+                <a href="#project" class="bottom-nav-item" data-page="project-page">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Projet</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Bottom Sheet for File/Folder Operations -->
+    <div class="bottom-sheet" id="operations-sheet">
+        <div class="bottom-sheet-drag-handle"></div>
+        <div class="bottom-sheet-header">
+            <h3>Créer un nouvel élément</h3>
+            <button class="btn icon flat close-sheet">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="bottom-sheet-content custom-scrollbar">
+            <div class="tabs">
+                <div class="tab active">Dossier</div>
+                <div class="tab">Lien</div>
+                <div class="tab">Texte</div>
+            </div>
+            
+            <!-- Folder creation form -->
+            <div class="form-section active">
+                <div style="margin-bottom: var(--padding-md);">
+                    <label for="folder-name" style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Nom du dossier</label>
+                    <input type="text" id="folder-name" placeholder="Mon nouveau dossier">
+                </div>
+                <button class="btn" style="width: 100%;">
+                    <i class="fas fa-check"></i>
+                    Créer le dossier
+                </button>
+            </div>
+            
+            <!-- Link creation form -->
+            <div class="form-section" style="display: none;">
+                <div style="margin-bottom: var(--padding-md);">
+                    <label for="link-name" style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Nom du lien</label>
+                    <input type="text" id="link-name" placeholder="Mon site préféré">
+                </div>
+                <div style="margin-bottom: var(--padding-md);">
+                    <label for="link-url" style="display: block; margin-bottom: 8px; color: var(--text-secondary);">URL</label>
+                    <input type="url" id="link-url" placeholder="https://example.com">
+                </div>
+                <button class="btn" style="width: 100%;">
+                    <i class="fas fa-check"></i>
+                    Ajouter le lien
+                </button>
+            </div>
+            
+            <!-- Text creation form -->
+            <div class="form-section" style="display: none;">
+                <div style="margin-bottom: var(--padding-md);">
+                    <label for="text-name" style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Titre</label>
+                    <input type="text" id="text-name" placeholder="Mes notes">
+                </div>
+                <div style="margin-bottom: var(--padding-md);">
+                    <label for="text-content" style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Contenu</label>
+                    <textarea id="text-content" placeholder="Écrivez votre texte ici..."></textarea>
+                </div>
+                <div class="text-editor-toolbar" style="display: flex; gap: var(--padding-sm); margin-bottom: var(--padding-md);">
+                    <button class="btn icon flat"><i class="fas fa-bold"></i></button>
+                    <button class="btn icon flat"><i class="fas fa-italic"></i></button>
+                    <button class="btn icon flat"><i class="fas fa-underline"></i></button>
+                    <button class="btn icon flat"><i class="fas fa-list-ul"></i></button>
+                    <button class="btn icon flat"><i class="fas fa-list-ol"></i></button>
+                </div>
+                <button class="btn" style="width: 100%;">
+                    <i class="fas fa-check"></i>
+                    Enregistrer le texte
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item">
+            <i class="fas fa-eye"></i>
+            <span>Ouvrir</span>
+        </div>
+        <div class="context-menu-item">
+            <i class="fas fa-pen"></i>
+            <span>Renommer</span>
+        </div>
+        <div class="context-menu-item">
+            <i class="fas fa-info-circle"></i>
+            <span>Détails</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item">
+            <i class="fas fa-copy"></i>
+            <span>Copier</span>
+        </div>
+        <div class="context-menu-item">
+            <i class="fas fa-cut"></i>
+            <span>Déplacer</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item">
+            <i class="fas fa-eye-slash"></i>
+            <span>Masquer</span>
+        </div>
+    </div>
+    
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Search Panel -->
+    <div class="drawer" id="search-panel">
+        <div class="drawer-header">
+            <h3>Rechercher</h3>
+            <button class="btn icon flat close-drawer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="drawer-content">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher...">
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active">Tous</div>
+                <div class="tab">Dossiers</div>
+                <div class="tab">Liens</div>
+                <div class="tab">Textes</div>
+            </div>
+            
+            <div id="search-results">
+                <div class="section-title">
+                    <i class="fas fa-search"></i>
+                    Résultats
+                </div>
+                
+                <div class="list">
+                    <div class="item">
+                        <div class="item-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">Frameworks JS</div>
+                            <div class="item-subtitle">/Projets Web/Ressources</div>
+                        </div>
+                    </div>
+                    
+                    <div class="item">
+                        <div class="item-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">MDN Web Docs</div>
+                            <div class="item-subtitle">/Projets Web/Ressources</div>
+                        </div>
+                    </div>
+                    
+                    <div class="item">
+                        <div class="item-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">Notes React</div>
+                            <div class="item-subtitle">/Projets Web/Ressources</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Drawer Overlay -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    
+    <script>
+        // DOM Elements
+        const appContainer = document.getElementById('app-container');
+        const appHeader = document.getElementById('app-header');
+        const mainContent = document.getElementById('main-content');
+        const bottomNav = document.querySelector('.bottom-nav');
+        const pages = document.querySelectorAll('.page');
+        const navItems = document.querySelectorAll('.bottom-nav-item');
+        const themeToggle = document.getElementById('theme-toggle');
+        const fab = document.getElementById('fab');
+        const fabMenu = document.getElementById('fab-menu');
+        const operationsSheet = document.getElementById('operations-sheet');
+        const closeSheetBtn = document.querySelector('.close-sheet');
+        const searchToggle = document.querySelector('.search-toggle');
+        const searchPanel = document.getElementById('search-panel');
+        const closeDrawerBtn = document.querySelector('.close-drawer');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+        const contextMenu = document.getElementById('context-menu');
+        const toastContainer = document.getElementById('toast-container');
+        const generateQrBtn = document.getElementById('generate-qr');
+        const qrResult = document.getElementById('qr-result');
+        const projectUrl = document.getElementById('project-url');
+        const qrCode = document.getElementById('qr-code');
+        const items = document.querySelectorAll('.item');
+        const accordions = document.querySelectorAll('.accordion');
+        const sheetTabs = document.querySelectorAll('#operations-sheet .tabs .tab');
+        const formSections = document.querySelectorAll('.form-section');
+        
+        // Variables for UI state
+        let lastScrollTop = 0;
+        let isFabMenuOpen = false;
+        let isDragging = false;
+        let startY = 0;
+        let startTranslateY = 0;
+        
+        // Theme handling
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            // Change icon
+            const themeIcon = document.querySelector('.theme-toggle-thumb i');
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            // Show toast notification
+            showToast(`Mode ${newTheme === 'dark' ? 'sombre' : 'clair'} activé`, 'success');
+        }
+        
+        // Page navigation
+        function navigateToPage(pageId) {
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.add('active');
+                    page.classList.remove('prev');
+                } else if (page.classList.contains('active')) {
+                    page.classList.remove('active');
+                    page.classList.add('prev');
+                } else {
+                    page.classList.remove('active', 'prev');
+                }
+            });
+            
+            navItems.forEach(item => {
+                if (item.dataset.page === pageId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // Header scroll behavior
+        function handleScroll() {
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (st > lastScrollTop && st > 100) {
+                // Scroll down
+                appHeader.classList.add('header-hidden');
+            } else {
+                // Scroll up
+                appHeader.classList.remove('header-hidden');
+            }
+            
+            lastScrollTop = st <= 0 ? 0 : st;
+        }
+        
+        // FAB menu
+        function toggleFabMenu() {
+            isFabMenuOpen = !isFabMenuOpen;
+            
+            if (isFabMenuOpen) {
+                fabMenu.classList.add('open');
+                fab.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                fabMenu.classList.remove('open');
+                fab.innerHTML = '<i class="fas fa-plus"></i>';
+            }
+        }
+        
+        // Bottom sheet handling
+        function openBottomSheet() {
+            operationsSheet.classList.add('open');
+            drawerOverlay.classList.add('active');
+        }
+        
+        function closeBottomSheet() {
+            operationsSheet.classList.remove('open');
+            drawerOverlay.classList.remove('active');
+        }
+        
+        // Drawer handling
+        function openDrawer() {
+            searchPanel.classList.add('open');
+            drawerOverlay.classList.add('active');
+        }
+        
+        function closeDrawer() {
+            searchPanel.classList.remove('open');
+            drawerOverlay.classList.remove('active');
+        }
+        
+        // Toast notifications
+        function showToast(message, type = 'default', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <div>${message}</div>
+                <div class="toast-progress"></div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, duration);
+        }
+        
+        // Context menu handling
+        function showContextMenu(e) {
+            e.preventDefault();
+            
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // Check boundaries
+            const menuWidth = contextMenu.offsetWidth;
+            const menuHeight = contextMenu.offsetHeight;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Adjust position if menu would go off screen
+            const posX = x + menuWidth > windowWidth ? windowWidth - menuWidth - 10 : x;
+            const posY = y + menuHeight > windowHeight ? windowHeight - menuHeight - 10 : y;
+            
+            contextMenu.style.left = `${posX}px`;
+            contextMenu.style.top = `${posY}px`;
+            contextMenu.style.display = 'block';
+            
+            // Mark the item as selected
+            if (e.target.closest('.item')) {
+                e.target.closest('.item').classList.add('selected');
+            }
+        }
+        
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            
+            // Remove selected class from all items
+            document.querySelectorAll('.item.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+        
+        // QR Code generation (simplified for prototype)
+        function generateQRCode() {
+            const url = projectUrl.value.trim();
+            
+            if (!url) {
+                showToast('Veuillez entrer une URL valide', 'warning');
+                return;
+            }
+            
+            // Simple QR code visualization for prototype
+            qrCode.innerHTML = `
+                <svg viewBox="0 0 200 200" width="100%" height="100%" style="display: block;">
+                    <rect x="0" y="0" width="200" height="200" fill="white"/>
+                    <rect x="20" y="20" width="160" height="160" fill="none" stroke="black" stroke-width="2"/>
+                    <rect x="40" y="40" width="40" height="40" fill="black"/>
+                    <rect x="120" y="40" width="40" height="40" fill="black"/>
+                    <rect x="40" y="120" width="40" height="40" fill="black"/>
+                    <rect x="100" y="100" width="60" height="60" fill="black"/>
+                    <rect x="60" y="80" width="20" height="20" fill="black"/>
+                </svg>
+            `;
+            
+            qrResult.style.display = 'block';
+            showToast('QR Code généré avec succès', 'success');
+            
+            // Scroll to QR code
+            qrResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Tab switching in bottom sheet
+        function switchTab(index) {
+            sheetTabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            formSections.forEach((section, i) => {
+                section.style.display = i === index ? 'block' : 'none';
+            });
+        }
+        
+        // Accordion toggle
+        function toggleAccordion(accordion) {
+            accordion.classList.toggle('open');
+        }
+        
+        // Touch gestures for bottom sheet
+        function setupBottomSheetDragging() {
+            const dragHandle = document.querySelector('.bottom-sheet-drag-handle');
+            
+            dragHandle.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                startTranslateY = operationsSheet.getBoundingClientRect().top;
+                
+                operationsSheet.style.transition = 'none';
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaY = e.touches[0].clientY - startY;
+                const newTranslateY = startTranslateY + deltaY;
+                
+                if (deltaY > 0) { // Only allow dragging down
+                    operationsSheet.style.transform = `translateY(${deltaY}px)`;
+                }
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                operationsSheet.style.transition = 'transform var(--transition-medium)';
+                
+                const deltaY = e.changedTouches[0].clientY - startY;
+                
+                if (deltaY > 100) {
+                    closeBottomSheet();
+                } else {
+                    operationsSheet.style.transform = 'translateY(0)';
+                }
+            });
+        }
+        
+        // Setup responsive behavior
+        function setupResponsiveLayout() {
+            const checkWindowSize = () => {
+                if (window.innerWidth >= 768) {
+                    // Tablet and desktop behavior
+                    document.body.classList.add('large-screen');
+                } else {
+                    // Mobile behavior
+                    document.body.classList.remove('large-screen');
+                }
+            };
+            
+            // Check on load and resize
+            checkWindowSize();
+            window.addEventListener('resize', checkWindowSize);
+        }
+        
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Escape closes modals
+                if (e.key === 'Escape') {
+                    closeBottomSheet();
+                    closeDrawer();
+                    hideContextMenu();
+                }
+                
+                // Ctrl+F for search
+                if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    openDrawer();
+                }
+                
+                // Ctrl+N for new item
+                if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    openBottomSheet();
+                }
+                
+                // Ctrl+E for export
+                if (e.key === 'e' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    showToast('Exportation de JSON initiée', 'info');
+                }
+                
+                // Ctrl+I for import
+                if (e.key === 'i' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    showToast('Importation de JSON initiée', 'info');
+                }
+                
+                // 1-3 for page navigation when focused
+                if (['1', '2', '3'].includes(e.key) && document.activeElement === document.body) {
+                    const pageIndex = parseInt(e.key) - 1;
+                    const pageIds = ['home-page', 'explorer-page', 'project-page'];
+                    navigateToPage(pageIds[pageIndex]);
+                }
+            });
+        }
+        
+        // Tree view toggle
+        function setupTreeView() {
+            const treeItems = document.querySelectorAll('.tree-item');
+            
+            treeItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('expanded');
+                });
+            });
+        }
+        
+        // Initialization
+        function initApp() {
+            // Setup event listeners
+            themeToggle.addEventListener('click', toggleTheme);
+            window.addEventListener('scroll', handleScroll);
+            
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigateToPage(item.dataset.page);
+                });
+            });
+            
+            // FAB
+            fab.addEventListener('click', () => {
+                if (!isFabMenuOpen) {
+                    openBottomSheet();
+                }
+                toggleFabMenu();
+            });
+            
+            // Bottom sheet
+            closeSheetBtn.addEventListener('click', closeBottomSheet);
+            drawerOverlay.addEventListener('click', () => {
+                closeBottomSheet();
+                closeDrawer();
+            });
+            
+            // Search panel
+            searchToggle.addEventListener('click', openDrawer);
+            closeDrawerBtn.addEventListener('click', closeDrawer);
+            
+            // Context menu
+            items.forEach(item => {
+                item.addEventListener('contextmenu', showContextMenu);
+            });
+            document.addEventListener('click', hideContextMenu);
+            
+            // Tabs in bottom sheet
+            sheetTabs.forEach((tab, index) => {
+                tab.addEventListener('click', () => switchTab(index));
+            });
+            
+            // Accordions
+            accordions.forEach(accordion => {
+                accordion.querySelector('.accordion-header').addEventListener('click', () => toggleAccordion(accordion));
+            });
+            
+            // QR Code generation
+            generateQrBtn.addEventListener('click', generateQRCode);
+            
+            // Additional setup
+            setupBottomSheetDragging();
+            setupResponsiveLayout();
+            setupKeyboardShortcuts();
+            setupTreeView();
+            
+            // Show initial toast
+            setTimeout(() => {
+                showToast('Bienvenue dans Projet.JL', 'success');
+            }, 1000);
+        }
+        
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

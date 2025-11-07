@@ -1,0 +1,255 @@
+T'es un développeur pro, t'as plusieurs compétences en développement d'applications web, mobiles, multiplaformes, tu es hyper expériments, on te paie toujours chère grâace aux qualités de ton travail qu'on cosidère de génie, tu es le maître absolue dans ce domaine, on t'appel même le dieu du design web, le pythagore du javascript, Leonard de vinci du css , tu es hyper réputer, ...
+
+un fidèle client qui paie toujours bien et qui est aussi développeur te demande de réaliser ceci pour lui, vu ton expertise, ta capacité à modéler les choses, à embellir les idées, à donner vie aux idées, à les rendre rélles, il te demande de réaliser ceci :
+
+"""
+Crées un prototype d'une application web moderne html css js:
+
+En utilisant des styles et design modernes comme :
+Smooth draggable bottom sheet
+bottom sheet
+Side panel
+Tabbed interface
+SPA navigation
+Page transition
+Sliding Panel/Drawer view
+No close button icon cross
+Responsive Layouts
+Adaptive Icons/buttons
+Dynamic Colors (Material You)
+Glassmorphism
+Neumorphism UI
+Drag & Drop fluide
+Page reveal/Fade transition
+Dark mode/light mode
+Parallax scrolling
+Smooth Accordion 
+Accordion UI
+FAQ Accordion 
+Scrollable contenaire
+Constraint-based layout
+Density-independent units
+
+App bar dynamique 
+Multiples App bars
+Staked App bars
+Toolbar + subtoolbar
+Persistent/Contextual App Bar
+Nav menu 
+Subnav menu
+Sidebar menu 
+bottom nav 
+nav bottom
+Collapsible panel
+Custom Scrollbar (thumb)
+Underlined input
+Rounded buttons
+Pill buttons
+Flat/minimal input
+
+Responsive Web Design (adaptatif/reconfiguré)
+adaptatif/reconfiguré design 
+Dynamic/Responsive components
+Progressive Enhancement
+
+Responsive **adaptatif / reconfiguré**
+ 
+→ La mise en page **change complètement selon l’écran**.
+ 
+- L’organisation est **restructurée** pour chaque type d’appareil.
+ 
+- Certaines parties peuvent être **déplacées, masquées, ou réorganisées**.
+
+📱💻 **Même contenu global**, mais **présentation et hiérarchie différentes**. ➡️ On parle ici de **"responsive adaptatif"** (Adaptive Design) ou **"responsive par rupture"**.
+
+À propos : C'est un prototype d'une application web qu'on doit réaliser , l'application est du genre Storage cloud, gestionnaire de fichiers, explorateur de fichiers, tout ce que là où peut créer des dossiers et ajoutés des éléments 
+Ici les seuls éléments sont : le dossier, le lien et le texte.
+L'application se nomme Projet.JL
+Et l'auteur et l'utilisateur de cette application, est un développeur, un explorateur du web, voilà pourquoi il a besoin d'une application pour stocker ses liens, avec certains textes.
+
+Il veut que tout ce dont qu'on va utiliser comme ressources soit toujours accessibles hors-ligne :
+svg comme icones
+
+Et il aura comme mode par défaut le dark mode, un mode sombre moderne
+
+Je vais décrire ce à quoi ça peut ressembler sur une interface mobile/petite écran :
+NB: Ici je ne fais que donner ma version, c'est toi le décideur final, tu peux l'appliquer, la perfectionner, faire autrement, c'est toi le dev pro ici, moi je ne suis qu'une idée primaire 
+
+NB: Il faut adapter pour chaque types de : petites, moyennes, grandes, en fonctions de chaques types de plateformes : mobiles, tablettes, desktop (pc)
+
+Je commence :
+Il n'aura besoin que de trois interface :
+- l'accueil 
+- l'explorateur de fichiers 
+- l'espace projet
+
+Dans le mobile, ils seront sous forme de nav bottom, pour une facilité de navigation 
+----
+
+Dans l'accueil on aura :
+Premièrement : il nous que ceci est un application avec comme capacité de stockage ♾️ infini 
+
+Il va ensuite nous parler du projet JL, c'est quoi le projet ?
+Le projet JL est un projet pensée/inventer/conçu par Jean-Louis LIKULA (moi).... Blabla 
+Consiste à.... Résoudre ce problème qu'il avait ... Conserver ses liens, il n'existe pas un gestionnaire pour ça, pour lui les liens sont... Lire plus ..
+bref voici mes motivations :
+- l'infinité du monde web, selon moi le web est ce qui représente l'infini dans ce monde, il y a tellement un nombre incalculables des ressources à découvrir, à offrir, à explorer 
+Et tout passe par un chemin : un lien web
+Vous n'imaginez pas combien des merveilles j'ai dû découvrir grâce à des simples liens, qui sont juste une sorte de textes courts mais qui font d'immense choses
+Vous n'imaginez pas non plus combien de ces merveilles j'ai pu oublié, perdu, tout ça parce que je n'avez pas un endroit où les stocker, 
+les gestionaires de fichiers classiques ne servent qu'à stocker des vidéos, images,... et plein d'autres types de fichiers accessibles nativement et surtout ils sont toujours limités au nombre de stockage, à l'appareil, ou au support de stockage...
+
+Je devais créer ce système, trouver une solution qui serait à la fois : 
+- toujours accessibles (n'importe où, n'importe quand)
+- non limité , non dépendant d'un système ( base de données, stockage , connexion internet) 
+je devais trouver des solutions qui répresenter, qui concordent avec l'infinité du web, quelque chose qui peut devenir le web à sa façon:
+- pas besoin de dépendre d'une base de données, d'un système, d'une platefome, d'une connexion internet 
+voilà pourquoi j'ai créer ce système de stockage infini, accessibles n'importe où, n'importe quand, hors-ligne, peu se trouver partout à la fois et l'utilisateur est le mettre de tout, un dieu qui contrôle son propre monde , qui est responsable de tout, modélise tout à sa façon
+sans limites, c'est ça l'infini
+
+Comment utiliser ce projet ?
+Premièrement avoir le projet déjà en main
+Si c'est la première fois...
+vous pouvez déjà commencé ajouter votre premier lien, créer votre premier dossier, ajouter du texte,...
+mais attention, ne soyez pas presser de quitter l'application
+vous devez à chaque fois exportez un fichier json, ce sera votre base de données(le fruit de vos activités faites, la mémoire) afin de toujours retrouvez vos activités effectués auparavant 
+exportez-le dans la racine de votre projet dans le dossier: data. 
+*Tu peux créer une arborescence interactive (qui fonctionne, on peut réduire/développer) montrant à quoi peux ressembler l'arborescence du dossier projet* comme :
+- votre projet 
+-- data (selectionner ce dossier comme destination du fichier json à télécharger)
+-- index.html 
+-- styles.css 
+-- scripts.js 
+NB: Avec des icones pour réprésenter des dossiers et des types de fichiers (html, css, js, json...)
+
+Le fichier sera enregistré comme nom exemple :
+backup_2025-11-01_10-30-45.Json
+Si ça été enregistré le 01 novembre à 10h30 de cette année
+C'est le format par défaut, 
+Utilisant le format: nom+YYYY-MM-DD_HH-MM-SS
+Vous pouvez toujours renommer comme bous le souhaitez , mais assurer de toujours garder le format de date car vous ferez plusieurs enregistrement et ceci vous sera d'une grande aide
+
+ensuite si un jour lors de vos activités futurs , lorsque l'application semblera vide car peut-être vous avez changer de navigateur, vous utiliser un autre appareil, ...etc 
+N'ayez crainte vous n'aurez qu'à "importer" votre fichier qui se trouve dans le dossier data à la racine de votre projet.
+*Tu peux créer une arborescence interactive (qui fonctionne, on peut réduire/développer) montrant à quoi peux ressembler l'arborescence du dossier projet*
+
+Voilà l'interface est remplit
+Bonne exploration/bonne journée/bonne application/découverte/navigation/expérience/...
+
+NB: Ici je te montre juste mes pensées, tu n'es pas obligé d'écrire exactement comme moi, tu peux la perfectionner, l'embellir, reformuler, tout réinventer, reconstruire
+
+----
+
+Dans le menu exploarateur de fichiers, c'est là on créer des dossiers, ajoute des liens, des textes, on aura:
+l'icône de recherche en haut 
+
+Quand on cliquera dessus, l'interface de de recherche apparaîtra, 
+Il aura de petits nav à sélectionner en bas pour trier entre : dossier, lien et texte 
+
+Et il aura une touche "retour" pour retourner dans le précédent interface 
+ ----
+une zone avec une icône qui aura comme option  :
+- un icône pour créer un dossier 
+- un icône pour ajouter un lien 
+- un icône pour ajouter du texte 
+- un icône pour importer un fichier Json 
+- un icône pour exporter un fichier Json 
+
+Pourquoi importer et exporter ?
+Parce que c'est le fichier Json qui sera comme la base de données de cette application 
+Voilà pourquoi je tiens à ce que tous les ressources qu'on va utiliser soit accessibles hors-ligne 
+----
+on aura un icône aussi pour trier qui aura comme option :
+- L'icône AZ avec flèche bas (sort A to Z), ordre alphabétique croissant
+- L'icône AZ avec flèche haut , ordre alphabétique décroissant 
+- L'icône pour trier par date en ordre croissant (récent vers l'ancien)
+- l'icône pour trier par date en ordre décroissant 
+- une case à cocher pour afficher les éléments masquer 
+----
+on aura une icône pour changer le type de vue, cette icône changera sa figure à chaque fois qu'on clique dessus et à chaque fois ça changera la vue des éléments entre : Grille, Compact, liste/Grand, moyen, petit...
+----
+on aura l'icône pour la selection des éléments, quand on cliquera dessus , les éléments dans le bureau deviendront sélectionnables (on peut maintenant sélectionner un ou plusieurs éléments) et ils nous présenteras ses différentes options :
+- un compteur d'éléments sélectionnés (exemple: 10/20 éléments selectionnés)
+- une option pour tout sélectionner 
+Et on aura comme possibilités :
+- Copier 
+- Déplacer 
+- masquer 
+Un ou Plusieurs éléments qui ont été sélectionnés 
+
+* Quand on clique sur copier, on aura la possibilité d'aller le/les "coller" vers un autre chemin, vers un autre dossier déjà existant ou de créer un nouveau dossier pour coller le fichier qui a été copié 
+* Quand on cliquer sur déplacer, on aura la possibilité d'aller le/les "coller" vers un autre chemin/dossier déjà existant ou de créer un nouveau dossier pour coller le fichier qui a été coupé 
+- quand on clique sur masquer, ses applications auront la caractéristique du masque (il ne seront plus visibles sur l'interface sauf si l'option "afficher les éléments masqués est coché")
+
+----
+NB: faut toujours penser à l'expérience utiliser , placer les icones contenant les options dans les endroits qui seront toujours accessibles à l'utiliseur, peu importe où il se trouve sur l'écran (en bas, à haut, à gauche, à droite, n'importe où ...etc)
+----
+on aura un système de navigation entre les dossiers :
+- un chemin 
+- un ou des icônes pour la navigation pour faire des retours ou des allers
+
+---
+Et nos éléments (dossiers, liens, textes) auront toujours un  icône 3 points qui quand on cliquera dessus on aura les options pour:
+- on verra le titre complet, le nom complet d'un élément
+avec la possibilité pour renommer
+- ouvrir 
+- s'il s'agit d'un lien l'option renouveller le lien/modifier, s'il s'agit du texte : éditer le texte..etc
+- l'option pour voir plus les détails, quand on cliquera dessus on verra : nom complet, chemin, date et heure d'ajout, date de modification,...
+- copier 
+- déplacer 
+- et la zone d'ombre : masquer
+
+----
+Les dossiers auront leurs icônes :
+- il y'aura une icône pour représenter un dossier vide (dossier ouvert, open folder)
+- et un icône pour représenter un dossier contenant des éléments 
+
+Les liens auront aussi leur icônes :
+Soit une icône DNS, globe ou lien, ...
+ 
+Les textes aussi auront leur icônes
+
+On aura la possibilité d'ouvrir :
+- un dossier, voir ses éléments, créer/ajouter des éléments, ouvrir ses éléments , ...
+lorsqu'on ouvre un dossier on verra le chemin pointé vers ce dossier actuel 
+- un lien : ça peut être aussi ouvert fans un nouvel ongle5 
+- un texte : oui même un simple texte qui contient "Bonjour, bienvenue"
+
+NB: Pour la création/ajout ou la modification d'un élément texte, je veux qu'il soit différent de l'ajout de lien ou de la création d'un dossier , ici il s'agit d'un texte, donc il aura besoin de ressembler à un éditeur de texte donc juste un simple éditeur avec les options pour enregistrer, enregistrer sous, quitter, retour,...etc
+
+---
+Dans l'espace projet, c'est l'interface la plus importante 
+
+C'est l'interface qui s'assurer de la préservation de mon projet 
+
+Il met demande d'être toujours prudent, 
+Pour préserver mon projet en cas d'oubli du compte, de mot de passe de là où il s'est stocké (github, Google Drive, mega, mediafire,...)
+
+Premièrement il me donne un petit conseil : il me demande de toujours uploader mon projet en ligne quelque part dans le cloud, de rendre mon projet public pas privé dans les endroits où ils sont stockés pour y avoir toujours accès et afin d'être toujours régulier pour les mises à jour surtout avec les fichiers Json qui représentent notre base de données 
+
+Dans cette interface il y'aura une barre ppur insérer un lien 
+C'est là où je vais insérer le lien de la plateforme de stockage (github, google drive, mega, mediafire), là où j'ai conservé mon projet 
+
+Plateformes recommandés :
+- github (avec un petit commentaire)
+- plateformes IPFS : ipfs.io, web3.storage, nft.storage, pinata cloud (pour le plateformes IPFS faut en parler, faire un petit commentaire sur ça)
+- Google Drive 
+- mega 
+- mediafire
+
+Lorsqu'on on insère un lien , il va générer un QR code de ce lien et me dire pourquoi :
+Il va me dire, ceci sera comme accès à mon projet vu que je ne l'ai pas hébergé en ligne, et surtout vu que je peux toutefois oublier vers quel compte que je l'avais uploader, et surtout de l'avoir toujours sur moi comme carte d'identité, ou chez moi dans mon coffre secret, valise, sac...
+Je peux aller quelque part, je n'ai pas de portable sur moi, ni un support de stockage, avec ça je peux toujours avoir accès à mon projet n'importe où, n'importe quand, avec n'importe quel appareil...
+Recréer un nouveau compte de stockage en cas d'oubli car j'aurai déjà le projet en main
+
+NB: Ici je te montre juste mes pensées, tu n'es pas obligé d'écrire exactement comme moi, tu peux la perfectionner, l'embellir, reformuler, tout réinventer, reconstruire
+
+NB: Tout ce que j'ai décris ici s'agit uniquement de l'apparence sur les petites écrans/mobiles, il faut créer un prototype responsive qui s'adapte en fonction de chaque type d'écran : petit, moyen, large dans n'importe quels platefomes : mobiles, tablettes et desktop, je veux un design responsive adaptatif/reconfiguré modern 
+tout doit être archi moderne
+----
+
+Voilà j'ai fini, tout doit être parfait pour réaliser cette application web 
+
+"""
+
+Bonne Chance !
