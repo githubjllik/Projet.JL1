@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebVault</title>
+    <style>
+        :root {
+            /* Light Mode */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-tertiary: #6c757d;
+            --accent-primary: #4361ee;
+            --accent-secondary: #3a0ca3;
+            --accent-tertiary: #7209b7;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --icon-color: #495057;
+            --hover-bg: #f1f3f5;
+            --folder-bg: #4361ee15;
+            --folder-icon: #4361ee;
+            --file-bg: #7209b715;
+            --file-icon: #7209b7;
+            --success: #38b000;
+            --danger: #e63946;
+            --warning: #fb8500;
+            --info: #4cc9f0;
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 60px;
+            --animation-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --text-tertiary: #6c757d;
+            --accent-primary: #4cc9f0;
+            --accent-secondary: #4361ee;
+            --accent-tertiary: #7209b7;
+            --border-color: #373737;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --icon-color: #adb5bd;
+            --hover-bg: #2d2d2d;
+            --folder-bg: #4cc9f015;
+            --folder-icon: #4cc9f0;
+            --file-bg: #4361ee15;
+            --file-icon: #4361ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color var(--animation-speed), color var(--animation-speed), border-color var(--animation-speed);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Layout */
+        .app-container {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "sidebar main";
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr;
+            height: 100vh;
+        }
+
+        .app-container.sidebar-collapsed {
+            grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+        }
+
+        .header {
+            grid-area: header;
+            background-color: var(--bg-secondary);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+            transition: width var(--animation-speed);
+            box-shadow: 2px 0 10px var(--shadow-color);
+        }
+
+        .main-content {
+            grid-area: main;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Header Components */
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .app-brand svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--accent-primary);
+        }
+
+        .app-brand-name {
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .path-navigator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-tertiary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex: 1;
+            max-width: 800px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            margin: 0 20px;
+        }
+
+        .path-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .path-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .path-separator {
+            color: var(--text-tertiary);
+        }
+
+        .path-current {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            height: 36px;
+        }
+
+        .btn:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Sidebar Components */
+        .sidebar-header {
+            padding: 0 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--icon-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: var(--hover-bg);
+            color: var(--accent-primary);
+        }
+
+        .sidebar-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 2px;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-menu-link:hover {
+            background-color: var(--hover-bg);
+            color: var(--accent-primary);
+        }
+
+        .sidebar-menu-link.active {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .sidebar-menu-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .sidebar-collapsed .sidebar-menu-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .sidebar-menu-link {
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* Main Content */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .content-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-primary-transparent);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .view-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .view-selector {
+            display: flex;
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .view-selector-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-selector-item.active {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .view-selector-item:not(.active):hover {
+            background-color: var(--hover-bg);
+        }
+
+        .view-selector-item svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-toggle:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .dropdown-toggle svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 180px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 100;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item.active {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .dropdown-item svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Files Grid */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .files-compact {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        /* File Card Styles */
+        .file-card {
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            border-color: var(--accent-primary);
+        }
+
+        /* Grid View */
+        .files-grid .file-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .files-grid .file-icon {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .files-grid .folder-icon {
+            background-color: var(--folder-bg);
+            color: var(--folder-icon);
+        }
+
+        .files-grid .link-icon {
+            background-color: var(--file-bg);
+            color: var(--file-icon);
+        }
+
+        .files-grid .file-details {
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .files-grid .file-name {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .files-grid .file-meta {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* List View */
+        .files-list .file-card {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 15px;
+        }
+
+        .files-list .file-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .files-list .folder-icon {
+            background-color: var(--folder-bg);
+            color: var(--folder-icon);
+        }
+
+        .files-list .link-icon {
+            background-color: var(--file-bg);
+            color: var(--file-icon);
+        }
+
+        .files-list .file-details {
+            overflow: hidden;
+        }
+
+        .files-list .file-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .files-list .file-meta {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .files-list .file-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Compact View */
+        .files-compact .file-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .files-compact .file-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .files-compact .folder-icon {
+            background-color: var(--folder-bg);
+            color: var(--folder-icon);
+        }
+
+        .files-compact .link-icon {
+            background-color: var(--file-bg);
+            color: var(--file-icon);
+        }
+
+        .files-compact .file-name {
+            font-size: 0.8rem;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .empty-illustration {
+            width: 150px;
+            height: 150px;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .empty-subtitle {
+            color: var(--text-tertiary);
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            position: relative;
+        }
+
+        .modal-backdrop.active .modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            background-color: var(--hover-bg);
+            color: var(--accent-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            color: var(--accent-primary);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .notification-close {
+            color: var(--text-tertiary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .notification-success {
+            border-left-color: var(--success);
+        }
+
+        .notification-success .notification-icon {
+            color: var(--success);
+        }
+
+        .notification-error {
+            border-left-color: var(--danger);
+        }
+
+        .notification-error .notification-icon {
+            color: var(--danger);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .context-menu.show {
+            display: block;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .context-menu-item svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 5px 0;
+        }
+
+        .context-menu-item.danger {
+            color: var(--danger);
+        }
+
+        .context-menu-item.danger:hover {
+            background-color: #ff000010;
+            color: var(--danger);
+        }
+
+        /* Selection overlay */
+        .file-card.selected {
+            border-color: var(--accent-primary);
+            background-color: #4361ee10;
+        }
+
+        .file-card.selected::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            background-color: var(--accent-primary);
+            border-radius: 50%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* QR Code */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .qr-code-img {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Color Theme Switcher */
+        .theme-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: var(--bg-tertiary);
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-switch-slider {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--bg-secondary);
+            left: 3px;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="dark"] .theme-switch-slider {
+            transform: translateX(26px);
+        }
+
+        .theme-switch svg {
+            width: 12px;
+            height: 12px;
+            fill: var(--text-tertiary);
+        }
+
+        /* Loader */
+        .loader {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--bg-primary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--bg-tertiary);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .app-container {
+                grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+            }
+
+            .sidebar-menu-text {
+                display: none;
+            }
+
+            .sidebar-menu-link {
+                justify-content: center;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .app-brand-name {
+                display: none;
+            }
+
+            .path-navigator {
+                margin: 0 10px;
+                flex-grow: 1;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .content-title {
+                margin-bottom: 0;
+            }
+
+            .content-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .view-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-bar {
+                max-width: none;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .app-container {
+                grid-template-areas:
+                    "header header"
+                    "main main";
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--header-height) 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                z-index: 90;
+                height: calc(100vh - var(--header-height));
+                top: var(--header-height);
+                left: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                width: var(--sidebar-width);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: var(--header-height);
+                left: 0;
+                width: 100%;
+                height: calc(100vh - var(--header-height));
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 80;
+                display: none;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .mobile-menu-toggle {
+                display: flex !important;
+            }
+
+            .path-navigator {
+                display: none;
+            }
+
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .files-compact {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+
+            .modal {
+                max-width: none;
+                width: 100%;
+                border-radius: 12px 12px 0 0;
+                position: fixed;
+                bottom: 0;
+                max-height: 90vh;
+            }
+        }
+
+        /* Utility Classes */
+        .hide {
+            display: none !important;
+        }
+
+        .hidden-mobile {
+            display: initial;
+        }
+
+        .shown-mobile {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .hidden-mobile {
+                display: none !important;
+            }
+
+            .shown-mobile {
+                display: initial !important;
+            }
+        }
+
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* For old feature phones */
+        @media screen and (max-width: 240px) {
+            .app-container {
+                display: block;
+                height: auto;
+            }
+            
+            .header {
+                height: auto;
+                padding: 10px 5px;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .main-content {
+                padding: 10px 5px;
+            }
+            
+            .files-grid, .files-list, .files-compact {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 5px 8px;
+                font-size: 0.8rem;
+                height: auto;
+            }
+            
+            .files-list .file-card {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .file-card {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="app-brand">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm12 10H7v-2h8v2zm2-4H7v-2h10v2zm0-4H7V5h10v2z"/>
+                </svg>
+                <span class="app-brand-name">WebVault</span>
+            </div>
+            
+            <div class="path-navigator" id="pathNavigator">
+                <div class="path-item path-home">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span>Accueil</span>
+                </div>
+                <div class="path-separator">/</div>
+                <div class="path-item path-current">Mes Applications</div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="theme-switch" id="themeToggle">
+                    <div class="theme-switch-slider">
+                        <svg id="lightIcon" viewBox="0 0 24 24">
+                            <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+                        </svg>
+                        <svg id="darkIcon" class="hide" viewBox="0 0 24 24">
+                            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <button class="btn btn-icon shown-mobile mobile-menu-toggle" id="mobileMenuToggle">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+
+                <button class="btn btn-primary" id="importBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M5 20h14v-2H5v2zm0-10h4v6h6v-6h4l-7-7-7 7z"/>
+                    </svg>
+                    <span class="hidden-mobile">Importer JSON</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Menu</div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link active">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Accueil</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Nouveau Dossier</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Ajouter Lien</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Profil</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Paramètres</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l1.41 1.41.59.59H20v10z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Applications Masquées</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <div class="sidebar-menu-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                        </div>
+                        <span class="sidebar-menu-text">Téléchargements</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Mes Applications</h1>
+                <div class="content-actions">
+                    <button class="btn btn-primary" id="newFolderBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z"/>
+                        </svg>
+                        <span>Nouveau Dossier</span>
+                    </button>
+                    <button class="btn btn-outline" id="addLinkBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                        </svg>
+                        <span>Ajouter Lien</span>
+                    </button>
+                    <button class="btn btn-outline" id="exportBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/>
+                        </svg>
+                        <span>Exporter JSON</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="search-bar">
+                <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input type="text" placeholder="Rechercher...">
+            </div>
+            
+            <div class="view-options">
+                <div class="view-selector">
+                    <div class="view-selector-item active" data-view="grid">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h4v-6h-4v6zm-6-7h5V5h-5v6zm6-6v6h4V5h-4z"/>
+                        </svg>
+                        <span>Grille</span>
+                    </div>
+                    <div class="view-selector-item" data-view="list">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                        </svg>
+                        <span>Liste</span>
+                    </div>
+                    <div class="view-selector-item" data-view="compact">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/>
+                            <path d="M7 9h2v2H7zM7 12h2v2H7zM15 9h2v2h-2zM15 12h2v2h-2zM11 9h2v2h-2zM11 12h2v2h-2z"/>
+                        </svg>
+                        <span>Compact</span>
+                    </div>
+                </div>
+                <div class="sort-options">
+                    <div class="dropdown">
+                        <div class="dropdown-toggle" id="sortDropdownToggle">
+                            <span>Trier par: Nom (A-Z)</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z"/>
+                            </svg>
+                        </div>
+                        <div class="dropdown-menu" id="sortDropdownMenu">
+                            <div class="dropdown-item active">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                                </svg>
+                                <span>Nom (A-Z)</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                                </svg>
+                                <span>Nom (Z-A)</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                </svg>
+                                <span>Date (Récent)</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                </svg>
+                                <span>Date (Ancien)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon" id="selectAllBtn" title="Tout sélectionner">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Fichiers en Vue Grille (par défaut) -->
+            <div class="files-container">
+                <div class="files-grid">
+                    <!-- Dossiers -->
+                    <div class="file-card" data-type="folder" data-name="Développement Web">
+                        <div class="file-icon folder-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Développement Web</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                </svg>
+                                10 Oct 2025
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="folder" data-name="Design UI/UX">
+                        <div class="file-icon folder-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Design UI/UX</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                </svg>
+                                15 Oct 2025
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="folder" data-name="Projets Mobile">
+                        <div class="file-icon folder-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Projets Mobile</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                </svg>
+                                20 Oct 2025
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Liens -->
+                    <div class="file-card" data-type="link" data-name="GitHub">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">G</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">GitHub</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                github.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="CodePen">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #7F52FF; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">C</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">CodePen</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                codepen.io
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="Stack Overflow">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #F48024; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">S</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Stack Overflow</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                stackoverflow.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="MDN Web Docs">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #0A84FF; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">M</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">MDN Web Docs</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                developer.mozilla.org
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="W3Schools">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #04AA6D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">W</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">W3Schools</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                w3schools.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="CSS Tricks">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #FF4500; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">C</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">CSS Tricks</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                css-tricks.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="Frontend Masters">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #c02d28; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">F</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Frontend Masters</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                frontendmasters.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-card" data-type="link" data-name="Udemy">
+                        <div class="file-icon link-icon">
+                            <div style="width: 40px; height: 40px; background-color: #a435f0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">U</div>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">Udemy</div>
+                            <div class="file-meta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                                </svg>
+                                udemy.com
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal pour Nouveau Dossier -->
+    <div class="modal-backdrop" id="newFolderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nouveau Dossier</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="folderName">Nom du dossier</label>
+                    <input type="text" class="form-control" id="folderName" placeholder="Mon nouveau dossier">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">Annuler</button>
+                <button class="btn btn-primary" id="createFolderBtn">Créer</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour Ajouter un Lien -->
+    <div class="modal-backdrop" id="addLinkModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajouter un Lien</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="linkName">Nom du lien</label>
+                    <input type="text" class="form-control" id="linkName" placeholder="Mon site préféré">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkUrl">URL</label>
+                    <input type="url" class="form-control" id="linkUrl" placeholder="https://exemple.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">Annuler</button>
+                <button class="btn btn-primary" id="saveLinkBtn">Ajouter</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour Importer JSON -->
+    <div class="modal-backdrop" id="importModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Importer les données</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px;">Importer un fichier JSON pour restaurer votre organisation de fichiers et liens.</p>
+                <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                    <button class="btn btn-primary" id="browseJsonBtn" style="width: 100%;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                        </svg>
+                        Parcourir les fichiers
+                    </button>
+                    <div style="text-align: center; color: var(--text-tertiary); font-size: 0.9rem;">
+                        ou
+                    </div>
+                    <div style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 30px; width: 100%; text-align: center; cursor: pointer;" id="dropZone">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="var(--text-tertiary)" style="margin-bottom: 10px;">
+                            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3zm-5-2v-3h-4v3H7l5 5 5-5h-3z"/>
+                        </svg>
+                        <p>Glissez et déposez votre fichier JSON ici</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour Générer QR Code -->
+    <div class="modal-backdrop" id="qrCodeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Code QR du lien</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-container">
+                    <!-- Utilisation d'un SVG généré pour montrer un QR code d'exemple -->
+                    <div class="qr-code-img">
+                        <svg viewBox="0 0 33 33" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                            <path fill="#000" d="M1,1h7v7h-7z M9,1h1v1h-1z M11,1h2v1h-2z M14,1h1v1h-1z M16,1h7v1h-7z M24,1h3v1h-3z M28,1h1v1h-1z M31,1h1v2h-1z M2,2h5v5h-5z M10,2h1v1h-1z M13,2h1v1h-1z M15,2h1v2h-1z M18,2h2v2h-2z M23,2h1v1h-1z M25,2h2v3h-2z M29,2h1v1h-1z M9,3h1v1h-1z M12,3h1v2h-1z M16,3h1v1h-1z M21,3h2v1h-2z M24,3h1v1h-1z M28,3h1v2h-1z M31,3h1v1h-1z M10,4h1v1h-1z M14,4h1v1h-1z M17,4h1v3h-1z M19,4h1v1h-1z M23,4h1v1h-1z M24,4h1v1h-1z M27,4h1v1h-1z M30,4h1v3h-1z M9,5h1v1h-1z M11,5h1v1h-1z M14,5h2v1h-2z M20,5h1v1h-1z M22,5h2v2h-2z M25,5h1v1h-1z M27,5h1v1h-1z M8,6h1v1h-1z M10,6h1v1h-1z M13,6h1v1h-1z M16,6h1v1h-1z M19,6h1v2h-1z M26,6h1v1h-1z M31,6h1v1h-1z M1,8h1v1h-1z M3,8h5v1h-5z M10,8h1v2h-1z M12,8h3v1h-3z M16,8h1v1h-1z M20,8h1v1h-1z M22,8h1v1h-1z M24,8h1v1h-1z M26,8h1v1h-1z M28,8h1v3h-1z M30,8h1v2h-1z M8,9h2v1h-2z M13,9h2v1h-2z M18,9h1v1h-1z M21,9h1v2h-1z M23,9h1v1h-1z M25,9h1v2h-1z M27,9h1v1h-1z M1,10h2v3h-2z M4,10h1v1h-1z M7,10h1v1h-1z M11,10h2v1h-2z M15,10h2v1h-2z M19,10h1v1h-1z M22,10h1v2h-1z M24,10h1v1h-1z M27,10h1v1h-1z M31,10h1v1h-1z M3,11h1v1h-1z M5,11h2v1h-2z M8,11h2v2h-2z M16,11h1v2h-1z M18,11h1v1h-1z M20,11h1v3h-1z M23,11h1v1h-1z M26,11h1v1h-1z M29,11h2v2h-2z M6,12h1v1h-1z M11,12h1v1h-1z M13,12h2v1h-2z M17,12h1v2h-1z M19,12h1v1h-1z M24,12h2v1h-2z M27,12h1v2h-1z M3,13h2v2h-2z M7,13h1v1h-1z M10,13h1v1h-1z M12,13h1v1h-1z M15,13h1v1h-1z M18,13h1v1h-1z M21,13h1v1h-1z M23,13h1v1h-1z M26,13h1v1h-1z M28,13h1v1h-1z M31,13h1v1h-1z M5,14h2v1h-2z M8,14h2v1h-2z M11,14h1v1h-1z M14,14h1v1h-1z M16,14h1v1h-1z M19,14h1v1h-1z M22,14h1v2h-1z M24,14h2v1h-2z M29,14h1v1h-1z M1,15h1v1h-1z M3,15h1v1h-1z M7,15h1v1h-1z M13,15h1v2h-1z M17,15h1v1h-1z M20,15h1v2h-1z M23,15h1v1h-1z M25,15h2v1h-2z M28,15h1v1h-1z M30,15h1v2h-1z M2,16h1v1h-1z M4,16h1v4h-1z M6,16h1v1h-1z M8,16h1v1h-1z M10,16h1v2h-1z M12,16h1v1h-1z M15,16h1v1h-1z M18,16h1v1h-1z M21,16h1v2h-1z M23,16h2v1h-2z M26,16h1v1h-1z M28,16h2v1h-2z M1,17h1v1h-1z M3,17h1v1h-1z M5,17h1v2h-1z M7,17h1v1h-1z M9,17h1v1h-1z M11,17h2v1h-2z M14,17h1v1h-1z M16,17h1v1h-1z M19,17h1v1h-1z M22,17h1v1h-1z M25,17h1v1h-1z M27,17h1v1h-1z M29,17h1v1h-1z M31,17h1v2h-1z M2,18h1v1h-1z M6,18h1v1h-1z M8,18h1v1h-1z M13,18h1v1h-1z M17,18h2v1h-2z M20,18h1v1h-1z M23,18h1v1h-1z M26,18h1v1h-1z M28,18h1v2h-1z M30,18h1v1h-1z M1,19h1v2h-1z M3,19h1v3h-1z M7,19h1v2h-1z M9,19h2v2h-2z M12,19h1v1h-1z M14,19h2v2h-2z M18,19h1v1h-1z M22,19h1v2h-1z M25,19h1v1h-1z M27,19h1v1h-1z M29,19h1v1h-1z M2,20h1v1h-1z M6,20h1v1h-1z M11,20h1v1h-1z M13,20h1v3h-1z M16,20h2v1h-2z M19,20h1v1h-1z M24,20h1v3h-1z M26,20h1v1h-1z M30,20h1v1h-1z M4,21h2v1h-2z M8,21h1v3h-1z M10,21h1v1h-1z M12,21h1v1h-1z M17,21h2v2h-2z M20,21h2v1h-2z M23,21h1v1h-1z M25,21h1v1h-1z M27,21h1v1h-1z M29,21h1v1h-1z M31,21h1v4h-1z M1,22h2v1h-2z M5,22h1v1h-1z M7,22h1v1h-1z M9,22h1v3h-1z M11,22h1v1h-1z M14,22h1v2h-1z M16,22h1v1h-1z M20,22h1v1h-1z M22,22h1v1h-1z M26,22h1v2h-1z M28,22h1v1h-1z M30,22h1v2h-1z M2,23h1v1h-1z M4,23h1v2h-1z M6,23h1v1h-1z M10,23h1v2h-1z M12,23h1v2h-1z M15,23h1v2h-1z M17,23h2v1h-2z M21,23h1v2h-1z M23,23h1v1h-1z M25,23h1v1h-1z M27,23h1v1h-1z M29,23h1v1h-1z M1,24h1v1h-1z M3,24h1v1h-1z M5,24h1v1h-1z M7,24h1v1h-1z M11,24h1v1h-1z M16,24h1v2h-1z M18,24h2v2h-2z M22,24h1v2h-1z M25,24h1v2h-1z M27,24h3v1h-3z M1,25h7v7h-7z M13,25h1v3h-1z M17,25h1v1h-1z M20,25h1v1h-1z M24,25h1v1h-1z M28,25h2v1h-2z M30,25h1v1h-1z M2,26h5v5h-5z M8,26h1v1h-1z M10,26h2v1h-2z M14,26h1v1h-1z M17,26h3v1h-3z M21,26h1v1h-1z M23,26h1v1h-1z M26,26h1v1h-1z M29,26h2v2h-2z M8,27h2v2h-2z M12,27h1v3h-1z M15,27h1v2h-1z M17,27h2v1h-2z M20,27h2v2h-2z M23,27h3v1h-3z M27,27h1v2h-1z M8,29h1v1h-1z M10,29h1v1h-1z M13,29h2v2h-2z M16,29h2v1h-2z M22,29h1v2h-1z M24,29h1v1h-1z M26,29h1v1h-1z M28,29h1v2h-1z M30,29h1v1h-1z M9,30h1v1h-1z M11,30h1v1h-1z M15,30h1v1h-1z M17,30h1v1h-1z M19,30h1v1h-1z M23,30h1v1h-1z M25,30h1v1h-1z M29,30h1v1h-1z M31,30h1v1h-1z M8,31h3v1h-3z M15,31h2v1h-2z M18,31h1v1h-1z M20,31h2v1h-2z M24,31h1v1h-1z M26,31h2v1h-2z M30,31h2v1h-2z" />
+                        </svg>
+                    </div>
+                    <div class="qr-actions">
+                        <button class="btn btn-outline">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                            Télécharger
+                        </button>
+                        <button class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                            </svg>
+                            Imprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">Succès</div>
+            <div class="notification-message">Opération réalisée avec succès</div>
+        </div>
+        <button class="notification-close">&times;</button>
+    </div>
+    
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/>
+            </svg>
+            Renommer
+        </div>
+        <div class="context-menu-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4l6 6v10c0 1.1-.9 2-2 2H7.99C6.89 23 6 22.1 6 21l.01-14c0-1.1.89-2 1.99-2h7zm-1 7h5.5L14 6.5V12z"/>
+            </svg>
+            Copier
+        </div>
+        <div class="context-menu-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            Couper
+        </div>
+        <div class="context-menu-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/>
+            </svg>
+            Générer Code QR
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+            </svg>
+            Masquer
+        </div>
+        <div class="context-menu-item danger">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+            Supprimer
+        </div>
+    </div>
+
+    <script>
+        // Initialisation de l'interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sélection des éléments DOM
+            const themeToggle = document.getElementById('themeToggle');
+            const lightIcon = document.getElementById('lightIcon');
+            const darkIcon = document.getElementById('darkIcon');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const appContainer = document.querySelector('.app-container');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            // Modals
+            const newFolderBtn = document.getElementById('newFolderBtn');
+            const addLinkBtn = document.getElementById('addLinkBtn');
+            const importBtn = document.getElementById('importBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const newFolderModal = document.getElementById('newFolderModal');
+            const addLinkModal = document.getElementById('addLinkModal');
+            const importModal = document.getElementById('importModal');
+            const qrCodeModal = document.getElementById('qrCodeModal');
+            const notification = document.getElementById('notification');
+            const contextMenu = document.getElementById('contextMenu');
+            
+            // Fichier sélectionné pour l'import JSON
+            const jsonFileInput = document.getElementById('jsonFileInput');
+            const browseJsonBtn = document.getElementById('browseJsonBtn');
+            const dropZone = document.getElementById('dropZone');
+            
+            // Selector de vues
+            const viewSelectors = document.querySelectorAll('.view-selector-item');
+            const filesContainer = document.querySelector('.files-container');
+            const sortDropdownToggle = document.getElementById('sortDropdownToggle');
+            const sortDropdownMenu = document.getElementById('sortDropdownMenu');
+            const fileCards = document.querySelectorAll('.file-card');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            
+            // Gestion du thème
+            themeToggle.addEventListener('click', function() {
+                if (document.body.getAttribute('data-theme') === 'dark') {
+                    document.body.removeAttribute('data-theme');
+                    lightIcon.classList.remove('hide');
+                    darkIcon.classList.add('hide');
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    lightIcon.classList.add('hide');
+                    darkIcon.classList.remove('hide');
+                }
+            });
+            
+            // Toggle Sidebar
+            sidebarToggle.addEventListener('click', function() {
+                appContainer.classList.toggle('sidebar-collapsed');
+            });
+            
+            // Mobile menu toggle
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+            
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+            
+            // Gestion des modales
+            function openModal(modal) {
+                modal.classList.add('active');
+            }
+            
+            function closeModal(modal) {
+                modal.classList.remove('active');
+            }
+            
+            function setupModals() {
+                const modals = [newFolderModal, addLinkModal, importModal, qrCodeModal];
+                
+                modals.forEach(modal => {
+                    // Fermer la modale en cliquant sur le bouton de fermeture
+                    const closeButtons = modal.querySelectorAll('.modal-close, .modal-cancel');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', () => closeModal(modal));
+                    });
+                    
+                    // Fermer la modale en cliquant sur le backdrop
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal);
+                        }
+                    });
+                });
+            }
+            
+            // Ouvrir les différentes modales
+            newFolderBtn.addEventListener('click', () => openModal(newFolderModal));
+            addLinkBtn.addEventListener('click', () => openModal(addLinkModal));
+            importBtn.addEventListener('click', () => openModal(importModal));
+            
+            // Import JSON interaction
+            browseJsonBtn.addEventListener('click', () => {
+                jsonFileInput.click();
+            });
+            
+            jsonFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    showNotification('Fichier sélectionné: ' + fileName);
+                    
+                    // Simulation du traitement pour l'aperçu
+                    setTimeout(() => {
+                        closeModal(importModal);
+                        showNotification('Importation réussie!', 'success');
+                    }, 1000);
+                }
+            });
+            
+            // Drop Zone
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropZone.style.borderColor = 'var(--accent-primary)';
+                dropZone.style.backgroundColor = 'var(--accent-primary-transparent)';
+            }
+            
+            function unhighlight() {
+                dropZone.style.borderColor = 'var(--border-color)';
+                dropZone.style.backgroundColor = 'transparent';
+            }
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const fileName = files[0].name;
+                    showNotification('Fichier déposé: ' + fileName);
+                    
+                    // Simulation du traitement pour l'aperçu
+                    setTimeout(() => {
+                        closeModal(importModal);
+                        showNotification('Importation réussie!', 'success');
+                    }, 1000);
+                }
+            }
+            
+            // Export JSON
+            exportBtn.addEventListener('click', () => {
+                showNotification('Exportation du fichier JSON...', 'info');
+                
+                // Simulation du traitement pour l'aperçu
+                setTimeout(() => {
+                    showNotification('Exportation réussie!', 'success');
+                }, 1000);
+            });
+            
+            // Notifications
+            function showNotification(message, type = 'info') {
+                const notif = document.getElementById('notification');
+                const title = notif.querySelector('.notification-title');
+                const msg = notif.querySelector('.notification-message');
+                
+                // Réinitialiser les classes
+                notif.className = 'notification';
+                
+                // Définir le type
+                switch(type) {
+                    case 'success':
+                        notif.classList.add('notification-success');
+                        title.textContent = 'Succès';
+                        break;
+                    case 'error':
+                        notif.classList.add('notification-error');
+                        title.textContent = 'Erreur';
+                        break;
+                    default:
+                        title.textContent = 'Information';
+                }
+                
+                msg.textContent = message;
+                notif.classList.add('show');
+                
+                // Masquer après un délai
+                setTimeout(() => {
+                    notif.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Fermer la notification
+            const notifClose = document.querySelector('.notification-close');
+            notifClose.addEventListener('click', () => {
+                notification.classList.remove('show');
+            });
+            
+            // View Selector
+            viewSelectors.forEach(selector => {
+                selector.addEventListener('click', () => {
+                    // Supprimer la classe active de tous les sélecteurs
+                    viewSelectors.forEach(s => s.classList.remove('active'));
+                    
+                    // Ajouter la classe active au sélecteur cliqué
+                    selector.classList.add('active');
+                    
+                    // Changer la vue des fichiers
+                    const view = selector.getAttribute('data-view');
+                    changeFilesView(view);
+                });
+            });
+            
+            function changeFilesView(view) {
+                // Supprime tout d'abord le contenu
+                filesContainer.innerHTML = '';
+                
+                // Crée le nouveau conteneur avec la bonne classe
+                const newContainer = document.createElement('div');
+                newContainer.className = 'files-' + view;
+                
+                // Copie tous les fichiers dans le nouveau conteneur
+                fileCards.forEach(card => {
+                    newContainer.appendChild(card.cloneNode(true));
+                });
+                
+                // Ajoute le nouveau conteneur au DOM
+                filesContainer.appendChild(newContainer);
+                
+                // Réinitialiser les événements pour les fichiers
+                setupFileCardEvents();
+            }
+            
+            // Dropdown Toggle
+            sortDropdownToggle.addEventListener('click', () => {
+                sortDropdownMenu.classList.toggle('show');
+            });
+            
+            // Cacher le dropdown quand on clique ailleurs
+            document.addEventListener('click', (e) => {
+                if (!sortDropdownToggle.contains(e.target) && !sortDropdownMenu.contains(e.target)) {
+                    sortDropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Sélection d'éléments du dropdown
+            sortDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Retirer la classe active de tous les éléments
+                    sortDropdownMenu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                    
+                    // Ajouter la classe active à l'élément sélectionné
+                    item.classList.add('active');
+                    
+                    // Mettre à jour le texte du toggle
+                    sortDropdownToggle.querySelector('span').textContent = 'Trier par: ' + item.querySelector('span').textContent;
+                    
+                    // Fermer le dropdown
+                    sortDropdownMenu.classList.remove('show');
+                });
+            });
+            
+            // Context Menu
+            document.addEventListener('contextmenu', (e) => {
+                // Vérifier si on a cliqué sur une carte de fichier
+                const fileCard = e.target.closest('.file-card');
+                if (fileCard) {
+                    e.preventDefault();
+                    
+                    // Positionner le menu contextuel
+                    contextMenu.style.left = `${e.pageX}px`;
+                    contextMenu.style.top = `${e.pageY}px`;
+                    
+                    // Afficher le menu
+                    contextMenu.classList.add('show');
+                    
+                    // Stocker la référence au fichier dans le menu
+                    contextMenu.setAttribute('data-target', fileCard.getAttribute('data-name'));
+                }
+            });
+            
+            // Cacher le menu contextuel en cliquant ailleurs
+            document.addEventListener('click', () => {
+                contextMenu.classList.remove('show');
+            });
+            
+            // Actions du menu contextuel
+            contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = contextMenu.getAttribute('data-target');
+                    
+                    // Obtenir le texte de l'action
+                    const action = item.textContent.trim();
+                    
+                    // Exécuter l'action
+                    switch(action) {
+                        case 'Renommer':
+                            showNotification(`Renommage de "${target}"...`);
+                            break;
+                        case 'Copier':
+                            showNotification(`"${target}" copié dans le presse-papier`, 'success');
+                            break;
+                        case 'Couper':
+                            showNotification(`"${target}" coupé`, 'info');
+                            break;
+                        case 'Masquer':
+                            showNotification(`"${target}" est maintenant masqué`, 'info');
+                            break;
+                        case 'Supprimer':
+                            showNotification(`"${target}" supprimé`, 'success');
+                            break;
+                        case 'Générer Code QR':
+                            openModal(qrCodeModal);
+                            break;
+                    }
+                    
+                    // Fermer le menu
+                    contextMenu.classList.remove('show');
+                });
+            });
+            
+            // Événements pour les cartes de fichiers
+            function setupFileCardEvents() {
+                const cards = document.querySelectorAll('.file-card');
+                
+                cards.forEach(card => {
+                    // Simple clic pour sélectionner
+                    card.addEventListener('click', (e) => {
+                        // Empêcher la sélection si on clique sur un bouton d'action
+                        if (!e.target.closest('.file-actions')) {
+                            // Toggle la sélection
+                            card.classList.toggle('selected');
+                        }
+                    });
+                    
+                    // Double-clic pour ouvrir
+                    card.addEventListener('dblclick', () => {
+                        const type = card.getAttribute('data-type');
+                        const name = card.getAttribute('data-name');
+                        
+                        if (type === 'folder') {
+                            // Simuler l'ouverture d'un dossier
+                            showNotification(`Ouverture du dossier "${name}"...`);
+                            
+                            // Mettre à jour le chemin
+                            const pathNavigator = document.getElementById('pathNavigator');
+                            const currentPath = document.querySelector('.path-current');
+                            
+                            // Créer un nouveau séparateur
+                            const separator = document.createElement('div');
+                            separator.className = 'path-separator';
+                            separator.textContent = '/';
+                            
+                            // Créer un nouvel élément pour l'ancien "courant"
+                            const oldCurrent = document.createElement('div');
+                            oldCurrent.className = 'path-item';
+                            oldCurrent.textContent = currentPath.textContent;
+                            
+                            // Mettre à jour le "courant"
+                            currentPath.textContent = name;
+                            
+                            // Insérer les nouveaux éléments
+                            pathNavigator.insertBefore(separator, currentPath);
+                            pathNavigator.insertBefore(oldCurrent, separator);
+                        } else if (type === 'link') {
+                            // Simuler l'ouverture d'un lien
+                            showNotification(`Ouverture du lien "${name}"...`, 'info');
+                        }
+                    });
+                });
+            }
+            
+            // Sélectionner/Désélectionner tout
+            let allSelected = false;
+            selectAllBtn.addEventListener('click', () => {
+                const cards = document.querySelectorAll('.file-card');
+                
+                if (allSelected) {
+                    // Désélectionner tout
+                    cards.forEach(card => card.classList.remove('selected'));
+                    showNotification('Tout désélectionné');
+                } else {
+                    // Sélectionner tout
+                    cards.forEach(card => card.classList.add('selected'));
+                    showNotification('Tout sélectionné');
+                }
+                
+                allSelected = !allSelected;
+            });
+            
+            // Initialisation
+            setupModals();
+            setupFileCardEvents();
+            
+            // Simulation d'une notification de bienvenue
+            setTimeout(() => {
+                showNotification('Bienvenue dans WebVault!', 'success');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

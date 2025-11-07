@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL - Gestionnaire de liens et fichiers</title>
+    <style>
+        :root {
+            /* Dark mode theme (default) */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --bg-card: rgba(45, 45, 45, 0.8);
+            --bg-modal: rgba(30, 30, 30, 0.95);
+            --bg-bottom-sheet: rgba(30, 30, 30, 0.95);
+            --bg-app-bar: rgba(18, 18, 18, 0.9);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #757575;
+            
+            --accent-color: #7c4dff;
+            --accent-color-light: #9e7bff;
+            --accent-color-dark: #5e35b1;
+            
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
+            --info-color: #2196f3;
+            
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 24px;
+            --border-radius-pill: 9999px;
+            
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.25);
+            
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+            --transition-slow: 0.4s ease;
+            
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            
+            /* Glass effect variables */
+            --glass-blur: 10px;
+            --glass-opacity: 0.8;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            
+            /* Neumorphism variables */
+            --neumorphic-light: rgba(255, 255, 255, 0.05);
+            --neumorphic-dark: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Light mode theme */
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e0e0e0;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --bg-modal: rgba(255, 255, 255, 0.95);
+            --bg-bottom-sheet: rgba(255, 255, 255, 0.95);
+            --bg-app-bar: rgba(245, 245, 245, 0.9);
+            
+            --text-primary: #212121;
+            --text-secondary: #424242;
+            --text-muted: #757575;
+            
+            --accent-color: #7c4dff;
+            --accent-color-light: #9e7bff;
+            --accent-color-dark: #5e35b1;
+            
+            --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+            --neumorphic-light: rgba(255, 255, 255, 0.9);
+            --neumorphic-dark: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Global styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color var(--transition-normal), color var(--transition-normal);
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .content {
+            flex: 1;
+            padding: var(--spacing-md);
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: padding var(--transition-normal);
+        }
+
+        /* App Bars */
+        .app-bar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-app-bar);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-bottom: var(--glass-border);
+            padding: var(--spacing-md);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-normal);
+            height: 64px;
+        }
+
+        .app-bar.scrolled {
+            height: 56px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .app-bar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: font-size var(--transition-normal);
+        }
+
+        .app-bar.scrolled .app-bar-title {
+            font-size: 1.1rem;
+        }
+
+        .app-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sub-app-bar {
+            background-color: var(--bg-secondary);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: var(--spacing-sm);
+            scrollbar-width: none;
+            border-bottom: var(--glass-border);
+        }
+
+        .sub-app-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: var(--spacing-xs);
+        }
+
+        .breadcrumb::-webkit-scrollbar {
+            display: none;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-item:not(:last-child):after {
+            content: "/";
+            margin: 0 var(--spacing-xs);
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-link.active {
+            color: var(--accent-color);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-secondary);
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-sm) 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            border-top: var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-normal);
+            position: relative;
+            font-size: 0.75rem;
+            user-select: none;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-item.active:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: var(--border-radius-pill);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        /* Cards and containers */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            border: var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .glass-card {
+            background-color: rgba(var(--bg-secondary), 0.7);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: var(--glass-border);
+            border-radius: var(--border-radius-md);
+        }
+
+        .neumorphic-card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius-md);
+            box-shadow: 
+                5px 5px 10px var(--neumorphic-dark), 
+                -5px -5px 10px var(--neumorphic-light);
+            padding: var(--spacing-md);
+        }
+
+        .neumorphic-button {
+            background-color: var(--bg-secondary);
+            border: none;
+            border-radius: var(--border-radius-pill);
+            padding: var(--spacing-sm) var(--spacing-md);
+            box-shadow: 
+                5px 5px 10px var(--neumorphic-dark), 
+                -5px -5px 10px var(--neumorphic-light);
+            transition: all var(--transition-normal);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .neumorphic-button:active {
+            box-shadow: 
+                inset 2px 2px 5px var(--neumorphic-dark), 
+                inset -2px -2px 5px var(--neumorphic-light);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            gap: var(--spacing-xs);
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-flat {
+            background-color: transparent;
+            padding: var(--spacing-xs) var(--spacing-sm);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--border-radius-pill);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-pill {
+            border-radius: var(--border-radius-pill);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .input-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: none;
+            border-radius: var(--border-radius-md);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            transition: all var(--transition-normal);
+        }
+
+        .input-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        .input-underlined {
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid var(--text-muted);
+            border-radius: 0;
+            padding: var(--spacing-sm) var(--spacing-xs);
+        }
+
+        .input-underlined:focus {
+            border-color: var(--accent-color);
+            box-shadow: none;
+        }
+
+        /* File explorer items */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .file-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            background-color: var(--bg-secondary);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .file-item:hover {
+            background-color: var(--bg-tertiary);
+            border-color: rgba(var(--accent-color), 0.3);
+        }
+
+        .file-item.selectable {
+            padding-top: var(--spacing-xl);
+        }
+
+        .file-item-selection {
+            position: absolute;
+            top: var(--spacing-xs);
+            left: var(--spacing-xs);
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-muted);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .file-item.selected .file-item-selection {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .file-item-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+            transition: all var(--transition-normal);
+        }
+
+        .folder-icon {
+            color: var(--accent-color);
+        }
+
+        .link-icon {
+            color: var(--info-color);
+        }
+
+        .text-icon {
+            color: var(--text-secondary);
+        }
+
+        .file-item-name {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            background-color: var(--bg-secondary);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            gap: var(--spacing-md);
+        }
+
+        .file-list-item:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .file-list-icon {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .file-list-details {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-list-name {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-list-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .file-list-actions {
+            opacity: 0.5;
+            transition: opacity var(--transition-normal);
+        }
+
+        .file-list-item:hover .file-list-actions {
+            opacity: 1;
+        }
+
+        /* Bottom sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-bottom-sheet);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            transform: translateY(100%);
+            transition: transform var(--transition-normal);
+            z-index: 1000;
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-lg);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 5px;
+            background-color: var(--text-muted);
+            border-radius: var(--border-radius-pill);
+            margin: 0 auto var(--spacing-md) auto;
+        }
+
+        /* Dialogs and modals */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: var(--bg-modal);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--border-radius-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+            border: var(--glass-border);
+        }
+
+        .modal-backdrop.active .modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid rgba(var(--text-muted), 0.2);
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .modal-body {
+            padding: var(--spacing-md);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            border-top: 1px solid rgba(var(--text-muted), 0.2);
+        }
+
+        /* Side panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            max-width: 90%;
+            height: 100%;
+            background-color: var(--bg-secondary);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .side-panel.active {
+            transform: translateX(0);
+        }
+
+        .side-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid rgba(var(--text-muted), 0.2);
+        }
+
+        .side-panel-body {
+            flex: 1;
+            padding: var(--spacing-md);
+            overflow-y: auto;
+        }
+
+        /* FAB (Floating Action Button) */
+        .fab {
+            position: fixed;
+            bottom: 80px; /* Above bottom nav */
+            right: var(--spacing-md);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            z-index: 90;
+            border: none;
+        }
+
+        .fab:hover {
+            background-color: var(--accent-color-light);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .fab-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Accordion */
+        .accordion {
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+            border: var(--glass-border);
+        }
+
+        .accordion-item {
+            background-color: var(--bg-secondary);
+        }
+
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            cursor: pointer;
+            transition: background-color var(--transition-normal);
+        }
+
+        .accordion-header:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .accordion-title {
+            font-weight: 500;
+        }
+
+        .accordion-icon {
+            transition: transform var(--transition-normal);
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-normal);
+            padding: 0 var(--spacing-md);
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 1000px;
+            padding: var(--spacing-md);
+            padding-top: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .content {
+                padding: var(--spacing-md) var(--spacing-xl);
+                padding-bottom: var(--spacing-md);
+            }
+
+            .bottom-nav {
+                height: 60px;
+                padding: 0;
+            }
+
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .fab {
+                bottom: var(--spacing-xl);
+                right: var(--spacing-xl);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .content {
+                padding: var(--spacing-lg) var(--spacing-xl);
+                margin-left: 250px; /* Space for sidebar */
+            }
+
+            .app-bar {
+                left: 250px;
+            }
+
+            .side-panel {
+                transform: none;
+                left: 0;
+                width: 250px;
+                z-index: 50;
+                box-shadow: none;
+                border-right: var(--glass-border);
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+
+        /* Utility classes */
+        .mb-sm { margin-bottom: var(--spacing-sm); }
+        .mb-md { margin-bottom: var(--spacing-md); }
+        .mb-lg { margin-bottom: var(--spacing-lg); }
+
+        .mt-sm { margin-top: var(--spacing-sm); }
+        .mt-md { margin-top: var(--spacing-md); }
+        .mt-lg { margin-top: var(--spacing-lg); }
+
+        .text-center { text-align: center; }
+        .text-muted { color: var(--text-muted); }
+        .text-ellipsis {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .d-flex { display: flex; }
+        .flex-column { flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .align-center { align-items: center; }
+        .gap-sm { gap: var(--spacing-sm); }
+        .gap-md { gap: var(--spacing-md); }
+        .flex-1 { flex: 1; }
+
+        /* Page transition animation */
+        .page {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-muted) var(--bg-primary);
+        }
+
+        /* SVG Icons */
+        .icon-folder {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-link {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-text {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Tree view */
+        .tree-view {
+            margin-top: var(--spacing-md);
+        }
+
+        .tree-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .tree-toggle {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .tree-toggle-icon {
+            transition: transform var(--transition-normal);
+        }
+
+        .tree-toggle.open .tree-toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .tree-children {
+            margin-left: var(--spacing-md);
+            height: 0;
+            overflow: hidden;
+            transition: height var(--transition-normal);
+        }
+
+        .tree-toggle.open + .tree-children {
+            height: auto;
+        }
+
+        /* For QR Code */
+        .qr-code-container {
+            display: flex;
+            justify-content: center;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .qr-code {
+            background-color: white;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Side panel (visible on desktop) -->
+        <div class="side-panel active" id="sidePanel">
+            <div class="side-panel-header">
+                <h3>Projet.JL</h3>
+                <button class="btn-icon" id="closeSidePanel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="side-panel-body">
+                <nav>
+                    <a href="#home" class="nav-item active" data-page="home">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Accueil
+                    </a>
+                    <a href="#explorer" class="nav-item" data-page="explorer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        Explorateur
+                    </a>
+                    <a href="#project" class="nav-item" data-page="project">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        Espace Projet
+                    </a>
+                </nav>
+                
+                <div class="mt-lg">
+                    <h4>Arborescence</h4>
+                    <div class="tree-view">
+                        <div class="tree-item">
+                            <div class="tree-toggle open">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tree-toggle-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                <span>votre projet</span>
+                            </div>
+                            <div class="tree-children" style="height: auto;">
+                                <div class="tree-item">
+                                    <div class="tree-toggle open">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tree-toggle-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                        <span>data</span>
+                                    </div>
+                                    <div class="tree-children" style="height: auto;">
+                                        <div class="tree-item">
+                                            <div class="d-flex align-center gap-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                                <span>backup_2025-11-01_10-30-45.json</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tree-item">
+                                    <div class="d-flex align-center gap-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                        <span>index.html</span>
+                                    </div>
+                                </div>
+                                <div class="tree-item">
+                                    <div class="d-flex align-center gap-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                        <span>styles.css</span>
+                                    </div>
+                                </div>
+                                <div class="tree-item">
+                                    <div class="d-flex align-center gap-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                        <span>scripts.js</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Bar -->
+        <div class="app-bar" id="appBar">
+            <div class="d-flex align-center gap-sm">
+                <button class="btn-icon d-md-none" id="menuButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <span class="app-bar-title">Projet.JL</span>
+            </div>
+            <div class="app-bar-actions">
+                <button class="btn-icon" id="searchButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+                <button class="btn-icon" id="themeToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sub App Bar (for explorer) -->
+        <div class="sub-app-bar" id="subAppBar" style="display: none;">
+            <div class="breadcrumb" id="breadcrumb">
+                <div class="breadcrumb-item">
+                    <a href="#" class="breadcrumb-link active">Racine</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Home Page -->
+            <div id="homePage" class="page">
+                <div class="card mb-md">
+                    <h2>Bienvenue sur Projet.JL</h2>
+                    <p>Une application de stockage ♾️ infini pour vos liens et documents.</p>
+                </div>
+
+                <div class="neumorphic-card mb-md">
+                    <h3>À propos du Projet.JL</h3>
+                    <p>Le projet JL est un projet conçu par Jean-Louis LIKULA pour résoudre un problème spécifique : la conservation et l'organisation des liens web de manière efficace et pérenne.</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="accordion-title">Mes motivations</div>
+                                <div class="accordion-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <p>L'infinité du monde web est ce qui représente l'infini dans ce monde. Il y a tellement un nombre incalculable de ressources à découvrir, à explorer, et tout passe par un chemin : un lien web.</p>
+                                <p>Vous n'imaginez pas combien de merveilles j'ai pu découvrir grâce à de simples liens, et combien de ces merveilles j'ai pu oublier ou perdre, parce que je n'avais pas un endroit où les stocker efficacement.</p>
+                                <p>Les gestionnaires de fichiers classiques ne servent qu'à stocker des médias et sont toujours limités en nombre de stockage, à l'appareil, ou au support de stockage.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="accordion-title">Ma solution</div>
+                                <div class="accordion-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <p>Je devais créer un système, trouver une solution qui serait à la fois :</p>
+                                <p>- Toujours accessible (n'importe où, n'importe quand)<br>
+                                - Non limité, non dépendant d'un système (base de données, stockage, connexion internet)</p>
+                                <p>Une solution qui concorde avec l'infinité du web, qui peut devenir le web à sa façon - pas besoin de dépendre d'une base de données, d'un système, d'une platefome, d'une connexion internet.</p>
+                                <p>Voilà pourquoi j'ai créé ce système de stockage infini, accessible n'importe où, n'importe quand, hors-ligne, qui peut se trouver partout à la fois et où l'utilisateur est le maître de tout.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card mb-md">
+                    <h3>Comment utiliser ce projet ?</h3>
+                    <p>Voici quelques étapes simples pour commencer :</p>
+
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="accordion-title">Première utilisation</div>
+                                <div class="accordion-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <p>1. Commencez par ajouter votre premier lien, créer votre premier dossier ou ajouter du texte.</p>
+                                <p>2. Avant de quitter l'application, exportez un fichier JSON - ce sera votre base de données contenant tous vos liens et dossiers.</p>
+                                <p>3. Exportez-le dans la racine de votre projet dans le dossier "data".</p>
+
+                                <div class="tree-view">
+                                    <div class="tree-item">
+                                        <div class="tree-toggle open">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tree-toggle-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                            <span>votre projet</span>
+                                        </div>
+                                        <div class="tree-children" style="height: auto;">
+                                            <div class="tree-item">
+                                                <div class="tree-toggle open">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tree-toggle-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                                    <span>data</span>
+                                                </div>
+                                                <div class="tree-children" style="height: auto;">
+                                                    <div class="tree-item">
+                                                        <div class="d-flex align-center gap-sm">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                                            <span>backup_2025-11-01_10-30-45.json</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="d-flex align-center gap-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                                    <span>index.html</span>
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="d-flex align-center gap-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                                    <span>styles.css</span>
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="d-flex align-center gap-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                                    <span>scripts.js</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="accordion-title">Utilisation ultérieure</div>
+                                <div class="accordion-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <p>Si un jour lors de vos activités futures l'application semble vide (peut-être parce que vous avez changé de navigateur ou vous utilisez un autre appareil), n'ayez crainte.</p>
+                                <p>Vous n'aurez qu'à "importer" votre fichier JSON qui se trouve dans le dossier data à la racine de votre projet, et toutes vos données seront restaurées.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explorer Page -->
+            <div id="explorerPage" class="page" style="display: none;">
+                <div class="d-flex justify-between align-center mb-md">
+                    <h2>Explorateur de fichiers</h2>
+                    <div class="d-flex gap-sm">
+                        <button class="btn-icon" id="sortButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10"></path><path d="M11 9h7"></path><path d="M11 13h4"></path><path d="M3 17h18"></path><path d="M3 21h18"></path><path d="M3 13V3l4 8"></path></svg>
+                        </button>
+                        <button class="btn-icon" id="viewModeButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        </button>
+                        <button class="btn-icon" id="selectButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Grid View (default) -->
+                <div class="file-grid" id="fileGrid">
+                    <div class="file-item">
+                        <div class="file-item-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div class="file-item-name">Documents</div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <div class="file-item-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div class="file-item-name">Ressources Web</div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <div class="file-item-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <div class="file-item-name">MDN Web Docs</div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <div class="file-item-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <div class="file-item-name">GitHub</div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <div class="file-item-icon text-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </div>
+                        <div class="file-item-name">Notes de développement</div>
+                    </div>
+                </div>
+
+                <!-- File List View (hidden by default) -->
+                <div class="file-list" id="fileList" style="display: none;">
+                    <div class="file-list-item">
+                        <div class="file-list-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div class="file-list-details">
+                            <div class="file-list-name">Documents</div>
+                            <div class="file-list-meta">Modifié le 5 Nov 2025</div>
+                        </div>
+                        <div class="file-list-actions">
+                            <button class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="file-list-item">
+                        <div class="file-list-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div class="file-list-details">
+                            <div class="file-list-name">Ressources Web</div>
+                            <div class="file-list-meta">Modifié le 4 Nov 2025</div>
+                        </div>
+                        <div class="file-list-actions">
+                            <button class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="file-list-item">
+                        <div class="file-list-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <div class="file-list-details">
+                            <div class="file-list-name">MDN Web Docs</div>
+                            <div class="file-list-meta">Ajouté le 3 Nov 2025</div>
+                        </div>
+                        <div class="file-list-actions">
+                            <button class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="file-list-item">
+                        <div class="file-list-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <div class="file-list-details">
+                            <div class="file-list-name">GitHub</div>
+                            <div class="file-list-meta">Ajouté le 2 Nov 2025</div>
+                        </div>
+                        <div class="file-list-actions">
+                            <button class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="file-list-item">
+                        <div class="file-list-icon text-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </div>
+                        <div class="file-list-details">
+                            <div class="file-list-name">Notes de développement</div>
+                            <div class="file-list-meta">Ajouté le 1 Nov 2025</div>
+                        </div>
+                        <div class="file-list-actions">
+                            <button class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Page -->
+            <div id="projectPage" class="page" style="display: none;">
+                <div class="card mb-md">
+                    <h2>Espace Projet</h2>
+                    <p>Préservez et partagez votre projet en toute sécurité.</p>
+                </div>
+
+                <div class="glass-card mb-md">
+                    <h3>Conseils de sécurité</h3>
+                    <p>Pour préserver votre projet en cas d'oubli de compte ou de mot de passe, nous vous recommandons de :</p>
+                    <ul>
+                        <li>Toujours uploader votre projet en ligne dans un service cloud</li>
+                        <li>Rendre votre projet public dans les endroits où il est stocké pour y avoir toujours accès</li>
+                        <li>Faire des mises à jour régulières, surtout des fichiers JSON qui représentent votre base de données</li>
+                    </ul>
+                </div>
+
+                <div class="neumorphic-card">
+                    <h3>Générer un QR code d'accès</h3>
+                    <p>Entrez le lien de la plateforme où vous avez stocké votre projet :</p>
+                    
+                    <div class="input-group">
+                        <input type="url" class="input-control" id="projectUrl" placeholder="https://github.com/votre-nom/projet-jl" />
+                    </div>
+                    
+                    <button class="neumorphic-button" id="generateQRButton">
+                        Générer QR Code
+                    </button>
+                    
+                    <div id="qrContainer" class="qr-code-container" style="display: none;">
+                        <div class="qr-code" id="qrCode">
+                            <!-- QR code will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="mt-md">
+                        <h4>Plateformes recommandées</h4>
+                        
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <div class="accordion-title">GitHub</div>
+                                    <div class="accordion-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>GitHub est idéal pour les projets web comme celui-ci. Il offre un versionnement du code et un accès facile depuis n'importe quel navigateur. Vous pouvez également activer GitHub Pages pour accéder directement à votre application en ligne.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <div class="accordion-title">Plateformes IPFS</div>
+                                    <div class="accordion-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>Les plateformes IPFS (InterPlanetary File System) comme IPFS.io, Web3.storage, NFT.storage ou Pinata Cloud permettent de stocker vos fichiers de manière décentralisée et immuable. Vos fichiers sont accessibles via un hash unique, garantissant que vos données resteront toujours accessibles tant que quelqu'un les partage sur le réseau.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <div class="accordion-title">Google Drive</div>
+                                    <div class="accordion-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>Google Drive est une solution de stockage cloud populaire et fiable avec un espace gratuit généreux. Vous pouvez partager votre projet avec un lien public pour y accéder facilement.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <div class="accordion-title">Mega / Mediafire</div>
+                                    <div class="accordion-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <p>Ces plateformes offrent un stockage généreux et permettent de partager facilement des liens publics vers vos fichiers, même si vous n'êtes pas connecté à votre compte.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation (for mobile) -->
+        <nav class="bottom-nav">
+            <a href="#home" class="nav-item active" data-page="home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Accueil</span>
+            </a>
+            <a href="#explorer" class="nav-item" data-page="explorer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                <span>Explorateur</span>
+            </a>
+            <a href="#project" class="nav-item" data-page="project">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span>Projet</span>
+            </a>
+        </nav>
+
+        <!-- Floating Action Button (FAB) -->
+        <button class="fab" id="fabButton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fab-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+
+        <!-- Add Item Bottom Sheet -->
+        <div class="bottom-sheet" id="addItemSheet">
+            <div class="bottom-sheet-handle"></div>
+            <h3>Ajouter un élément</h3>
+            <div class="d-flex gap-md mt-md">
+                <button class="btn btn-primary" id="addFolderBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Dossier
+                </button>
+                <button class="btn btn-primary" id="addLinkBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    Lien
+                </button>
+                <button class="btn btn-primary" id="addTextBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    Texte
+                </button>
+            </div>
+            <div class="d-flex gap-md mt-md">
+                <button class="btn btn-secondary" id="importJsonBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Importer JSON
+                </button>
+                <button class="btn btn-secondary" id="exportJsonBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Exporter JSON
+                </button>
+            </div>
+        </div>
+
+        <!-- Sort Options Bottom Sheet -->
+        <div class="bottom-sheet" id="sortOptionsSheet">
+            <div class="bottom-sheet-handle"></div>
+            <h3>Options de tri</h3>
+            <div class="mt-md">
+                <div class="d-flex flex-column gap-sm">
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                            A à Z (ordre alphabétique croissant)
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"></polyline></svg>
+                    </button>
+                    
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                            Z à A (ordre alphabétique décroissant)
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 11 12 6 17 11"></polyline></svg>
+                    </button>
+                    
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Récent vers ancien
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"></polyline></svg>
+                    </button>
+                    
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Ancien vers récent
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 11 12 6 17 11"></polyline></svg>
+                    </button>
+                </div>
+                
+                <div class="mt-md">
+                    <label class="d-flex align-center gap-sm">
+                        <input type="checkbox" id="showHiddenCheckbox">
+                        <span>Afficher les éléments masqués</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Mode Bottom Sheet -->
+        <div class="bottom-sheet" id="viewModeSheet">
+            <div class="bottom-sheet-handle"></div>
+            <h3>Mode d'affichage</h3>
+            <div class="mt-md">
+                <div class="d-flex flex-column gap-sm">
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                            Grille
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                    
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            Liste
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                    
+                    <button class="btn btn-flat d-flex justify-between align-center">
+                        <span class="d-flex align-center gap-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                            Compact
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Folder Modal -->
+        <div class="modal-backdrop" id="createFolderModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Créer un dossier</h3>
+                    <button class="modal-close" id="closeFolderModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="folderName" class="input-label">Nom du dossier</label>
+                        <input type="text" id="folderName" class="input-control" placeholder="Nouveau dossier">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" id="cancelFolderBtn">Annuler</button>
+                    <button class="btn btn-primary" id="saveFolderBtn">Créer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Link Modal -->
+        <div class="modal-backdrop" id="addLinkModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Ajouter un lien</h3>
+                    <button class="modal-close" id="closeLinkModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="linkTitle" class="input-label">Titre du lien</label>
+                        <input type="text" id="linkTitle" class="input-control" placeholder="Mon site web préféré">
+                    </div>
+                    <div class="input-group">
+                        <label for="linkUrl" class="input-label">URL</label>
+                        <input type="url" id="linkUrl" class="input-control" placeholder="https://exemple.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="linkDescription" class="input-label">Description (optionnel)</label>
+                        <textarea id="linkDescription" class="input-control" rows="3" placeholder="Une description du lien..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" id="cancelLinkBtn">Annuler</button>
+                    <button class="btn btn-primary" id="saveLinkBtn">Ajouter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Text Modal -->
+        <div class="modal-backdrop" id="addTextModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Ajouter un texte</h3>
+                    <button class="modal-close" id="closeTextModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="textTitle" class="input-label">Titre</label>
+                        <input type="text" id="textTitle" class="input-control" placeholder="Ma note">
+                    </div>
+                    <div class="input-group">
+                        <label for="textContent" class="input-label">Contenu</label>
+                        <textarea id="textContent" class="input-control" rows="6" placeholder="Écrivez votre texte ici..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" id="cancelTextBtn">Annuler</button>
+                    <button class="btn btn-primary" id="saveTextBtn">Ajouter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Modal -->
+        <div class="modal-backdrop" id="searchModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Rechercher</h3>
+                    <button class="modal-close" id="closeSearchModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <div class="d-flex gap-sm">
+                            <input type="text" id="searchInput" class="input-control" placeholder="Rechercher...">
+                            <button class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-md">
+                        <div class="d-flex justify-between mb-sm">
+                            <span>Filtrer par type:</span>
+                        </div>
+                        <div class="d-flex gap-sm">
+                            <button class="btn btn-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                Dossier
+                            </button>
+                            <button class="btn btn-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                Lien
+                            </button>
+                            <button class="btn btn-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                Texte
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-md">
+                        <h4>Résultats de recherche</h4>
+                        <div class="file-list">
+                            <!-- Résultats de recherche seront affichés ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const appBar = document.getElementById('appBar');
+        const subAppBar = document.getElementById('subAppBar');
+        const menuButton = document.getElementById('menuButton');
+        const sidePanel = document.getElementById('sidePanel');
+        const closeSidePanel = document.getElementById('closeSidePanel');
+        const fabButton = document.getElementById('fabButton');
+        const addItemSheet = document.getElementById('addItemSheet');
+        const sortButton = document.getElementById('sortButton');
+        const sortOptionsSheet = document.getElementById('sortOptionsSheet');
+        const viewModeButton = document.getElementById('viewModeButton');
+        const viewModeSheet = document.getElementById('viewModeSheet');
+        const searchButton = document.getElementById('searchButton');
+        const searchModal = document.getElementById('searchModal');
+        const closeSearchModal = document.getElementById('closeSearchModal');
+        const themeToggle = document.getElementById('themeToggle');
+        const addFolderBtn = document.getElementById('addFolderBtn');
+        const createFolderModal = document.getElementById('createFolderModal');
+        const closeFolderModal = document.getElementById('closeFolderModal');
+        const cancelFolderBtn = document.getElementById('cancelFolderBtn');
+        const addLinkBtn = document.getElementById('addLinkBtn');
+        const addLinkModal = document.getElementById('addLinkModal');
+        const closeLinkModal = document.getElementById('closeLinkModal');
+        const cancelLinkBtn = document.getElementById('cancelLinkBtn');
+        const addTextBtn = document.getElementById('addTextBtn');
+        const addTextModal = document.getElementById('addTextModal');
+        const closeTextModal = document.getElementById('closeTextModal');
+        const cancelTextBtn = document.getElementById('cancelTextBtn');
+        const fileGrid = document.getElementById('fileGrid');
+        const fileList = document.getElementById('fileList');
+        const selectButton = document.getElementById('selectButton');
+        const generateQRButton = document.getElementById('generateQRButton');
+        const qrContainer = document.getElementById('qrContainer');
+        const qrCode = document.getElementById('qrCode');
+        
+        // Pages
+        const homePage = document.getElementById('homePage');
+        const explorerPage = document.getElementById('explorerPage');
+        const projectPage = document.getElementById('projectPage');
+        
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        // Global state
+        const state = {
+            currentPage: 'home',
+            isSelectionMode: false,
+            selectedItems: [],
+            viewMode: 'grid',
+            currentPath: ['Racine'],
+            isBottomSheetOpen: false,
+            isDarkMode: true, // Default dark mode
+        };
+        
+        // Navigation
+        function navigateTo(page) {
+            // Hide all pages
+            homePage.style.display = 'none';
+            explorerPage.style.display = 'none';
+            projectPage.style.display = 'none';
+            
+            // Show sub app bar only for explorer page
+            subAppBar.style.display = page === 'explorer' ? 'flex' : 'none';
+            
+            // Show the selected page
+            if (page === 'home') {
+                homePage.style.display = 'block';
+            } else if (page === 'explorer') {
+                explorerPage.style.display = 'block';
+            } else if (page === 'project') {
+                projectPage.style.display = 'block';
+            }
+            
+            // Update nav items
+            navItems.forEach(item => {
+                if (item.dataset.page === page) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Update state
+            state.currentPage = page;
+            
+            // On smaller screens, close the side panel after navigation
+            if (window.innerWidth < 1024) {
+                sidePanel.classList.remove('active');
+            }
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            state.isDarkMode = !state.isDarkMode;
+            document.documentElement.setAttribute('data-theme', state.isDarkMode ? 'dark' : 'light');
+            themeToggle.innerHTML = state.isDarkMode 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>' 
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+        }
+        
+        // Toggle view mode
+        function toggleViewMode() {
+            state.viewMode = state.viewMode === 'grid' ? 'list' : 'grid';
+            if (state.viewMode === 'grid') {
+                fileGrid.style.display = 'grid';
+                fileList.style.display = 'none';
+            } else {
+                fileGrid.style.display = 'none';
+                fileList.style.display = 'flex';
+            }
+            closeBottomSheet();
+        }
+        
+        // Toggle selection mode
+        function toggleSelectionMode() {
+            state.isSelectionMode = !state.isSelectionMode;
+            
+            const fileItems = document.querySelectorAll('.file-item');
+            fileItems.forEach(item => {
+                if (state.isSelectionMode) {
+                    item.classList.add('selectable');
+                    const selection = document.createElement('div');
+                    selection.className = 'file-item-selection';
+                    item.prepend(selection);
+                } else {
+                    item.classList.remove('selectable');
+                    item.classList.remove('selected');
+                    const selection = item.querySelector('.file-item-selection');
+                    if (selection) {
+                        selection.remove();
+                    }
+                }
+            });
+            
+            // Update button icon
+            selectButton.innerHTML = state.isSelectionMode 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' 
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>';
+        }
+        
+        // Show bottom sheet
+        function showBottomSheet(sheet) {
+            // Hide all bottom sheets first
+            addItemSheet.classList.remove('active');
+            sortOptionsSheet.classList.remove('active');
+            viewModeSheet.classList.remove('active');
+            
+            // Show the requested one
+            sheet.classList.add('active');
+            state.isBottomSheetOpen = true;
+        }
+        
+        // Close bottom sheet
+        function closeBottomSheet() {
+            addItemSheet.classList.remove('active');
+            sortOptionsSheet.classList.remove('active');
+            viewModeSheet.classList.remove('active');
+            state.isBottomSheetOpen = false;
+        }
+        
+        // Show modal
+        function showModal(modal) {
+            modal.classList.add('active');
+        }
+        
+        // Close modal
+        function closeModal(modal) {
+            modal.classList.remove('active');
+        }
+        
+        // Generate QR code
+        function generateQRCode() {
+            const url = document.getElementById('projectUrl').value.trim();
+            
+            if (!url) {
+                alert('Veuillez entrer une URL valide.');
+                return;
+            }
+            
+            // Simple QR code representation (in a real app, you'd use a proper QR code library)
+            qrCode.innerHTML = `
+                <div style="width: 200px; height: 200px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); gap: 2px;">
+                    ${Array(100).fill('').map(() => `
+                        <div style="background-color: ${Math.random() > 0.5 ? 'black' : 'white'}; width: 100%; height: 100%;"></div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 8px; text-align: center; font-size: 12px; color: var(--text-muted);">${url}</div>
+            `;
+            
+            qrContainer.style.display = 'flex';
+        }
+        
+        // Event listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize theme
+            document.documentElement.setAttribute('data-theme', state.isDarkMode ? 'dark' : 'light');
+            
+            // App bar scroll behavior
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    appBar.classList.add('scrolled');
+                } else {
+                    appBar.classList.remove('scrolled');
+                }
+            });
+            
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigateTo(item.dataset.page);
+                });
+            });
+            
+            // Side panel toggle
+            menuButton.addEventListener('click', () => {
+                sidePanel.classList.toggle('active');
+            });
+            
+            closeSidePanel.addEventListener('click', () => {
+                sidePanel.classList.remove('active');
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // FAB button
+            fabButton.addEventListener('click', () => {
+                if (state.isBottomSheetOpen) {
+                    closeBottomSheet();
+                } else {
+                    showBottomSheet(addItemSheet);
+                }
+            });
+            
+            // Bottom sheets
+            document.addEventListener('click', (e) => {
+                if (state.isBottomSheetOpen && 
+                    !e.target.closest('#addItemSheet') && 
+                    !e.target.closest('#sortOptionsSheet') && 
+                    !e.target.closest('#viewModeSheet') && 
+                    !e.target.closest('#fabButton') && 
+                    !e.target.closest('#sortButton') && 
+                    !e.target.closest('#viewModeButton')) {
+                    closeBottomSheet();
+                }
+            });
+            
+            // Make bottom sheets draggable
+            const bottomSheets = document.querySelectorAll('.bottom-sheet');
+            bottomSheets.forEach(sheet => {
+                const handle = sheet.querySelector('.bottom-sheet-handle');
+                
+                let startY = 0;
+                let startHeight = 0;
+                
+                handle.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    startHeight = sheet.offsetHeight;
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                handle.addEventListener('touchmove', (e) => {
+                    const deltaY = e.touches[0].clientY - startY;
+                    const newHeight = startHeight - deltaY;
+                    
+                    if (deltaY > 0) { // Dragging down
+                        sheet.style.transition = 'none';
+                        sheet.style.transform = `translateY(${deltaY}px)`;
+                    }
+                });
+                
+                handle.addEventListener('touchend', (e) => {
+                    sheet.style.transition = 'transform var(--transition-normal)';
+                    document.body.style.overflow = '';
+                    
+                    const deltaY = e.changedTouches[0].clientY - startY;
+                    
+                    if (deltaY > 100) { // Threshold to close
+                        closeBottomSheet();
+                    } else {
+                        sheet.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            // Sort button
+            sortButton.addEventListener('click', () => {
+                if (state.isBottomSheetOpen && sortOptionsSheet.classList.contains('active')) {
+                    closeBottomSheet();
+                } else {
+                    showBottomSheet(sortOptionsSheet);
+                }
+            });
+            
+            // View mode button
+            viewModeButton.addEventListener('click', () => {
+                if (state.isBottomSheetOpen && viewModeSheet.classList.contains('active')) {
+                    closeBottomSheet();
+                } else {
+                    showBottomSheet(viewModeSheet);
+                }
+            });
+            
+            // Selection mode
+            selectButton.addEventListener('click', toggleSelectionMode);
+            
+            // Search
+            searchButton.addEventListener('click', () => {
+                showModal(searchModal);
+            });
+            
+            closeSearchModal.addEventListener('click', () => {
+                closeModal(searchModal);
+            });
+            
+            // Create folder
+            addFolderBtn.addEventListener('click', () => {
+                closeBottomSheet();
+                showModal(createFolderModal);
+            });
+            
+            closeFolderModal.addEventListener('click', () => {
+                closeModal(createFolderModal);
+            });
+            
+            cancelFolderBtn.addEventListener('click', () => {
+                closeModal(createFolderModal);
+            });
+            
+            // Add link
+            addLinkBtn.addEventListener('click', () => {
+                closeBottomSheet();
+                showModal(addLinkModal);
+            });
+            
+            closeLinkModal.addEventListener('click', () => {
+                closeModal(addLinkModal);
+            });
+            
+            cancelLinkBtn.addEventListener('click', () => {
+                closeModal(addLinkModal);
+            });
+            
+            // Add text
+            addTextBtn.addEventListener('click', () => {
+                closeBottomSheet();
+                showModal(addTextModal);
+            });
+            
+            closeTextModal.addEventListener('click', () => {
+                closeModal(addTextModal);
+            });
+            
+            cancelTextBtn.addEventListener('click', () => {
+                closeModal(addTextModal);
+            });
+            
+            // Accordion functionality
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const accordionItem = header.parentElement;
+                    accordionItem.classList.toggle('active');
+                });
+            });
+            
+            // Tree view functionality
+            const treeToggles = document.querySelectorAll('.tree-toggle');
+            treeToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    toggle.classList.toggle('open');
+                });
+            });
+            
+            // QR code generation
+            generateQRButton.addEventListener('click', generateQRCode);
+            
+            // View mode options
+            document.querySelectorAll('#viewModeSheet .btn-flat').forEach((btn, index) => {
+                btn.addEventListener('click', () => {
+                    if (index === 0) { // Grid
+                        state.viewMode = 'grid';
+                        fileGrid.style.display = 'grid';
+                        fileList.style.display = 'none';
+                    } else { // List or compact
+                        state.viewMode = 'list';
+                        fileGrid.style.display = 'none';
+                        fileList.style.display = 'flex';
+                    }
+                    closeBottomSheet();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

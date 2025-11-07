@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL - Stockage Infini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #151520;
+            --bg-tertiary: #1e1e2e;
+            --bg-glass: rgba(30, 30, 46, 0.7);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        /* App Header */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .app-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Home Page */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .infinity-icon {
+            font-size: 80px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            margin: 40px 0 20px;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin: 30px 0 15px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .content-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-section p {
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .motivation-list {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .motivation-list p {
+            margin-bottom: 15px;
+        }
+
+        .diagram {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            border: 1px solid var(--border);
+        }
+
+        .tree-item {
+            margin: 8px 0;
+            color: var(--text-secondary);
+        }
+
+        .tree-item.highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .file-example {
+            background: var(--bg-tertiary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 3px solid var(--success);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Explorer */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .icon-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--accent);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* File Grid */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .file-grid.list {
+            grid-template-columns: 1fr;
+        }
+
+        .file-grid.compact {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .file-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            text-align: center;
+        }
+
+        .file-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .file-item.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .file-item.hidden-item {
+            opacity: 0.5;
+        }
+
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-glass);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .file-item:hover .file-menu {
+            opacity: 1;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 2000;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2001;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .sheet-option {
+            padding: 15px;
+            margin: 5px 0;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sheet-option:hover {
+            background: var(--accent);
+            transform: translateX(5px);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 24px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-glass);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Search */
+        .search-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-container.active {
+            transform: translateY(0);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .filter-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            flex: 1;
+            border-radius: 12px;
+            margin: 0 5px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
+
+        /* QR Code */
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        #qrcode {
+            width: 256px;
+            height: 256px;
+        }
+
+        /* Selection Mode */
+        .selection-toolbar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: var(--accent);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            z-index: 998;
+        }
+
+        .selection-toolbar.active {
+            transform: translateY(0);
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Accordion */
+        .accordion {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .accordion-header {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            padding: 0 20px;
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 1000px;
+            padding: 0 20px 20px;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Platform Cards */
+        .platform-grid {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .platform-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .platform-name {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .platform-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+
+            .platform-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* SVG Icons */
+        .svg-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .page-transition {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            z-index: 4000;
+            min-width: 200px;
+            display: none;
+        }
+
+        .context-menu.active {
+            display: block;
+        }
+
+        .context-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .context-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .context-item.danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 5000;
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <div class="app-header">
+        <div class="logo">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+            </svg>
+            Projet.JL
+        </div>
+        <button class="icon-btn" id="searchBtn">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-input" placeholder="Rechercher..." id="searchInput">
+        <div class="search-filters">
+            <div class="filter-chip active" data-filter="all">Tous</div>
+            <div class="filter-chip" data-filter="folder">Dossiers</div>
+            <div class="filter-chip" data-filter="link">Liens</div>
+            <div class="filter-chip" data-filter="text">Textes</div>
+        </div>
+    </div>
+
+    <!-- Selection Toolbar -->
+    <div class="selection-toolbar" id="selectionToolbar">
+        <div>
+            <span id="selectionCount">0 sélectionné(s)</span>
+            <button class="btn btn-secondary" id="selectAllBtn" style="margin-left: 15px;">Tout sélectionner</button>
+        </div>
+        <div class="selection-actions">
+            <button class="icon-btn" id="copySelectedBtn" title="Copier">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" id="moveSelectedBtn" title="Déplacer">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" id="hideSelectedBtn" title="Masquer">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Page -->
+        <div id="homePage" class="page-transition">
+            <div class="hero">
+                <div class="infinity-icon">∞</div>
+                <h1>Projet.JL</h1>
+                <p class="subtitle">Stockage Infini pour l'Infinité du Web</p>
+            </div>
+
+            <div class="content-section">
+                <h2>Qu'est-ce que le Projet.JL ?</h2>
+                <p>Le Projet.JL est une vision révolutionnaire conçue par Jean-Louis LIKULA, née d'une profonde réflexion sur la nature infinie du web et notre besoin de préserver les trésors que nous y découvrons.</p>
+                <p>Ce projet répond à un problème fondamental : comment conserver, organiser et accéder à nos découvertes web de manière illimitée, indépendante et véritablement infinie ?</p>
+            </div>
+
+            <div class="content-section">
+                <h2>La Philosophie de l'Infini</h2>
+                <div class="motivation-list">
+                    <h3>L'Infinité du Web</h3>
+                    <p>Le web représente l'infini dans notre monde moderne. C'est un univers en expansion perpétuelle, regorgeant de ressources incalculables, de connaissances infinies, de découvertes sans limite.</p>
+                    
+                    <h3>Le Pouvoir d'un Lien</h3>
+                    <p>Chaque lien web est bien plus qu'un simple texte. C'est une porte vers l'infini, un chemin vers des merveilles insoupçonnées, une clé qui déverrouille des mondes de connaissances.</p>
+                    <p>Vous ne pouvez imaginer combien de trésors j'ai découverts grâce à de simples liens. Vous ne pouvez imaginer non plus combien de ces merveilles j'ai perdues, simplement parce qu'il n'existait pas d'endroit pour les préserver dignement.</p>
+                    
+                    <h3>Les Limites des Solutions Traditionnelles</h3>
+                    <p>Les gestionnaires de fichiers classiques sont conçus pour le physique : vidéos, images, documents. Ils sont toujours limités par l'espace de stockage, liés à un appareil spécifique, dépendants d'une infrastructure matérielle.</p>
+                    <p>Mais les liens du web transcendent ces limitations. Ils n'occupent presque pas d'espace, mais donnent accès à l'infini.</p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>La Solution : Un Système Infini</h2>
+                <p>J'ai créé ce système pour répondre à des exigences qui reflètent l'infinité du web :</p>
+                
+                <div class="motivation-list">
+                    <h3>Accessibilité Universelle</h3>
+                    <p>Toujours accessible, n'importe où, n'importe quand, depuis n'importe quel appareil.</p>
+                    
+                    <h3>Indépendance Totale</h3>
+                    <p>Aucune dépendance à une base de données centralisée, un système propriétaire, une plateforme commerciale ou même une connexion internet.</p>
+                    
+                    <h3>Capacité Illimitée</h3>
+                    <p>Pas de limites de stockage, pas de quotas, pas de restrictions. Aussi infini que le web lui-même.</p>
+                    
+                    <h3>Souveraineté Absolue</h3>
+                    <p>Vous êtes le maître absolu de votre univers numérique. Vous contrôlez tout, modélisez tout à votre façon, sans limites imposées de l'extérieur.</p>
+                </div>
+                
+                <p>Voilà l'essence de l'infini : un système qui grandit avec vous, qui s'adapte à vos besoins, qui ne connaît pas de frontières.</p>
+            </div>
+
+            <div class="content-section">
+                <h2>Comment Utiliser le Projet.JL ?</h2>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Première Utilisation</span>
+                        <svg class="accordion-icon svg-icon" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Si c'est votre première fois avec le Projet.JL, vous pouvez immédiatement commencer à :</p>
+                        <p>• Créer votre premier dossier</p>
+                        <p>• Ajouter votre premier lien</p>
+                        <p>• Saisir vos premières notes</p>
+                        <p>Mais attention ! Ne soyez pas pressé de quitter l'application sans avoir sauvegardé votre travail.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Le Système de Sauvegarde</span>
+                        <svg class="accordion-icon svg-icon" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Votre base de données est un simple fichier JSON. C'est la mémoire de toutes vos activités, le fruit de votre exploration.</p>
+                        <p>À chaque session, exportez ce fichier et placez-le dans le dossier <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">data</code> à la racine de votre projet.</p>
+                        
+                        <div class="diagram">
+                            <div class="tree-item">📁 votre-projet/</div>
+                            <div class="tree-item" style="margin-left: 20px;">📁 data/</div>
+                            <div class="tree-item highlight" style="margin-left: 40px;">📄 backup_2025-11-05_14-30-45.json ← Placez votre fichier ici</div>
+                            <div class="tree-item" style="margin-left: 20px;">📄 index.html</div>
+                            <div class="tree-item" style="margin-left: 20px;">📄 styles.css</div>
+                            <div class="tree-item" style="margin-left: 20px;">📄 scripts.js</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Format des Fichiers</span>
+                        <svg class="accordion-icon svg-icon" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Les fichiers sont automatiquement nommés selon ce format :</p>
+                        <div class="file-example">
+                            backup_YYYY-MM-DD_HH-MM-SS.json
+                        </div>
+                        <p>Exemple : <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">backup_2025-11-05_14-30-45.json</code> pour un fichier créé le 5 novembre 2025 à 14h30.</p>
+                        <p>Vous pouvez renommer ces fichiers comme vous le souhaitez, mais conservez toujours la date pour faciliter vos sauvegardes multiples.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Restauration de vos Données</span>
+                        <svg class="accordion-icon svg-icon" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Lorsque vous changez d'appareil, de navigateur, ou que l'application semble vide :</p>
+                        <p>N'ayez crainte ! Cliquez simplement sur "Importer" et sélectionnez votre fichier JSON depuis le dossier data.</p>
+                        
+                        <div class="diagram">
+                            <div class="tree-item">1. Ouvrez l'application</div>
+                            <div class="tree-item">2. Cliquez sur l'icône d'importation</div>
+                            <div class="tree-item">3. Sélectionnez : votre-projet/data/backup_*.json</div>
+                            <div class="tree-item highlight">4. Votre univers réapparaît instantanément ✨</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>Bonne Exploration !</h2>
+                <p>Vous voilà prêt à explorer l'infini du web tout en gardant une trace de vos découvertes.</p>
+                <p>Que votre voyage soit riche en trouvailles merveilleuses, et que le Projet.JL soit le gardien fidèle de vos trésors numériques.</p>
+                <p style="text-align: center; margin-top: 30px; font-size: 1.2em; color: var(--accent);">Bon voyage dans l'infini ! 🚀</p>
+            </div>
+        </div>
+
+        <!-- Explorer Page -->
+        <div id="explorerPage" style="display: none;" class="page-transition">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button class="icon-btn" id="addBtn" title="Ajouter">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="sortBtn" title="Trier">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="viewBtn" title="Vue">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="selectBtn" title="Sélectionner">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Breadcrumb -->
+            <div class="breadcrumb" id="breadcrumb">
+                <div class="breadcrumb-item active" data-path="">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span>Accueil</span>
+                </div>
+            </div>
+
+            <!-- File Grid -->
+            <div class="file-grid" id="fileGrid">
+                <div class="empty-state">
+                    <div class="empty-icon">📂</div>
+                    <p>Aucun élément</p>
+                    <p style="font-size: 14px; margin-top: 10px;">Commencez par créer un dossier ou ajouter un lien</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Page -->
+        <div id="projectPage" style="display: none;" class="page-transition">
+            <div class="hero">
+                <div class="infinity-icon">🔒</div>
+                <h1>Espace Projet</h1>
+                <p class="subtitle">Préservez votre univers numérique</p>
+            </div>
+
+            <div class="content-section">
+                <h2>⚠️ Soyez Prudent !</h2>
+                <p>La pérennité de votre projet dépend de votre vigilance. Ne laissez jamais votre travail dépendre uniquement de votre mémoire ou d'un seul point de stockage.</p>
+            </div>
+
+            <div class="content-section">
+                <h2>💡 Conseil Essentiel</h2>
+                <p>Uploadez toujours votre projet dans le cloud, de préférence sur plusieurs plateformes. Rendez-le public plutôt que privé pour garantir un accès permanent, même en cas d'oubli de mot de passe.</p>
+                <p>Mettez régulièrement à jour vos fichiers JSON pour synchroniser votre base de données avec le cloud.</p>
+            </div>
+
+            <div class="content-section">
+                <h2>🌐 Lien de Sauvegarde Cloud</h2>
+                <div class="form-group">
+                    <label>Entrez le lien vers votre projet hébergé :</label>
+                    <input type="url" id="cloudUrl" placeholder="https://github.com/username/projet-jl">
+                </div>
+                <button class="btn" id="generateQrBtn">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
+                    </svg>
+                    Générer le QR Code
+                </button>
+                
+                <div id="qrSection" style="display: none; text-align: center; margin-top: 30px;">
+                    <h3>Votre QR Code d'Accès</h3>
+                    <p style="color: var(--text-secondary); margin: 15px 0;">Conservez ce code comme une carte d'identité numérique</p>
+                    <div class="qr-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-top: 15px; line-height: 1.6;">
+                        Ce QR code vous permet d'accéder à votre projet depuis n'importe où, n'importe quand, avec n'importe quel appareil.<br>
+                        Imprimez-le, conservez-le dans votre portefeuille, votre coffre secret, ou prenez-en une photo.<br>
+                        C'est votre clé vers l'infini de vos découvertes web.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📦 Plateformes Recommandées</h2>
+                
+                <div class="platform-grid">
+                    <div class="platform-card">
+                        <div class="platform-name">GitHub</div>
+                        <div class="platform-desc">
+                            Plateforme idéale pour le versioning de votre projet. Gratuit, fiable, et accessible depuis n'importe où. Permet de suivre l'historique de vos modifications.
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card">
+                        <div class="platform-name">IPFS (InterPlanetary File System)</div>
+                        <div class="platform-desc">
+                            Le futur du stockage décentralisé. Vos fichiers sont distribués sur un réseau peer-to-peer, garantissant une pérennité maximale. Disponible via ipfs.io, web3.storage, nft.storage, ou Pinata Cloud.
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card">
+                        <div class="platform-name">Google Drive</div>
+                        <div class="platform-desc">
+                            Solution simple et universelle. 15 GB gratuits, synchronisation automatique, accès depuis tous vos appareils.
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card">
+                        <div class="platform-name">MEGA</div>
+                        <div class="platform-desc">
+                            20 GB gratuits avec chiffrement de bout en bout. Excellent pour la sécurité et la confidentialité de vos données.
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card">
+                        <div class="platform-name">MediaFire</div>
+                        <div class="platform-desc">
+                            10 GB gratuits, interface simple, partage facile. Bon compromis entre simplicité et fonctionnalités.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🎯 Pourquoi le QR Code ?</h2>
+                <p>Le QR code est bien plus qu'une simple commodité. C'est votre bouée de sauvetage numérique :</p>
+                <div class="motivation-list">
+                    <p><strong>Accès Universel :</strong> Scannez-le depuis n'importe quel smartphone, tablette ou ordinateur équipé d'une caméra.</p>
+                    <p><strong>Indépendance Matérielle :</strong> Vous n'avez pas votre ordinateur ? Pas de problème. Votre smartphone suffit.</p>
+                    <p><strong>Récupération d'Urgence :</strong> En cas d'oubli de compte ou de mot de passe, le QR code vous ramène directement à votre projet.</p>
+                    <p><strong>Portabilité Physique :</strong> Conservez-le imprimé dans votre portefeuille, comme une carte bancaire ou une pièce d'identité.</p>
+                    <p><strong>Partage Simplifié :</strong> Partagez facilement votre projet avec d'autres appareils ou personnes de confiance.</p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🌟 L'Infini à Portée de Main</h2>
+                <p>Avec ces précautions, votre projet transcende les limites du physique. Il devient véritablement infini : accessible partout, préservé dans le temps, indépendant de toute infrastructure unique.</p>
+                <p style="text-align: center; margin-top: 30px; font-size: 1.1em; color: var(--accent);">Votre univers numérique est désormais éternel. 🚀</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-page="home">
+            <div class="nav-icon">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </div>
+            <div class="nav-label">Accueil</div>
+        </div>
+        <div class="nav-item" data-page="explorer">
+            <div class="nav-icon">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                </svg>
+            </div>
+            <div class="nav-label">Explorer</div>
+        </div>
+        <div class="nav-item" data-page="project">
+            <div class="nav-icon">
+                <svg class="svg-icon" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                </svg>
+            </div>
+            <div class="nav-label">Projet</div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet for Add Options -->
+    <div class="bottom-sheet-overlay" id="addOverlay"></div>
+    <div class="bottom-sheet" id="addSheet">
+        <div class="bottom-sheet-handle"></div>
+        <h3 style="margin-bottom: 20px;">Ajouter un élément</h3>
+        <div class="sheet-option" data-action="folder">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <span>Créer un dossier</span>
+        </div>
+        <div class="sheet-option" data-action="link">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+            </svg>
+            <span>Ajouter un lien</span>
+        </div>
+        <div class="sheet-option" data-action="text">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/>
+            </svg>
+            <span>Ajouter du texte</span>
+        </div>
+        <div style="border-top: 1px solid var(--border); margin: 15px 0;"></div>
+        <div class="sheet-option" data-action="import">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+            </svg>
+            <span>Importer JSON</span>
+        </div>
+        <div class="sheet-option" data-action="export">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+            </svg>
+            <span>Exporter JSON</span>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet for Sort Options -->
+    <div class="bottom-sheet-overlay" id="sortOverlay"></div>
+    <div class="bottom-sheet" id="sortSheet">
+        <div class="bottom-sheet-handle"></div>
+        <h3 style="margin-bottom: 20px;">Options de tri</h3>
+        <div class="sheet-option" data-sort="az-asc">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M9.25 5L12.5 1.75 15.75 5h-6.5zM15.75 19L12.5 22.25 9.25 19h6.5zM8 11h8v2H8z"/>
+            </svg>
+            <span>A → Z</span>
+        </div>
+        <div class="sheet-option" data-sort="az-desc">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M15.75 5L12.5 1.75 9.25 5h6.5zM9.25 19L12.5 22.25 15.75 19H9.25zM8 11h8v2H8z"/>
+            </svg>
+            <span>Z → A</span>
+        </div>
+        <div class="sheet-option" data-sort="date-asc">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z"/>
+            </svg>
+            <span>Plus récent → Plus ancien</span>
+        </div>
+        <div class="sheet-option" data-sort="date-desc">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M7 14l5-5 5 5z"/>
+            </svg>
+            <span>Plus ancien → Plus récent</span>
+        </div>
+        <div style="border-top: 1px solid var(--border); margin: 15px 0;"></div>
+        <div class="sheet-option" data-sort="toggle-hidden">
+            <input type="checkbox" id="showHidden" style="margin-right: 10px;">
+            <span>Afficher les éléments masqués</span>
+        </div>
+    </div>
+
+    <!-- Modal for Creating/Editing -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nouvel élément</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Content will be inserted dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item" data-action="open">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+            </svg>
+            Ouvrir
+        </div>
+        <div class="context-item" data-action="rename">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+            Renommer
+        </div>
+        <div class="context-item" data-action="edit">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+            Modifier
+        </div>
+        <div class="context-item" data-action="details">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            Détails
+        </div>
+        <div class="context-item" data-action="copy">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            Copier
+        </div>
+        <div class="context-item" data-action="move">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/>
+            </svg>
+            Déplacer
+        </div>
+        <div class="context-item danger" data-action="hide">
+            <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+            </svg>
+            Masquer
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // Data Structure
+        let fileSystem = {
+            folders: [],
+            links: [],
+            texts: []
+        };
+        let currentPath = [];
+        let clipboard = null;
+        let clipboardAction = null; // 'copy' or 'move'
+        let selectedItems = new Set();
+        let selectionMode = false;
+        let viewMode = 'grid'; // 'grid', 'list', 'compact'
+        let sortMode = 'az-asc';
+        let showHidden = false;
+        let contextMenuItem = null;
+
+        // Navigation
+        const pages = {
+            home: document.getElementById('homePage'),
+            explorer: document.getElementById('explorerPage'),
+            project: document.getElementById('projectPage')
+        };
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                Object.values(pages).forEach(p => p.style.display = 'none');
+                pages[page].style.display = 'block';
+                
+                if (page === 'explorer') {
+                    renderFileGrid();
+                }
+            });
+        });
+
+        // Accordion
+        document.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const accordion = header.parentElement;
+                accordion.classList.toggle('active');
+            });
+        });
+
+        // Search
+        const searchBtn = document.getElementById('searchBtn');
+        const searchContainer = document.getElementById('searchContainer');
+        searchBtn.addEventListener('click', () => {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+        // Search filters
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                // Implement filter logic here
+            });
+        });
+
+        // Add Button - Bottom Sheet
+        const addBtn = document.getElementById('addBtn');
+        const addOverlay = document.getElementById('addOverlay');
+        const addSheet = document.getElementById('addSheet');
+
+        addBtn.addEventListener('click', () => {
+            addOverlay.classList.add('active');
+            addSheet.classList.add('active');
+        });
+
+        addOverlay.addEventListener('click', () => {
+            addOverlay.classList.remove('active');
+            addSheet.classList.remove('active');
+        });
+
+        // Sort Button - Bottom Sheet
+        const sortBtn = document.getElementById('sortBtn');
+        const sortOverlay = document.getElementById('sortOverlay');
+        const sortSheet = document.getElementById('sortSheet');
+
+        sortBtn.addEventListener('click', () => {
+            sortOverlay.classList.add('active');
+            sortSheet.classList.add('active');
+        });
+
+        sortOverlay.addEventListener('click', () => {
+            sortOverlay.classList.remove('active');
+            sortSheet.classList.remove('active');
+        });
+
+        // View Mode Toggle
+        const viewBtn = document.getElementById('viewBtn');
+        viewBtn.addEventListener('click', () => {
+            const modes = ['grid', 'list', 'compact'];
+            const currentIndex = modes.indexOf(viewMode);
+            viewMode = modes[(currentIndex + 1) % modes.length];
+            renderFileGrid();
+            showToast(`Vue: ${viewMode}`);
+        });
+
+        // Selection Mode
+        const selectBtn = document.getElementById('selectBtn');
+        const selectionToolbar = document.getElementById('selectionToolbar');
+
+        selectBtn.addEventListener('click', () => {
+            selectionMode = !selectionMode;
+            selectedItems.clear();
+            selectionToolbar.classList.toggle('active', selectionMode);
+            renderFileGrid();
+            updateSelectionCount();
+        });
+
+        document.getElementById('selectAllBtn').addEventListener('click', () => {
+            const allItems = getAllItemsInCurrentPath();
+            allItems.forEach(item => selectedItems.add(item.id));
+            renderFileGrid();
+            updateSelectionCount();
+        });
+
+        function updateSelectionCount() {
+            const count = selectedItems.size;
+            const total = getAllItemsInCurrentPath().length;
+            document.getElementById('selectionCount').textContent = `${count}/${total} sélectionné(s)`;
+        }
+
+        // Add Sheet Actions
+        document.querySelectorAll('#addSheet .sheet-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const action = option.dataset.action;
+                addOverlay.classList.remove('active');
+                addSheet.classList.remove('active');
+                
+                switch(action) {
+                    case 'folder':
+                        showCreateModal('folder');
+                        break;
+                    case 'link':
+                        showCreateModal('link');
+                        break;
+                    case 'text':
+                        showCreateModal('text');
+                        break;
+                    case 'import':
+                        importJSON();
+                        break;
+                    case 'export':
+                        exportJSON();
+                        break;
+                }
+            });
+        });
+
+        // Sort Sheet Actions
+        document.querySelectorAll('#sortSheet .sheet-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const sort = option.dataset.sort;
+                
+                if (sort === 'toggle-hidden') {
+                    showHidden = document.getElementById('showHidden').checked;
+                } else {
+                    sortMode = sort;
+                    sortOverlay.classList.remove('active');
+                    sortSheet.classList.remove('active');
+                }
+                
+                renderFileGrid();
+            });
+        });
+
+        // Modal Functions
+        const itemModal = document.getElementById('itemModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const closeModal = document.getElementById('closeModal');
+
+        closeModal.addEventListener('click', () => {
+            itemModal.classList.remove('active');
+        });
+
+        itemModal.addEventListener('click', (e) => {
+            if (e.target === itemModal) {
+                itemModal.classList.remove('active');
+            }
+        });
+
+        function showCreateModal(type, item = null) {
+            const isEdit = item !== null;
+            modalTitle.textContent = isEdit ? `Modifier ${type}` : `Nouveau ${type}`;
+            
+            let html = '';
+            
+            if (type === 'folder') {
+                html = `
+                    <div class="form-group">
+                        <label>Nom du dossier</label>
+                        <input type="text" id="folderName" value="${item ? item.name : ''}" placeholder="Mon dossier">
+                    </div>
+                    <button class="btn" onclick="saveItem('folder', ${isEdit})">
+                        ${isEdit ? 'Modifier' : 'Créer'}
+                    </button>
+                `;
+            } else if (type === 'link') {
+                html = `
+                    <div class="form-group">
+                        <label>Nom du lien</label>
+                        <input type="text" id="linkName" value="${item ? item.name : ''}" placeholder="Exemple: GitHub">
+                    </div>
+                    <div class="form-group">
+                        <label>URL</label>
+                        <input type="url" id="linkUrl" value="${item ? item.url : ''}" placeholder="https://github.com">
+                    </div>
+                    <button class="btn" onclick="saveItem('link', ${isEdit})">
+                        ${isEdit ? 'Modifier' : 'Ajouter'}
+                    </button>
+                `;
+            } else if (type === 'text') {
+                html = `
+                    <div class="form-group">
+                        <label>Titre</label>
+                        <input type="text" id="textTitle" value="${item ? item.name : ''}" placeholder="Notes importantes">
+                    </div>
+                    <div class="form-group">
+                        <label>Contenu</label>
+                        <textarea id="textContent" placeholder="Votre texte ici...">${item ? item.content : ''}</textarea>
+                    </div>
+                    <button class="btn" onclick="saveItem('text', ${isEdit})">
+                        ${isEdit ? 'Modifier' : 'Créer'}
+                    </button>
+                `;
+            }
+            
+            modalBody.innerHTML = html;
+            itemModal.classList.add('active');
+            
+            // Focus first input
+            setTimeout(() => {
+                modalBody.querySelector('input').focus();
+            }, 100);
+        }
+
+        function saveItem(type, isEdit = false) {
+            let newItem = {
+                id: isEdit ? contextMenuItem.id : Date.now().toString(),
+                type: type,
+                path: [...currentPath],
+                created: isEdit ? contextMenuItem.created : new Date().toISOString(),
+                modified: new Date().toISOString(),
+                hidden: false
+            };
+            
+            if (type === 'folder') {
+                const name = document.getElementById('folderName').value.trim();
+                if (!name) {
+                    showToast('Veuillez entrer un nom', 'error');
+                    return;
+                }
+                newItem.name = name;
+                
+                if (isEdit) {
+                    const index = fileSystem.folders.findIndex(f => f.id === contextMenuItem.id);
+                    fileSystem.folders[index] = { ...fileSystem.folders[index], ...newItem };
+                } else {
+                    fileSystem.folders.push(newItem);
+                }
+            } else if (type === 'link') {
+                const name = document.getElementById('linkName').value.trim();
+                const url = document.getElementById('linkUrl').value.trim();
+                
+                if (!name || !url) {
+                    showToast('Veuillez remplir tous les champs', 'error');
+                    return;
+                }
+                
+                newItem.name = name;
+                newItem.url = url;
+                
+                if (isEdit) {
+                    const index = fileSystem.links.findIndex(l => l.id === contextMenuItem.id);
+                    fileSystem.links[index] = { ...fileSystem.links[index], ...newItem };
+                } else {
+                    fileSystem.links.push(newItem);
+                }
+            } else if (type === 'text') {
+                const title = document.getElementById('textTitle').value.trim();
+                const content = document.getElementById('textContent').value.trim();
+                
+                if (!title) {
+                    showToast('Veuillez entrer un titre', 'error');
+                    return;
+                }
+                
+                newItem.name = title;
+                newItem.content = content;
+                
+                if (isEdit) {
+                    const index = fileSystem.texts.findIndex(t => t.id === contextMenuItem.id);
+                    fileSystem.texts[index] = { ...fileSystem.texts[index], ...newItem };
+                } else {
+                    fileSystem.texts.push(newItem);
+                }
+            }
+            
+            itemModal.classList.remove('active');
+            renderFileGrid();
+            showToast(isEdit ? 'Élément modifié' : 'Élément créé', 'success');
+        }
+
+        // File Grid Rendering
+        function renderFileGrid() {
+            const fileGrid = document.getElementById('fileGrid');
+            fileGrid.className = `file-grid ${viewMode}`;
+            
+            const items = getAllItemsInCurrentPath();
+            
+            if (items.length === 0) {
+                fileGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <p>Aucun élément</p>
+                        <p style="font-size: 14px; margin-top: 10px;">Commencez par créer un dossier ou ajouter un lien</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            fileGrid.innerHTML = items.map(item => {
+                const isSelected = selectedItems.has(item.id);
+                const icon = getItemIcon(item);
+                
+                return `
+                    <div class="file-item ${isSelected ? 'selected' : ''} ${item.hidden ? 'hidden-item' : ''}" 
+                         data-id="${item.id}" 
+                         data-type="${item.type}"
+                         ${selectionMode ? `onclick="toggleSelection('${item.id}')"` : `onclick="openItem('${item.id}', '${item.type}')"`}>
+                        <div class="file-icon">${icon}</div>
+                        <div class="file-name">${item.name}</div>
+                        <div class="file-menu" onclick="event.stopPropagation(); showContextMenu(event, '${item.id}', '${item.type}')">⋮</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getAllItemsInCurrentPath() {
+            const pathStr = currentPath.join('/');
+            
+            let items = [
+                ...fileSystem.folders.filter(f => f.path.join('/') === pathStr),
+                ...fileSystem.links.filter(l => l.path.join('/') === pathStr),
+                ...fileSystem.texts.filter(t => t.path.join('/') === pathStr)
+            ];
+            
+            if (!showHidden) {
+                items = items.filter(item => !item.hidden);
+            }
+            
+            // Sort items
+            items.sort((a, b) => {
+                if (sortMode === 'az-asc') {
+                    return a.name.localeCompare(b.name);
+                } else if (sortMode === 'az-desc') {
+                    return b.name.localeCompare(a.name);
+                } else if (sortMode === 'date-asc') {
+                    return new Date(b.created) - new Date(a.created);
+                } else if (sortMode === 'date-desc') {
+                    return new Date(a.created) - new Date(b.created);
+                }
+                return 0;
+            });
+            
+            return items;
+        }
+
+        function getItemIcon(item) {
+            if (item.type === 'folder') {
+                const hasItems = fileSystem.folders.some(f => f.path.join('/').startsWith([...item.path, item.name].join('/'))) ||
+                                fileSystem.links.some(l => l.path.join('/').startsWith([...item.path, item.name].join('/'))) ||
+                                fileSystem.texts.some(t => t.path.join('/').startsWith([...item.path, item.name].join('/')));
+                return hasItems ? '📁' : '📂';
+            } else if (item.type === 'link') {
+                return '🔗';
+            } else if (item.type === 'text') {
+                return '📝';
+            }
+        }
+
+        function openItem(id, type) {
+            if (selectionMode) return;
+            
+            if (type === 'folder') {
+                const folder = fileSystem.folders.find(f => f.id === id);
+                currentPath.push(folder.name);
+                updateBreadcrumb();
+                renderFileGrid();
+            } else if (type === 'link') {
+                const link = fileSystem.links.find(l => l.id === id);
+                window.open(link.url, '_blank');
+            } else if (type === 'text') {
+                const text = fileSystem.texts.find(t => t.id === id);
+                alert(text.content); // Simple display - could be enhanced with a modal
+            }
+        }
+
+        function toggleSelection(id) {
+            if (selectedItems.has(id)) {
+                selectedItems.delete(id);
+            } else {
+                selectedItems.add(id);
+            }
+            renderFileGrid();
+            updateSelectionCount();
+        }
+
+        // Breadcrumb
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = `
+                <div class="breadcrumb-item ${currentPath.length === 0 ? 'active' : ''}" onclick="navigateToPath([])">
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span>Accueil</span>
+                </div>
+            `;
+            
+            currentPath.forEach((folder, index) => {
+                const isLast = index === currentPath.length - 1;
+                const path = currentPath.slice(0, index + 1);
+                html += `
+                    <span style="color: var(--text-secondary);">›</span>
+                    <div class="breadcrumb-item ${isLast ? 'active' : ''}" onclick='navigateToPath(${JSON.stringify(path)})'>
+                        <span>${folder}</span>
+                    </div>
+                `;
+            });
+            
+            breadcrumb.innerHTML = html;
+        }
+
+        function navigateToPath(path) {
+            currentPath = path;
+            updateBreadcrumb();
+            renderFileGrid();
+        }
+
+        // Context Menu
+        const contextMenu = document.getElementById('contextMenu');
+
+        function showContextMenu(event, id, type) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const allItems = [...fileSystem.folders, ...fileSystem.links, ...fileSystem.texts];
+            contextMenuItem = allItems.find(item => item.id === id);
+            
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+            contextMenu.classList.add('active');
+        }
+
+        document.addEventListener('click', () => {
+            contextMenu.classList.remove('active');
+        });
+
+        document.querySelectorAll('#contextMenu .context-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                handleContextAction(action);
+                contextMenu.classList.remove('active');
+            });
+        });
+
+        function handleContextAction(action) {
+            if (!contextMenuItem) return;
+            
+            switch(action) {
+                case 'open':
+                    openItem(contextMenuItem.id, contextMenuItem.type);
+                    break;
+                case 'rename':
+                case 'edit':
+                    showCreateModal(contextMenuItem.type, contextMenuItem);
+                    break;
+                case 'details':
+                    showItemDetails(contextMenuItem);
+                    break;
+                case 'copy':
+                    clipboard = contextMenuItem;
+                    clipboardAction = 'copy';
+                    showToast('Élément copié', 'success');
+                    break;
+                case 'move':
+                    clipboard = contextMenuItem;
+                    clipboardAction = 'move';
+                    showToast('Élément coupé', 'success');
+                    break;
+                case 'hide':
+                    toggleItemVisibility(contextMenuItem);
+                    break;
+            }
+        }
+
+        function showItemDetails(item) {
+            const details = `
+                <div class="form-group">
+                    <label>Nom</label>
+                    <p>${item.name}</p>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <p>${item.type === 'folder' ? 'Dossier' : item.type === 'link' ? 'Lien' : 'Texte'}</p>
+                </div>
+                <div class="form-group">
+                    <label>Chemin</label>
+                    <p>/${item.path.join('/')}</p>
+                </div>
+                <div class="form-group">
+                    <label>Date de création</label>
+                    <p>${new Date(item.created).toLocaleString('fr-FR')}</p>
+                </div>
+                <div class="form-group">
+                    <label>Dernière modification</label>
+                    <p>${new Date(item.modified).toLocaleString('fr-FR')}</p>
+                </div>
+                ${item.type === 'link' ? `
+                    <div class="form-group">
+                        <label>URL</label>
+                        <p style="word-break: break-all;">${item.url}</p>
+                    </div>
+                ` : ''}
+            `;
+            
+            modalTitle.textContent = 'Détails';
+            modalBody.innerHTML = details;
+            itemModal.classList.add('active');
+        }
+
+        function toggleItemVisibility(item) {
+            const collection = item.type === 'folder' ? fileSystem.folders :
+                             item.type === 'link' ? fileSystem.links : fileSystem.texts;
+            
+            const index = collection.findIndex(i => i.id === item.id);
+            collection[index].hidden = !collection[index].hidden;
+            
+            renderFileGrid();
+            showToast(collection[index].hidden ? 'Élément masqué' : 'Élément visible', 'success');
+        }
+
+        // Import/Export
+        function exportJSON() {
+            const data = JSON.stringify(fileSystem, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const now = new Date();
+            const filename = `backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}.json`;
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Fichier exporté avec succès', 'success');
+        }
+
+        function importJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        fileSystem = data;
+                        renderFileGrid();
+                        showToast('Données importées avec succès', 'success');
+                    } catch (error) {
+                        showToast('Erreur lors de l\'importation', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // QR Code Generation
+        document.getElementById('generateQrBtn').addEventListener('click', () => {
+            const url = document.getElementById('cloudUrl').value.trim();
+            if (!url) {
+                showToast('Veuillez entrer une URL', 'error');
+                return;
+            }
+            
+            const qrSection = document.getElementById('qrSection');
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = '';
+            
+            new QRCode(qrcodeDiv, {
+                text: url,
+                width: 256,
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+            });
+            
+            qrSection.style.display = 'block';
+            showToast('QR Code généré', 'success');
+        });
+
+        // Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        updateBreadcrumb();
+        renderFileGrid();
+
+        // Auto-hide header on scroll
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.querySelector('.app-header');
+            
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>

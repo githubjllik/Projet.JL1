@@ -1,0 +1,198 @@
+Créer une application web :
+Il doit être :
+- multiplateformes 
+- responsive 
+- adaptable à n'importe quel type d'écran 
+
+Utilise que des ressources accessibles hors-ligne :
+- icônes svg
+- emojis (pas trop ) uniquement quand c'est nécessaire 
+- technologies Javascript accessibles hors-ligne 
+
+Voici les choses le plus important à prendre en compte :
+1. L'expérience utilisateur : rendre les choses simples, faciles , accessibles , pas de difficultés,...
+Faut toujours voir au-delà, ce n'est pas une simple application, exemple si par exemple l'utilisateur aura plus de 1 milliards de choses à parcourir, faut lui permettre de trouver ce qu'il cherche dans une seconde que de parcourir plus de 1 milliards de données, c'est ça l'expérience utilisateur.
+
+2. L'interface utilisateur : l'application doit être agréable peu importe l'écran, peu importe l'appareil (mini, moyen, grand) ... adaptable sur chaque plateforme, l'interface doit plaire
+
+3. Le maintien de la cohérence, de la logique, de l'harmonie, de l'organisation, de la structure, de la pertinence
+
+Voici ce qu'on crée :
+
+On crée  une sorte de cloud, si tu connais PikPak c'est un proche 
+
+Mais ici c'est uniquement pour Stocker des liens web et du texte.
+
+L'application se nomme : Projet.JL
+
+Ici je vais t'expliquer à quoi va ressembler l'application sur les mobiles ou les petits écrans, ensuite tu adapteras pour les autres plateformes (moyen, grands...):
+
+Il sera comme une application mobile moderne sur les appareils mobiles (petits écrans) 
+
+On aura l'icône de recherche en haut 
+Il n'apparaîtra qu'uniquement dans les zones où on peut faire des recherches, donc quand c'est nécessaire pas sur toutes les interfaces 
+
+Quand on cliquera dessus, l'interface de de recherche apparaîtra, 
+Il aura de petits nav à sélectionner en bas pour trier entre : dossier, lien et texte 
+
+Et il aura une touche "retour" pour retourner dans le précédent interface 
+ ----
+Toujours en haut dans la même section que la zone de recherche, une icône qui aura comme option  :
+- un icône pour créer un dossier 
+- un icône pour ajouter un lien 
+- un icône pour ajouter du texte 
+- un icône pour importer un fichier Json 
+- un icône pour exporter un fichier Json 
+
+Pourquoi importer et exporter ?
+Parce que c'est le fichier Json qui sera comme la base de données de cette application 
+Voilà pourquoi je tiens à ce que tous les ressources qu'on va utiliser soit accessibles hors-ligne 
+----
+Toujours en haut il y'aura une zone pour mettre passer de dark mode au light mode 
+Le dark mode est le mode par défaut
+----
+
+Toujours en haut après la section de la zone de recherche (en bas) on aura un icône pour trier qui aura comme option :
+- L'icône AZ avec flèche bas (sort A to Z), ordre alphabétique croissant
+- L'icône AZ avec flèche haut , ordre alphabétique décroissant 
+- L'icône pour trier par date en ordre croissant (récent vers l'ancien)
+- l'icône pour trier par date en ordre décroissant 
+- une case à cocher pour afficher les éléments masquer 
+----
+Toujours en haut on aura une icône pour changer le type de vue, cette icône changera sa figure à chaque fois qu'on clique dessus et à chaque fois ça changera la vue des éléments entre : Grille, Compact, liste/Grand, moyen, petit...
+----
+
+Toujours en haut on aura l'icône pour sélectionner, quand on cliquera dessus , les éléments dans le bureau seront sélectionnables et ils nous présenteras ses différentes options :
+- un compteur d'éléments sélectionnés 
+- l'option pour tout sélectionner 
+Et on aura comme possibilités :
+- Copier 
+- Déplacer 
+- masquer 
+Un ou Plusieurs éléments qui ont été sélectionnés 
+
+* Quand on clique sur copier, on aura la possibilité d'aller le/les "coller" vers un autre chemin, vers un autre dossier déjà existant ou de créer un nouveau dossier pour coller le fichier qui a été copié 
+* Quand on cliquer sur déplacer, on aura la possibilité d'aller le/les "coller" vers un autre chemin/dossier déjà existant ou de créer un nouveau dossier pour coller le fichier qui a été coupé 
+- quand on clique sur masquer, ses applications auront la caractéristique du masque (il ne seront plus visibles sur l'interface sauf si l'option "afficher les éléments masqués est coché")
+
+----
+
+Toujours en haut on aura un système de navigation entre les dossiers :
+- un chemin 
+- un ou des icônes pour la navigation pour faire des retours ou des allers
+
+---
+
+Et nos éléments (dossiers, liens, textes) auront toujours un  icône 3 points qui quand on cliquera dessus on aura les options pour:
+- on verra le titre complet, le nom complet d'un élément
+- ouvrir 
+- renommer
+- s'il s'agit d'un lien l'option renouveller le lien/modifier, s'il s'agit du texte : éditer le texte..etc
+- voir le le détail : nom complet, chemin, date et heure d'ajout, date de modification,...
+- copier 
+- déplacer 
+- et la zone d'ombre : masquer
+
+----
+Les dossiers auront leurs icônes :
+- il y'aura une icône pour représenter un dossier vide
+- et un icône pour représenter un dossier contenant des éléments 
+
+Les liens auront aussi leur icônes :
+Soit l'icône DNS, globe ou lien, ...
+
+Les textes aussi auront leur icônes 
+
+----
+
+On aura une barre de navigation en bas avec les icônes :
+- menu 
+- explorateur de fichiers (liens, textes)
+- Projet 
+
+----
+Dans le menu projet, c'est le menu le plus important 
+
+C'est l'onglet qui s'assurer de la préservation de mon projet 
+
+Il met demande d'être toujours prudent, 
+Pour préserver mon projet en cas d'oubli du compte, de mot de passe de là où il s'est stocké (github, Google Drive, mega, mediafire,...)
+
+Premièrement il me donne un petit conseil : il me demande de toujours uploader mon projet en ligne quelque part dans le cloud, de rendre mon projet public pas privé dans les endroits où ils sont stockés pour y avoir toujours accès et afin d'être toujours régulier pour les mises à jour surtout avec les fichiers Json qui représentent notre base de données 
+
+Dans cette onglet il y'aura une barre d'adresse 
+C'est là où je vais insérer le lien de là j'ai conservé mon projet 
+
+Plateformes recommandés :
+- github (avec un petit commentaire)
+- plateformes IPFS : ipfs.io, web3.storage, nft.storage, pinata cloud (pour le plateformes IPFS faut en parler, faire un petit commentaire sur ça)
+- Google Drive 
+- mega 
+- mediafire
+
+Lorsqu'on on insère un lien , il va générer un QR code de ce lien et me dire pourquoi :
+Il va me dire, ceci sera comme accès à mon projet vu que je ne l'ai pas hébergé en ligne, et surtout vu que je peux toutefois oublier vers quel compte que je l'avais uploader, et surtout de l'avoir toujours sur moi comme carte d'identité, ou chez moi dans mon coffre secret, valise, sac...
+Je peux aller quelque part, je n'ai pas de portable sur moi, ni un support de stockage, avec ça je peux toujours avoir accès à mon projet n'importe où, n'importe quand, avec n'importe quel appareil...
+
+Recréer un nouveau compte de stockage en cas d'oubli car j'aurai déjà le projet en main
+
+----
+
+Dans le menu accueil, comme son l'indique, il va toujours bien nous accueillir :
+
+Premièrement : il nous que ceci est un application avec comme capacité de stockage ♾️ infini 
+
+Il va ensuite nous parler du projet JL, c'est quoi le projet ?
+Le projet JL est un projet pensée/inventer/conçu par Jean-Louis LIKULA (moi).... Blabla 
+Consiste à.... Résoudre ce problème qu'il avait ... Conserver ses liens, il n'existe pas un gestionnaire pour ça, pour lui les liens sont... Lire plus ..
+bref voici mes motivations :
+- l'infinité du monde web, selon moi le web est ce qui représente l'infini dans ce monde, il y a tellement un nombre incalculables des ressources à découvrir, à offrir, à explorer 
+Et tout passe par un chemin : un lien web
+Vous n'imaginez pas combien des merveilles j'ai dû découvrir grâce à des simples liens, qui sont juste une sorte de textes courts mais qui font d'immense choses
+Vous n'imaginez pas non plus combien de ces merveilles j'ai pu oublié, perdu, tout ça parce que je n'avez pas un endroit où les stocker, 
+les gestionaires de fichiers classiques ne servent qu'à stocker des vidéos, images,... et plein d'autres types de fichiers accessibles nativement et surtout ils sont toujours limités au nombre de stockage, à l'appareil, ou au support de stockage...
+
+Je devais créer ce système, trouver une solution qui serait à la fois : 
+- toujours accessibles (n'importe où, n'importe quand)
+- non limité , non dépendant d'un système ( base de données, stockage , connexion internet) 
+je devais trouver des solutions qui répresenter, qui concordent avec l'infinité du web, quelque chose qui peut devenir le web à sa façon:
+- pas besoin de dépendre d'une base de données, d'un système, d'une platefome, d'une connexion internet 
+voilà pourquoi j'ai créer ce système de stockage infini, accessibles n'importe où, n'importe quand, hors-ligne, peu se trouver partout à la fois et l'utilisateur est le mettre de tout, un dieu qui contrôle son propre monde , qui est responsable de tout, modélise tout à sa façon
+sans limites, c'est ça l'infini
+
+Comment utiliser ce projet ?
+Premièrement avoir le projet déjà en main
+Si c'est la première fois...
+vous pouvez déjà commencé ajouter votre premier lien, créer votre premier dossier, ajouter du texte,...
+mais attention, ne soyez pas presser de quitter l'application
+vous devez à chaque fois exportez un fichier json, ce sera votre base de données(le fruit de vos activités faites, la mémoire) afin de toujours retrouvez vos activités effectués auparavant 
+exportez-le dans la racine de votre projet dans le dossier: data. 
+*Tu peux dessiner un schema montrant à quoi peux ressembler l'arborescence du projet* comme :
+- votre projet 
+-- data (selectionner ce dossier comme destination du fichier json à télécharger)
+-- index.html 
+-- styles.css 
+-- scripts.js 
+
+Le fichier sera enregistré comme nom exemple :
+backup_2025-11-01_10-30-45.Json
+Si ça été enregistré le 01 novembre à 10h30 de cette année
+C'est le format par défaut, 
+Utilisant le format: nom+YYYY-MM-DD_HH-MM-SS
+Vous pouvez toujours renommer comme bous le souhaitez , mais assurer de toujours garder le format de date car vous ferez plusieurs enregistrement et ceci vous sera d'une grande aide
+
+ensuite si un jour lors de vos activités futurs , lorsque l'application semblera vide car peut-être vous avez changer de navigateur, vous utiliser un autre appareil, ...etc 
+N'ayez crainte vous n'aurez qu'à "importer" votre fichier qui se trouve dans le dossier data à la racine de votre projet.
+*tu peux dessiner un petit schema pour répresenter cela*
+
+Voilà l'interface est remplit
+Bonne exploration/bonne journée/bonne application/découverte/navigation/expérience/...
+
+
+
+
+
+
+
+
+

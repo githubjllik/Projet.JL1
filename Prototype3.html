@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL</title>
+    <style>
+        :root {
+            /* Palette de couleurs - Material You (thème sombre) */
+            --primary: #bb86fc;
+            --primary-variant: #3700b3;
+            --secondary: #03dac6;
+            --background: #121212;
+            --surface: #1e1e1e;
+            --surface-variant: #2d2d2d;
+            --error: #cf6679;
+            --on-primary: #000000;
+            --on-secondary: #000000;
+            --on-background: #ffffff;
+            --on-surface: #ffffff;
+            --on-error: #000000;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            --transition-duration: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-background);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Neumorphism */
+        .neumorphic {
+            background: var(--surface);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3),
+                        -5px -5px 10px rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+        }
+
+        /* App bar dynamique */
+        .app-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+            transition: all var(--transition-duration) ease;
+            box-shadow: var(--box-shadow);
+        }
+
+        .app-bar.scrolled {
+            background-color: var(--surface-variant);
+            height: 50px;
+        }
+
+        .app-bar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Subtoolbar */
+        .subtoolbar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background-color: var(--surface-variant);
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            z-index: 99;
+            padding: 0 16px;
+            transition: all var(--transition-duration) ease;
+        }
+
+        .subtoolbar::-webkit-scrollbar {
+            height: 3px;
+        }
+        
+        .subtoolbar::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--surface);
+            border-radius: 16px;
+            height: 32px;
+            padding: 0 12px;
+            margin-right: 8px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--on-surface);
+        }
+
+        .chip.active {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        .chip svg {
+            margin-right: 4px;
+            height: 18px;
+            width: 18px;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            margin-top: 110px; /* app-bar + subtoolbar */
+            margin-bottom: 70px; /* pour bottom-nav */
+            padding: 16px;
+            flex: 1;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: var(--on-surface);
+            opacity: 0.7;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+            opacity: 1;
+        }
+
+        .bottom-nav-item svg {
+            height: 24px;
+            width: 24px;
+            margin-bottom: 4px;
+        }
+
+        .bottom-nav-item span {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Cards, éléments et boutons */
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow);
+            transition: transform var(--transition-duration);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--on-primary);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-variant);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn svg {
+            margin-right: 6px;
+            height: 18px;
+            width: 18px;
+        }
+
+        .btn.btn-outlined {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn.btn-outlined:hover {
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--on-surface);
+            font-weight: 500;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--surface-variant);
+            border: none;
+            border-bottom: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            color: var(--on-surface);
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+
+        /* Accordéon */
+        .accordion {
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--surface-variant);
+            cursor: pointer;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 16px;
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 500px;
+            padding: 16px;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            border-radius: 24px 24px 0 0;
+            z-index: 200;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+        }
+
+        .bottom-sheet.visible {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background-color: var(--on-surface);
+            opacity: 0.3;
+            border-radius: 2px;
+            margin: 12px auto;
+        }
+
+        .bottom-sheet-content {
+            padding: 0 16px 32px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 80%;
+            max-width: 320px;
+            background-color: var(--surface);
+            z-index: 300;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .side-panel.visible {
+            transform: translateX(0);
+        }
+
+        .side-panel-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-variant);
+        }
+
+        .side-panel-content {
+            padding: 16px;
+            overflow-y: auto;
+            max-height: calc(100% - 56px);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Dialog/Modal */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            z-index: 350;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--on-surface);
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        /* FAB Button */
+        .fab {
+            position: fixed;
+            bottom: 76px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background-color: var(--primary);
+            color: var(--on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 90;
+            transition: all 0.3s;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: absolute;
+            background-color: var(--surface-variant);
+            border-radius: var(--border-radius);
+            padding: 8px 0;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
+            min-width: 180px;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9);
+            transform-origin: top left;
+            transition: all 0.2s;
+        }
+
+        .context-menu.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .context-menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--surface);
+        }
+
+        .context-menu-item svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+        }
+
+        /* File Grid View */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .file-item {
+            background-color: var(--surface-variant);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-item:hover {
+            transform: translateY(-4px);
+            background-color: var(--surface);
+        }
+
+        .file-item svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .file-item-name {
+            text-align: center;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .file-item-options {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--surface);
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+
+        .file-item:hover .file-item-options {
+            opacity: 1;
+        }
+
+        /* List View */
+        .file-list {
+            margin-top: 16px;
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--surface-variant);
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-list-item:hover {
+            background-color: var(--surface);
+        }
+
+        .file-list-item svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 16px;
+            color: var(--primary);
+        }
+
+        .file-list-item-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-list-item-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+
+        .file-list-item-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+        }
+
+        .file-list-item-actions {
+            display: flex;
+        }
+
+        .file-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            background-color: var(--surface);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .file-action:hover {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        /* Path Navigation */
+        .path-nav {
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 8px 0;
+            margin-bottom: 16px;
+        }
+
+        .path-nav::-webkit-scrollbar {
+            height: 2px;
+        }
+
+        .path-nav::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+        }
+
+        .path-segment {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.2s;
+        }
+
+        .path-segment:hover {
+            color: var(--primary);
+        }
+
+        .path-separator {
+            margin: 0 8px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* QR Code Container */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            max-width: 220px;
+            margin: 20px auto;
+        }
+
+        .qr-image {
+            width: 180px;
+            height: 180px;
+            margin-bottom: 12px;
+        }
+
+        .qr-label {
+            color: black;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* Text Editor */
+        .text-editor {
+            background-color: var(--surface-variant);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            padding: 8px;
+            background-color: var(--surface);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .editor-button {
+            background: none;
+            border: none;
+            color: var(--on-surface);
+            margin-right: 8px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .editor-button:hover {
+            opacity: 1;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 16px;
+            color: var(--on-surface);
+            background-color: var(--surface-variant);
+            border: none;
+            resize: none;
+            outline: none;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* Animations and transitions */
+        .fade-in {
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Sélection multiple */
+        .selection-toolbar {
+            position: fixed;
+            bottom: 70px;
+            left: 16px;
+            right: 16px;
+            padding: 12px 16px;
+            background-color: var(--surface-variant);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 90;
+            display: none;
+        }
+
+        .selection-toolbar.visible {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selection-count {
+            font-weight: 500;
+        }
+
+        .selection-actions {
+            display: flex;
+        }
+
+        .selection-action {
+            margin-left: 16px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .selectable .file-item, 
+        .selectable .file-list-item {
+            position: relative;
+        }
+
+        .selectable .file-item::before,
+        .selectable .file-list-item::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background-color: var(--surface);
+            transition: all 0.2s;
+        }
+
+        .selectable .file-item.selected::before,
+        .selectable .file-list-item.selected::before {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Responsive design - tablettes */
+        @media screen and (min-width: 768px) {
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .main-content {
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        /* Responsive design - desktop */
+        @media screen and (min-width: 1024px) {
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            .bottom-nav {
+                width: 60px;
+                height: 100vh;
+                flex-direction: column;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .bottom-nav-item {
+                margin: 16px 0;
+            }
+            
+            .main-content {
+                margin-left: 60px;
+                margin-bottom: 0;
+            }
+            
+            .app-bar {
+                left: 60px;
+            }
+            
+            .subtoolbar {
+                left: 60px;
+            }
+            
+            .fab {
+                bottom: 24px;
+                right: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- App Bar -->
+    <div class="app-bar">
+        <div class="app-bar-title">Projet.JL</div>
+        <div>
+            <button class="editor-button" id="searchBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Subtoolbar pour l'explorateur de fichiers (affichage conditionnel) -->
+    <div class="subtoolbar" style="display: none;" id="explorerSubtoolbar">
+        <div class="chip" id="createBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Créer
+        </div>
+        <div class="chip" id="sortBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="14" y2="15"></line><line x1="17" y1="4" x2="17" y2="10"></line><polyline points="20 7 17 4 14 7"></polyline></svg>
+            Trier
+        </div>
+        <div class="chip" id="viewBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Grille
+        </div>
+        <div class="chip" id="selectBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Sélectionner
+        </div>
+        <div class="chip">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Importer
+        </div>
+        <div class="chip">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Exporter
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <!-- Accueil (affiché par défaut) -->
+        <div id="homeContent" class="fade-in">
+            <div class="card">
+                <h2 class="section-title">Bienvenue sur Projet.JL</h2>
+                <p>Un gestionnaire de liens et de notes avec une capacité de stockage ♾️ infinie</p>
+                <div class="neumorphic" style="padding: 16px; margin-top: 16px;">
+                    <p style="margin-bottom: 12px;">Stockez vos liens, créez des dossiers organisés et ajoutez des notes importantes - tout en un seul endroit, accessible n'importe où.</p>
+                    <button class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        Commencer
+                    </button>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    <div>À propos du Projet.JL</div>
+                    <div class="accordion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+                <div class="accordion-content">
+                    <p>Le projet JL a été conçu par Jean-Louis LIKULA pour résoudre un problème majeur : la conservation des liens web précieux.</p>
+                    <p>Dans un monde numérique en constante expansion, le web représente l'infini avec d'innombrables ressources à découvrir et explorer. Tout passe par un simple chemin : un lien web.</p>
+                    <p>Trop de découvertes ont été perdues faute d'un système adapté pour les conserver. Les gestionnaires de fichiers classiques sont limités et ne répondent pas à ce besoin spécifique.</p>
+                    <button class="btn btn-outlined" style="margin-top: 12px;">Lire plus</button>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    <div>Mes motivations</div>
+                    <div class="accordion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+                <div class="accordion-content">
+                    <ul style="padding-left: 20px; line-height: 1.6;">
+                        <li>L'infinité du monde web, un espace sans limites de ressources à découvrir</li>
+                        <li>La simplicité et la puissance des liens qui ouvrent des univers entiers</li>
+                        <li>Le besoin d'une solution qui représente cette infinité - toujours accessible, non limitée</li>
+                        <li>L'importance d'un système qui fonctionne hors-ligne, indépendant de toute plateforme</li>
+                        <li>La volonté de créer un espace où l'utilisateur contrôle entièrement son univers numérique</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    <div>Comment utiliser ce projet</div>
+                    <div class="accordion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>1.</strong> Commencez par ajouter votre premier lien, créer un dossier ou ajouter du texte</p>
+                    <p><strong>2.</strong> Exportez régulièrement vos données en fichier JSON (c'est votre "base de données")</p>
+                    <p><strong>3.</strong> Stockez ce fichier dans le dossier "data" à la racine de votre projet</p>
+                    
+                    <div style="margin: 16px 0; padding: 12px; background-color: var(--surface); border-radius: var(--border-radius);">
+                        <div style="margin-bottom: 8px; color: var(--primary);">Structure du projet</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M3 6l9-4 9 4v12l-9 4-9-4V6z"></path><path d="M3 6l9 4 9-4"></path><line x1="12" y1="10" x2="12" y2="22"></line></svg>
+                            <span>votre-projet</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-left: 16px; margin-bottom: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            <span>data (stockage des fichiers JSON)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-left: 16px; margin-bottom: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            <span>index.html</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-left: 16px; margin-bottom: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            <span>styles.css</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-left: 16px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            <span>scripts.js</span>
+                        </div>
+                    </div>
+                    
+                    <p><strong>4.</strong> Si vous changez d'appareil ou de navigateur, importez simplement votre fichier JSON et retrouvez toutes vos données</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explorateur de fichiers (masqué par défaut) -->
+        <div id="explorerContent" style="display: none;">
+            <div class="path-nav">
+                <div class="path-segment">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <div class="path-separator">/</div>
+                <div class="path-segment">Documents</div>
+            </div>
+
+            <!-- Vue en grille (par défaut) -->
+            <div class="file-grid">
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-item-name">Projets Web</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+                
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-item-name">Ressources Design</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+                
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="file-item-name">Documentation MDN</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+                
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="file-item-name">GitHub</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+                
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <div class="file-item-name">Notes sur React</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+                
+                <div class="file-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-item-name">Tutoriels JavaScript</div>
+                    <div class="file-item-options">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vue en liste (masquée par défaut) -->
+            <div class="file-list" style="display: none;">
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Projets Web</div>
+                        <div class="file-list-item-meta">Modifié le 02/11/2025</div>
+                    </div>
+                    <div class="file-list-item-actions">
+                        <div class="file-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Ressources Design</div>
+                        <div class="file-list-item-meta">Modifié le 01/11/2025</div>
+                    </div>
+                    <div class="file-list-item-actions">
+                        <div class="file-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Documentation MDN</div>
+                        <div class="file-list-item-meta">Ajouté le 31/10/2025</div>
+                    </div>
+                    <div class="file-list-item-actions">
+                        <div class="file-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">GitHub</div>
+                        <div class="file-list-item-meta">Ajouté le 30/10/2025</div>
+                    </div>
+                    <div class="file-list-item-actions">
+                        <div class="file-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Notes sur React</div>
+                        <div class="file-list-item-meta">Modifié le 29/10/2025</div>
+                    </div>
+                    <div class="file-list-item-actions">
+                        <div class="file-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Espace Projet (masqué par défaut) -->
+        <div id="projectContent" style="display: none;">
+            <div class="card">
+                <h2 class="section-title">Préserver votre projet</h2>
+                <p>Pour assurer l'accessibilité permanente de votre projet, stockez-le dans des plateformes cloud et gardez une trace physique de son accès.</p>
+            
+                <div class="input-group" style="margin-top: 16px;">
+                    <label class="input-label">Lien de votre projet hébergé</label>
+                    <input type="text" class="input" placeholder="https://github.com/username/projet-jl" id="projectUrlInput">
+                </div>
+                <button class="btn" id="generateQRBtn" style="margin-top: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+                    Générer QR Code
+                </button>
+                
+                <div id="qrCodeContainer" style="display: none; margin-top: 20px;">
+                    <div class="qr-container">
+                        <div class="qr-image" id="qrcode"></div>
+                        <div class="qr-label">Scannez pour accéder à votre projet</div>
+                    </div>
+                    <p style="text-align: center; margin-top: 12px; opacity: 0.7;">Conservez ce QR code comme accès permanent à votre projet.</p>
+                    <button class="btn" style="display: block; margin: 16px auto;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Télécharger QR Code
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">Plateformes recommandées</h2>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <div>GitHub</div>
+                        <div class="accordion-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Idéal pour les développeurs, GitHub offre un hébergement gratuit pour des projets publics et permet une gestion de version efficace.</p>
+                        <p>Rendez votre dépôt public pour y accéder facilement depuis n'importe où.</p>
+                        <button class="btn btn-outlined" style="margin-top: 12px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                            En savoir plus
+                        </button>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <div>Plateformes IPFS</div>
+                        <div class="accordion-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <p>IPFS (InterPlanetary File System) est un protocole décentralisé permettant un stockage distribué, permanent et résistant à la censure.</p>
+                        <p>Services recommandés : IPFS.io, Web3.storage, NFT.storage, Pinata Cloud</p>
+                        <p>Avantages : Votre contenu reste accessible même si un service cesse de fonctionner, tant que quelqu'un dispose d'une copie du fichier dans le réseau.</p>
+                        <button class="btn btn-outlined" style="margin-top: 12px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                            Explorer IPFS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <div>Google Drive</div>
+                        <div class="accordion-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Solution populaire avec 15 Go de stockage gratuit. Facile d'utilisation avec partage de fichiers flexible.</p>
+                        <p>Assurez-vous de configurer les liens de partage en mode "public" ou "accessible avec le lien".</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <div>MEGA</div>
+                        <div class="accordion-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Offre 20 Go de stockage gratuit avec chiffrement de bout en bout.</p>
+                        <p>Idéal pour un stockage sécurisé avec des liens de partage publics.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <div>MediaFire</div>
+                        <div class="accordion-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Service simple avec 10 Go de stockage gratuit.</p>
+                        <p>Partage de fichiers facile via des liens directs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">Conseils de sécurité</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 20px; margin-right: 12px; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>Sauvegardez votre projet sur plusieurs plateformes différentes</span>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 20px; margin-right: 12px; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>Imprimez le QR code et conservez-le dans un lieu sûr</span>
+                    </li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 20px; margin-right: 12px; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>Mettez régulièrement à jour vos fichiers JSON exportés</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 20px; margin-right: 12px; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>Partagez l'accès avec une personne de confiance en cas d'urgence</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-item active" id="homeNav">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Accueil</span>
+        </div>
+        <div class="bottom-nav-item" id="explorerNav">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l9-4 9 4v12l-9 4-9-4V6z"></path><path d="M3 6l9 4 9-4"></path><line x1="12" y1="10" x2="12" y2="22"></line></svg>
+            <span>Explorer</span>
+        </div>
+        <div class="bottom-nav-item" id="projectNav">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Projet</span>
+        </div>
+    </div>
+
+    <!-- FAB Button (visible seulement dans l'explorateur) -->
+    <div class="fab" id="fabBtn" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="overlay" id="bottomSheetOverlay"></div>
+    <div class="bottom-sheet" id="createBottomSheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-content">
+            <h3 style="margin-bottom: 16px;">Créer un élément</h3>
+            
+            <div class="file-list">
+                <div class="file-list-item" id="createFolderBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Nouveau dossier</div>
+                        <div class="file-list-item-meta">Créer un dossier pour organiser vos éléments</div>
+                    </div>
+                </div>
+
+                <div class="file-list-item" id="createLinkBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Ajouter un lien</div>
+                        <div class="file-list-item-meta">Enregistrer un lien web important</div>
+                    </div>
+                </div>
+
+                <div class="file-list-item" id="createTextBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Ajouter du texte</div>
+                        <div class="file-list-item-meta">Créer une note ou un mémo textuel</div>
+                    </div>
+                </div>
+
+                <div class="file-list-item" id="importJsonBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Importer JSON</div>
+                        <div class="file-list-item-meta">Restaurer vos données depuis un fichier JSON</div>
+                    </div>
+                </div>
+
+                <div class="file-list-item" id="exportJsonBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Exporter JSON</div>
+                        <div class="file-list-item-meta">Sauvegarder vos données dans un fichier JSON</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="overlay" id="sidePanelOverlay"></div>
+    <div class="side-panel" id="sortSidePanel">
+        <div class="side-panel-header">
+            <div>Trier les éléments</div>
+            <button class="modal-close" id="closeSortPanel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="side-panel-content">
+            <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 12px; font-weight: 500;">Ordre alphabétique</div>
+                <div class="file-list-item" style="margin-bottom: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">A à Z</div>
+                    </div>
+                </div>
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Z à A</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 12px; font-weight: 500;">Par date</div>
+                <div class="file-list-item" style="margin-bottom: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Plus récent d'abord</div>
+                    </div>
+                </div>
+                <div class="file-list-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <div class="file-list-item-info">
+                        <div class="file-list-item-name">Plus ancien d'abord</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 12px; font-weight: 500;">Options supplémentaires</div>
+                <div style="display: flex; align-items: center; margin-bottom: 12px; padding-left: 8px;">
+                    <input type="checkbox" id="showHiddenCheck" style="margin-right: 12px;">
+                    <label for="showHiddenCheck">Afficher les éléments masqués</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog pour créer un dossier -->
+    <div class="overlay" id="createFolderOverlay"></div>
+    <div class="modal" id="createFolderModal">
+        <div class="modal-header">
+            <h3>Nouveau dossier</h3>
+            <button class="modal-close" id="closeCreateFolderModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="input-group">
+            <label class="input-label">Nom du dossier</label>
+            <input type="text" class="input" placeholder="Mon dossier">
+        </div>
+        <button class="btn" style="width: 100%;">Créer</button>
+    </div>
+
+    <!-- Dialog pour ajouter un lien -->
+    <div class="overlay" id="createLinkOverlay"></div>
+    <div class="modal" id="createLinkModal">
+        <div class="modal-header">
+            <h3>Ajouter un lien</h3>
+            <button class="modal-close" id="closeCreateLinkModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="input-group">
+            <label class="input-label">Titre du lien</label>
+            <input type="text" class="input" placeholder="Documentation MDN">
+        </div>
+        <div class="input-group">
+            <label class="input-label">URL</label>
+            <input type="url" class="input" placeholder="https://developer.mozilla.org">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Description (optionnelle)</label>
+            <input type="text" class="input" placeholder="Documentation complète pour le développement web">
+        </div>
+        <button class="btn" style="width: 100%;">Enregistrer</button>
+    </div>
+
+    <!-- Dialog pour ajouter du texte -->
+    <div class="overlay" id="createTextOverlay"></div>
+    <div class="modal" id="createTextModal">
+        <div class="modal-header">
+            <h3>Ajouter un texte</h3>
+            <button class="modal-close" id="closeCreateTextModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="input-group">
+            <label class="input-label">Titre</label>
+            <input type="text" class="input" placeholder="Notes sur React">
+        </div>
+        <div class="text-editor">
+            <div class="editor-toolbar">
+                <button class="editor-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                </button>
+                <button class="editor-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                </button>
+            </div>
+            <textarea class="editor-content" placeholder="Écrivez votre texte ici..."></textarea>
+        </div>
+        <button class="btn" style="width: 100%; margin-top: 16px;">Enregistrer</button>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="fileContextMenu">
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Renommer
+        </div>
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Ouvrir
+        </div>
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            Détails
+        </div>
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            Copier
+        </div>
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Déplacer
+        </div>
+        <div class="context-menu-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            Masquer
+        </div>
+    </div>
+
+    <!-- Sélection toolbar -->
+    <div class="selection-toolbar" id="selectionToolbar">
+        <div class="selection-count">0 élément(s) sélectionné(s)</div>
+        <div class="selection-actions">
+            <div class="selection-action">Tout sélectionner</div>
+            <div class="selection-action">Copier</div>
+            <div class="selection-action">Déplacer</div>
+            <div class="selection-action">Masquer</div>
+        </div>
+    </div>
+
+    <script>
+        // Variables pour stocker l'état de l'application
+        let currentView = 'grid'; // 'grid' ou 'list'
+        let isSelectionMode = false;
+        let selectedItems = [];
+
+        // Éléments DOM
+        const homeContent = document.getElementById('homeContent');
+        const explorerContent = document.getElementById('explorerContent');
+        const projectContent = document.getElementById('projectContent');
+        const homeNav = document.getElementById('homeNav');
+        const explorerNav = document.getElementById('explorerNav');
+        const projectNav = document.getElementById('projectNav');
+        const fabBtn = document.getElementById('fabBtn');
+        const explorerSubtoolbar = document.getElementById('explorerSubtoolbar');
+        
+        // Bottom Sheet & Overlay
+        const createBottomSheet = document.getElementById('createBottomSheet');
+        const bottomSheetOverlay = document.getElementById('bottomSheetOverlay');
+        const createBtn = document.getElementById('createBtn');
+        
+        // Side Panel
+        const sortSidePanel = document.getElementById('sortSidePanel');
+        const sidePanelOverlay = document.getElementById('sidePanelOverlay');
+        const sortBtn = document.getElementById('sortBtn');
+        const closeSortPanel = document.getElementById('closeSortPanel');
+        
+        // Modals
+        const createFolderModal = document.getElementById('createFolderModal');
+        const createFolderOverlay = document.getElementById('createFolderOverlay');
+        const createLinkModal = document.getElementById('createLinkModal');
+        const createLinkOverlay = document.getElementById('createLinkOverlay');
+        const createTextModal = document.getElementById('createTextModal');
+        const createTextOverlay = document.getElementById('createTextOverlay');
+        
+        const closeCreateFolderModal = document.getElementById('closeCreateFolderModal');
+        const closeCreateLinkModal = document.getElementById('closeCreateLinkModal');
+        const closeCreateTextModal = document.getElementById('closeCreateTextModal');
+        
+        // Bottom Sheet items
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const createLinkBtn = document.getElementById('createLinkBtn');
+        const createTextBtn = document.getElementById('createTextBtn');
+        
+        // View toggle
+        const viewBtn = document.getElementById('viewBtn');
+        
+        // Selection
+        const selectBtn = document.getElementById('selectBtn');
+        const selectionToolbar = document.getElementById('selectionToolbar');
+        
+        // Context Menu
+        const fileContextMenu = document.getElementById('fileContextMenu');
+        
+        // QR Code
+        const projectUrlInput = document.getElementById('projectUrlInput');
+        const generateQRBtn = document.getElementById('generateQRBtn');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+
+        // Navigation entre les sections principales
+        function showSection(section) {
+            homeContent.style.display = 'none';
+            explorerContent.style.display = 'none';
+            projectContent.style.display = 'none';
+            explorerSubtoolbar.style.display = 'none';
+            fabBtn.style.display = 'none';
+            
+            homeNav.classList.remove('active');
+            explorerNav.classList.remove('active');
+            projectNav.classList.remove('active');
+            
+            if (section === 'home') {
+                homeContent.style.display = 'block';
+                homeNav.classList.add('active');
+            } else if (section === 'explorer') {
+                explorerContent.style.display = 'block';
+                explorerNav.classList.add('active');
+                explorerSubtoolbar.style.display = 'flex';
+                fabBtn.style.display = 'flex';
+            } else if (section === 'project') {
+                projectContent.style.display = 'block';
+                projectNav.classList.add('active');
+            }
+        }
+
+        // Gestion des accordéons
+        document.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const accordion = header.parentElement;
+                accordion.classList.toggle('active');
+            });
+        });
+
+        // Afficher/masquer le bottom sheet
+        function toggleBottomSheet(visible) {
+            if (visible) {
+                createBottomSheet.classList.add('visible');
+                bottomSheetOverlay.classList.add('visible');
+            } else {
+                createBottomSheet.classList.remove('visible');
+                bottomSheetOverlay.classList.remove('visible');
+            }
+        }
+
+        // Afficher/masquer le side panel
+        function toggleSidePanel(visible) {
+            if (visible) {
+                sortSidePanel.classList.add('visible');
+                sidePanelOverlay.classList.add('visible');
+            } else {
+                sortSidePanel.classList.remove('visible');
+                sidePanelOverlay.classList.remove('visible');
+            }
+        }
+
+        // Afficher/masquer un modal
+        function toggleModal(modal, overlay, visible) {
+            if (visible) {
+                modal.classList.add('visible');
+                overlay.classList.add('visible');
+            } else {
+                modal.classList.remove('visible');
+                overlay.classList.remove('visible');
+            }
+        }
+
+        // Basculer entre les vues grille et liste
+        function toggleView() {
+            const fileGrid = document.querySelector('.file-grid');
+            const fileList = document.querySelector('.file-list');
+            
+            if (currentView === 'grid') {
+                fileGrid.style.display = 'none';
+                fileList.style.display = 'block';
+                viewBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    Liste
+                `;
+                currentView = 'list';
+            } else {
+                fileGrid.style.display = 'grid';
+                fileList.style.display = 'none';
+                viewBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Grille
+                `;
+                currentView = 'grid';
+            }
+        }
+
+        // Activer/désactiver le mode de sélection
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            const fileContainer = document.querySelector(currentView === 'grid' ? '.file-grid' : '.file-list');
+            
+            if (isSelectionMode) {
+                fileContainer.classList.add('selectable');
+                selectionToolbar.classList.add('visible');
+                selectBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-6 6v3h9l3-3"></path><path d="M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"></path></svg>
+                    Annuler
+                `;
+            } else {
+                fileContainer.classList.remove('selectable');
+                selectionToolbar.classList.remove('visible');
+                selectBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Sélectionner
+                `;
+                // Désélectionner tous les éléments
+                document.querySelectorAll('.file-item.selected, .file-list-item.selected').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                selectedItems = [];
+            }
+        }
+
+        // Mise à jour du compteur d'éléments sélectionnés
+        function updateSelectionCount() {
+            const selectionCount = document.querySelector('.selection-count');
+            const totalItems = document.querySelectorAll('.file-item, .file-list-item').length;
+            
+            selectionCount.textContent = `${selectedItems.length}/${totalItems} élément(s) sélectionné(s)`;
+        }
+
+        // Afficher le menu contextuel
+        function showContextMenu(event, element) {
+            event.preventDefault();
+            
+            const rect = element.getBoundingClientRect();
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            fileContextMenu.style.left = `${x}px`;
+            fileContextMenu.style.top = `${y}px`;
+            fileContextMenu.classList.add('visible');
+            
+            document.addEventListener('click', hideContextMenu);
+        }
+
+        // Masquer le menu contextuel
+        function hideContextMenu() {
+            fileContextMenu.classList.remove('visible');
+            document.removeEventListener('click', hideContextMenu);
+        }
+
+        // Générer un QR code
+        function generateQRCode() {
+            const url = projectUrlInput.value.trim();
+            
+            if (!url) {
+                alert('Veuillez entrer une URL valide.');
+                return;
+            }
+            
+            // Simple QR code ASCII representation for demo
+            qrCodeContainer.style.display = 'block';
+            const qrcode = document.getElementById('qrcode');
+            qrcode.innerHTML = `
+                <svg width="180" height="180" viewBox="0 0 29 29">
+                    <path fill="black" d="M1,1 h7 v7 h-7 z M10,1 h1 v1 h-1 z M12,1 h3 v1 h-3 z M16,1 h1 v2 h-1 z M20,1 h1 v3 h-2 v-2 h1 z M21,1 h7 v7 h-7 z M3,3 h3 v3 h-3 z M23,3 h3 v3 h-3 z M9,4 h1 v1 h-1 z M11,4 h1 v1 h-1 z M13,4 h2 v2 h-1 v-1 h-1 z M17,4 h1 v1 h-1 z M10,5 h1 v1 h-1 z M12,5 h1 v1 h-1 z M17,5 h1 v1 h-1 z M1,10 h2 v1 h-2 z M5,10 h1 v2 h-1 z M8,10 h4 v1 h-4 z M15,10 h2 v1 h-2 z M19,10 h1 v1 h1 v1 h-3 v-1 h1 z M22,10 h1 v1 h-1 z M26,10 h1 v1 h-1 z M27,10 h1 v3 h-1 z M4,11 h1 v1 h-1 z M7,11 h1 v2 h-1 z M13,11 h2 v1 h-2 z M17,11 h1 v1 h-1 z M23,11 h3 v1 h-3 z M3,12 h1 v1 h-1 z M6,12 h1 v1 h-1 z M9,12 h1 v1 h-1 z M11,12 h1 v1 h-1 z M14,12 h1 v2 h-1 z M16,12 h2 v1 h-1 v1 h-1 z M19,12 h2 v1 h-2 z M25,12 h1 v1 h-1 z M1,13 h3 v1 h-3 z M6,13 h1 v1 h-1 z M8,13 h4 v1 h-4 z M18,13 h1 v1 h-1 z M20,13 h2 v1 h-2 z M24,13 h1 v3 h-3 v-1 h2 z M26,13 h1 v1 h-1 z M5,14 h1 v1 h-1 z M12,14 h1 v1 h-1 z M15,14 h3 v1 h-3 z M22,14 h1 v1 h-1 z M26,14 h1 v2 h-1 z M4,15 h1 v1 h-1 z M6,15 h3 v1 h-3 z M11,15 h1 v1 h-1 z M13,15 h1 v1 h-1 z M16,15 h1 v1 h-1 z M19,15 h1 v2 h-1 z M21,15 h1 v2 h-2 v-1 h1 z M1,16 h1 v1 h-1 z M3,16 h1 v1 h-1 z M5,16 h1 v1 h-1 z M7,16 h1 v1 h-1 z M12,16 h1 v2 h-2 v-1 h1 z M14,16 h2 v1 h-2 z M17,16 h1 v1 h-1 z M25,16 h1 v2 h-1 z M27,16 h1 v2 h-2 v-1 h1 z M2,17 h1 v1 h-1 z M4,17 h1 v1 h-1 z M9,17 h1 v1 h-1 z M15,17 h2 v1 h-2 z M18,17 h1 v1 h-1 z M23,17 h2 v1 h-2 z M1,18 h1 v1 h-1 z M3,18 h1 v1 h-1 z M5,18 h3 v1 h-3 z M9,18 h2 v1 h-2 z M13,18 h1 v1 h-1 z M16,18 h1 v1 h-1 z M18,18 h1 v1 h-1 z M20,18 h2 v1 h-2 z M24,18 h1 v1 h-1 z M26,18 h1 v1 h-1 z M6,19 h3 v1 h-3 z M12,19 h1 v2 h-1 z M14,19 h2 v1 h-2 z M17,19 h1 v1 h-1 z M19,19 h1 v1 h-1 z M21,19 h1 v1 h-1 z M23,19 h1 v3 h-1 z M25,19 h2 v1 h-2 z M2,20 h1 v1 h-1 z M10,20 h1 v1 h-1 z M13,20 h2 v2 h-2 z M16,20 h1 v1 h-1 z M18,20 h2 v1 h-2 z M21,20 h1 v1 h-1 z M25,20 h2 v1 h-2 z M1,21 h1 v7 h-1 z M3,21 h5 v1 h-5 z M9,21 h2 v1 h-2 z M16,21 h2 v1 h-2 z M20,21 h1 v1 h-1 z M22,21 h1 v1 h-1 z M24,21 h3 v1 h-3 z M2,22 h1 v5 h-1 z M4,22 h1 v3 h-1 z M6,22 h1 v3 h-1 z M8,22 h4 v1 h-4 z M15,22 h3 v1 h-3 z M19,22 h1 v1 h-1 z M21,22 h2 v1 h-1 v1 h-1 z M24,22 h1 v2 h-1 z M26,22 h1 v3 h-3 v-2 h2 z M27,22 h1 v1 h-1 z M9,23 h2 v1 h-2 z M12,23 h3 v1 h-3 z M17,23 h2 v1 h1 v1 h-4 v-1 h1 z M20,23 h1 v1 h-1 z M9,24 h1 v1 h-1 z M11,24 h1 v2 h-1 z M22,24 h2 v1 h-2 z M9,25 h1 v1 h-1 z M12,25 h1 v1 h-1 z M14,25 h1 v1 h-1 z M16,25 h2 v1 h-2 z M19,25 h1 v1 h-1 z M21,25 h3 v1 h-3 z M25,25 h1 v1 h-1 z M27,25 h1 v2 h-1 z M3,26 h4 v1 h-4 z M10,26 h1 v1 h-1 z M13,26 h1 v1 h-1 z M15,26 h2 v1 h-2 z M18,26 h1 v1 h-1 z M20,26 h2 v1 h-2 z M24,26 h2 v1 h-2 z"></path>
+                </svg>
+            `;
+        }
+
+        // === Event Listeners ===
+
+        // Navigation
+        homeNav.addEventListener('click', () => showSection('home'));
+        explorerNav.addEventListener('click', () => showSection('explorer'));
+        projectNav.addEventListener('click', () => showSection('project'));
+
+        // Bottom Sheet
+        createBtn.addEventListener('click', () => toggleBottomSheet(true));
+        bottomSheetOverlay.addEventListener('click', () => toggleBottomSheet(false));
+        
+        // Make bottom sheet draggable
+        const bottomSheetHandle = document.querySelector('.bottom-sheet-handle');
+        let startY, startTransform;
+        
+        bottomSheetHandle.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            startTransform = createBottomSheet.getBoundingClientRect().top;
+            document.addEventListener('touchmove', moveBottomSheet);
+            document.addEventListener('touchend', endBottomSheetMove);
+        });
+        
+        bottomSheetHandle.addEventListener('mousedown', function(e) {
+            startY = e.clientY;
+            startTransform = createBottomSheet.getBoundingClientRect().top;
+            document.addEventListener('mousemove', moveBottomSheetMouse);
+            document.addEventListener('mouseup', endBottomSheetMove);
+        });
+        
+        function moveBottomSheet(e) {
+            const deltaY = e.touches[0].clientY - startY;
+            if (deltaY > 0) {
+                createBottomSheet.style.transform = `translateY(${deltaY}px)`;
+            }
+        }
+        
+        function moveBottomSheetMouse(e) {
+            const deltaY = e.clientY - startY;
+            if (deltaY > 0) {
+                createBottomSheet.style.transform = `translateY(${deltaY}px)`;
+            }
+        }
+        
+        function endBottomSheetMove(e) {
+            document.removeEventListener('touchmove', moveBottomSheet);
+            document.removeEventListener('mousemove', moveBottomSheetMouse);
+            document.removeEventListener('touchend', endBottomSheetMove);
+            document.removeEventListener('mouseup', endBottomSheetMove);
+            
+            const height = window.innerHeight;
+            const sheetHeight = createBottomSheet.offsetHeight;
+            const currentTop = createBottomSheet.getBoundingClientRect().top;
+            
+            if (currentTop > height - (sheetHeight * 0.6)) {
+                toggleBottomSheet(false);
+            } else {
+                createBottomSheet.style.transform = 'translateY(0)';
+            }
+        }
+
+        // Side Panel
+        sortBtn.addEventListener('click', () => toggleSidePanel(true));
+        sidePanelOverlay.addEventListener('click', () => toggleSidePanel(false));
+        closeSortPanel.addEventListener('click', () => toggleSidePanel(false));
+
+        // Modals
+        createFolderBtn.addEventListener('click', () => {
+            toggleBottomSheet(false);
+            toggleModal(createFolderModal, createFolderOverlay, true);
+        });
+        
+        createLinkBtn.addEventListener('click', () => {
+            toggleBottomSheet(false);
+            toggleModal(createLinkModal, createLinkOverlay, true);
+        });
+        
+        createTextBtn.addEventListener('click', () => {
+            toggleBottomSheet(false);
+            toggleModal(createTextModal, createTextOverlay, true);
+        });
+        
+        closeCreateFolderModal.addEventListener('click', () => toggleModal(createFolderModal, createFolderOverlay, false));
+        closeCreateLinkModal.addEventListener('click', () => toggleModal(createLinkModal, createLinkOverlay, false));
+        closeCreateTextModal.addEventListener('click', () => toggleModal(createTextModal, createTextOverlay, false));
+        
+        createFolderOverlay.addEventListener('click', () => toggleModal(createFolderModal, createFolderOverlay, false));
+        createLinkOverlay.addEventListener('click', () => toggleModal(createLinkModal, createLinkOverlay, false));
+        createTextOverlay.addEventListener('click', () => toggleModal(createTextModal, createTextOverlay, false));
+
+        // View toggle
+        viewBtn.addEventListener('click', toggleView);
+
+        // Selection mode
+        selectBtn.addEventListener('click', toggleSelectionMode);
+
+        // File options/context menu
+        document.querySelectorAll('.file-item-options, .file-action').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const fileItem = button.closest('.file-item') || button.closest('.file-list-item');
+                showContextMenu(e, fileItem);
+            });
+        });
+
+        // File selection in selection mode
+        document.addEventListener('click', (e) => {
+            if (!isSelectionMode) return;
+            
+            const fileItem = e.target.closest('.file-item') || e.target.closest('.file-list-item');
+            if (fileItem) {
+                fileItem.classList.toggle('selected');
+                
+                const fileId = fileItem.getAttribute('data-id');
+                const index = selectedItems.indexOf(fileId);
+                
+                if (index > -1) {
+                    selectedItems.splice(index, 1);
+                } else {
+                    selectedItems.push(fileId);
+                }
+                
+                updateSelectionCount();
+            }
+        });
+
+        // FAB button
+        fabBtn.addEventListener('click', () => toggleBottomSheet(true));
+
+        // QR Code generation
+        generateQRBtn.addEventListener('click', generateQRCode);
+
+        // App bar scroll effect
+        window.addEventListener('scroll', function() {
+            const appBar = document.querySelector('.app-bar');
+            if (window.scrollY > 20) {
+                appBar.classList.add('scrolled');
+            } else {
+                appBar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialisation
+        showSection('home');
+    </script>
+</body>
+</html>

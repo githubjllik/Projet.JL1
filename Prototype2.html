@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL</title>
+    <style>
+        :root {
+            /* Base theme colors - Dark mode by default */
+            --primary: #8C6BFF;
+            --primary-variant: #6B4EFF;
+            --secondary: #03DAC6;
+            --background: #121212;
+            --surface: #1E1E1E;
+            --surface-variant: #2D2D2D;
+            --surface-higher: #383838;
+            --on-primary: #FFFFFF;
+            --on-secondary: #000000;
+            --on-background: #E1E1E1;
+            --on-surface: #DDDDDD;
+            --on-surface-medium: #BBBBBB;
+            --on-surface-disabled: #757575;
+            --error: #CF6679;
+            --transparent-overlay: rgba(0, 0, 0, 0.5);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            
+            /* Specific component colors */
+            --bottom-bar: rgba(30, 30, 30, 0.9);
+            --drawer-background: rgba(18, 18, 18, 0.95);
+            --glass-background: rgba(30, 30, 30, 0.7);
+            --tooltip-background: rgba(97, 97, 97, 0.9);
+            
+            /* Animation timings */
+            --transition-fast: 0.15s;
+            --transition-medium: 0.25s;
+            --transition-slow: 0.4s;
+            
+            /* Sizing and spacing */
+            --border-radius-small: 8px;
+            --border-radius-medium: 12px; 
+            --border-radius-large: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        [data-theme="light"] {
+            --primary: #6200EE;
+            --primary-variant: #3700B3;
+            --secondary: #03DAC6;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --surface-variant: #F0F0F0;
+            --surface-higher: #E1E1E1;
+            --on-primary: #FFFFFF;
+            --on-secondary: #000000;
+            --on-background: #121212;
+            --on-surface: #121212;
+            --on-surface-medium: #666666;
+            --on-surface-disabled: #9E9E9E;
+            --error: #B00020;
+            --transparent-overlay: rgba(255, 255, 255, 0.5);
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            
+            --bottom-bar: rgba(255, 255, 255, 0.9);
+            --drawer-background: rgba(245, 245, 245, 0.95);
+            --glass-background: rgba(255, 255, 255, 0.7);
+            --tooltip-background: rgba(225, 225, 225, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-background);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color var(--transition-medium);
+        }
+
+        /* Typographie */
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
+            flex: 1;
+        }
+
+        /* Header & Navigation */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--glass-background);
+            box-shadow: 0 2px 10px var(--shadow-color);
+            transition: all var(--transition-medium);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--on-background);
+        }
+
+        .app-title svg {
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--bottom-bar);
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-sm) 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10;
+            border-top: 1px solid var(--surface-higher);
+            box-shadow: 0 -2px 10px var(--shadow-color);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-sm);
+            color: var(--on-surface-medium);
+            transition: all var(--transition-medium);
+            position: relative;
+            width: 33.33%;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+            margin-top: var(--spacing-xs);
+        }
+
+        .nav-indicator {
+            position: absolute;
+            bottom: -8px;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px;
+            transition: transform var(--transition-medium), opacity var(--transition-medium);
+            opacity: 0;
+        }
+
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-bottom: 70px; /* Space for bottom nav */
+            min-height: calc(100vh - 130px);
+            position: relative;
+        }
+
+        /* Views/Pages */
+        .view {
+            display: none;
+            animation: fadeIn var(--transition-medium);
+            min-height: 100%;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Explorer view */
+        .explorer-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .path-navigation {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background-color: var(--surface);
+            border-radius: var(--border-radius-medium);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+
+        .path-navigation::-webkit-scrollbar {
+            display: none;
+        }
+
+        .path-segment {
+            display: flex;
+            align-items: center;
+        }
+
+        .path-separator {
+            margin: 0 var(--spacing-xs);
+            color: var(--on-surface-medium);
+        }
+
+        /* File/Folder Grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-md);
+            background-color: var(--surface);
+            border-radius: var(--border-radius-medium);
+            transition: all var(--transition-medium);
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .item:hover {
+            background-color: var(--surface-variant);
+            transform: translateY(-2px);
+        }
+
+        .item.selectable {
+            position: relative;
+        }
+
+        .item-select-checkbox {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--on-surface-medium);
+            background-color: transparent;
+            display: none;
+        }
+
+        .item.selectable .item-select-checkbox {
+            display: block;
+        }
+
+        .item.selected .item-select-checkbox {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .item.selected .item-select-checkbox::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 4px;
+            width: 8px;
+            height: 4px;
+            border-left: 2px solid var(--on-primary);
+            border-bottom: 2px solid var(--on-primary);
+            transform: rotate(-45deg);
+        }
+
+        .item-icon {
+            margin-bottom: var(--spacing-sm);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .item-name {
+            font-size: 0.85rem;
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .item-options {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            padding: var(--spacing-xs);
+        }
+
+        /* Items in list view */
+        .items-list .item {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+        }
+
+        .items-list .item-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            max-width: 70%;
+        }
+
+        .items-list .item-name {
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .items-list .item-icon {
+            margin-bottom: 0;
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            background-color: var(--surface-variant);
+            color: var(--on-surface);
+            gap: var(--spacing-sm);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-variant);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        .btn-fab {
+            position: fixed;
+            bottom: 80px;
+            right: var(--spacing-lg);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            z-index: 9;
+        }
+
+        .btn:hover {
+            background-color: var(--surface-higher);
+        }
+
+        .btn-fab:hover {
+            background-color: var(--primary-variant);
+            transform: translateY(-2px);
+        }
+
+        /* Bottom sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform var(--transition-medium);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--transparent-overlay);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-medium);
+        }
+
+        .sheet-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sheet-header {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-variant);
+            position: relative;
+        }
+
+        .sheet-content {
+            padding: var(--spacing-md);
+        }
+
+        .sheet-drag-handle {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background-color: var(--on-surface-disabled);
+            border-radius: 4px;
+        }
+
+        /* Dialog/Modal */
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background-color: var(--surface);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            max-width: 90%;
+            width: 400px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-medium);
+            overflow: hidden;
+        }
+
+        .dialog.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .dialog-header {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-variant);
+        }
+
+        .dialog-content {
+            padding: var(--spacing-md);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .dialog-footer {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-md);
+            border-top: 1px solid var(--surface-variant);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            color: var(--on-surface-medium);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--surface-higher);
+            border-radius: var(--border-radius-medium);
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        }
+
+        /* Sidebar/Side Panel */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 300px;
+            background-color: var(--drawer-background);
+            box-shadow: -2px 0 15px var(--shadow-color);
+            z-index: 20;
+            transform: translateX(100%);
+            transition: transform var(--transition-medium);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-variant);
+        }
+
+        .sidebar-content {
+            padding: var(--spacing-md);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Accordions */
+        .accordion {
+            margin-bottom: var(--spacing-md);
+            border-radius: var(--border-radius-medium);
+            overflow: hidden;
+            background-color: var(--surface);
+        }
+
+        .accordion-header {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color var(--transition-fast);
+        }
+
+        .accordion-header:hover {
+            background-color: var(--surface-variant);
+        }
+
+        .accordion-icon {
+            transition: transform var(--transition-medium);
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-medium);
+            padding: 0 var(--spacing-md);
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 500px;
+            padding: var(--spacing-md);
+            padding-top: 0;
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--on-surface-disabled);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--on-surface-medium);
+        }
+
+        /* Loading spinners & indicators */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--surface-higher);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spinner 1s infinite linear;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        /* QR Code */
+        .qr-container {
+            background-color: var(--surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-medium);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: var(--spacing-md) 0;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: var(--spacing-md) 0;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-small);
+        }
+
+        /* Projet presentation card */
+        .project-card {
+            background-color: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .project-logo {
+            width: 50px;
+            height: 50px;
+            margin-right: var(--spacing-md);
+            background-color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--on-primary);
+        }
+
+        /* Search components */
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            padding: var(--spacing-sm) 0;
+            background-color: var(--background);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-medium);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: var(--surface);
+            border-radius: var(--border-radius-medium);
+            padding: var(--spacing-sm) var(--spacing-md);
+            transition: all var(--transition-medium);
+            border: 1px solid transparent;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: var(--spacing-sm);
+            color: var(--on-surface);
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .search-filter::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background-color: var(--surface);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        /* Toast/Snackbar */
+        .toast-container {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background-color: var(--surface-higher);
+            color: var(--on-surface);
+            border-radius: var(--border-radius-medium);
+            margin-bottom: var(--spacing-sm);
+            box-shadow: var(--card-shadow);
+            max-width: 90%;
+            pointer-events: auto;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all var(--transition-medium);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toast.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-action {
+            margin-left: var(--spacing-md);
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Empty states & placeholders */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--on-surface-medium);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--on-surface-disabled);
+        }
+
+        .empty-state-text {
+            max-width: 300px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Glossy card effect for project view */
+        .glossy-card {
+            background: linear-gradient(
+                135deg,
+                var(--surface-variant) 0%,
+                var(--surface) 100%
+            );
+            border-radius: var(--border-radius-large);
+            padding: var(--spacing-lg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .glossy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0)
+            );
+            border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+        }
+
+        /* Neumorphism style buttons */
+        .btn-neumorphic {
+            background-color: var(--surface);
+            box-shadow: 
+                5px 5px 10px rgba(0, 0, 0, 0.2),
+                -5px -5px 10px rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-medium);
+            padding: var(--spacing-md) var(--spacing-lg);
+            transition: all var(--transition-medium);
+            border: none;
+            color: var(--on-surface);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-neumorphic:active {
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 5px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Project diagram */
+        .project-structure {
+            margin: var(--spacing-md) 0;
+            border: 1px solid var(--surface-higher);
+            border-radius: var(--border-radius-medium);
+            overflow: hidden;
+        }
+
+        .structure-item {
+            display: flex;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--surface-higher);
+            font-family: 'Courier New', monospace;
+        }
+
+        .structure-item:last-child {
+            border-bottom: none;
+        }
+
+        .structure-indent {
+            margin-left: 20px;
+        }
+
+        .folder-item {
+            color: var(--primary);
+        }
+
+        .file-item {
+            color: var(--on-surface-medium);
+        }
+
+        /* Responsive design */
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+
+            .main-content {
+                margin-bottom: 0;
+                margin-left: 250px;
+            }
+
+            .desktop-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 250px;
+                height: 100%;
+                background-color: var(--surface);
+                z-index: 5;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid var(--surface-higher);
+            }
+
+            .desktop-nav {
+                display: flex;
+                flex-direction: column;
+                padding: var(--spacing-md);
+                flex: 1;
+            }
+
+            .desktop-nav-item {
+                display: flex;
+                align-items: center;
+                padding: var(--spacing-md);
+                border-radius: var(--border-radius-medium);
+                margin-bottom: var(--spacing-sm);
+                cursor: pointer;
+                transition: background-color var(--transition-medium);
+            }
+
+            .desktop-nav-item.active {
+                background-color: var(--surface-variant);
+                color: var(--primary);
+            }
+
+            .desktop-nav-item:hover:not(.active) {
+                background-color: var(--surface-higher);
+            }
+
+            .desktop-nav-icon {
+                margin-right: var(--spacing-md);
+            }
+
+            .desktop-logo {
+                display: flex;
+                align-items: center;
+                padding: var(--spacing-md);
+                margin-bottom: var(--spacing-md);
+                border-bottom: 1px solid var(--surface-higher);
+            }
+
+            .desktop-settings {
+                padding: var(--spacing-md);
+                border-top: 1px solid var(--surface-higher);
+            }
+
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+
+        /* Small screens, phones */
+        @media (max-width: 576px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                gap: var(--spacing-sm);
+            }
+
+            .item-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .item-name {
+                font-size: 0.75rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Mobile landscape mode */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .bottom-nav {
+                padding: var(--spacing-xs) 0;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            animation: fadeIn var(--transition-medium) forwards;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .slide-up {
+            animation: slideUp var(--transition-medium) forwards;
+        }
+
+        /* Theme toggle switch */
+        .theme-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--surface-higher);
+            transition: var(--transition-medium);
+            border-radius: 34px;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--on-surface);
+            transition: var(--transition-medium);
+            border-radius: 50%;
+        }
+
+        input:checked + .switch-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .switch-slider:before {
+            transform: translateX(26px);
+            background-color: var(--on-primary);
+        }
+        
+        /* SVG filter for neumorphism */
+        .filter-shadow {
+            filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Hidden elements */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="app-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="currentColor"/>
+                </svg>
+                Projet.JL
+            </div>
+            <div>
+                <button id="toggleTheme" class="btn btn-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div id="navHome" class="nav-item active" data-view="home">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+            </svg>
+            <span>Accueil</span>
+            <div class="nav-indicator"></div>
+        </div>
+        <div id="navExplorer" class="nav-item" data-view="explorer">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>
+            </svg>
+            <span>Explorateur</span>
+            <div class="nav-indicator"></div>
+        </div>
+        <div id="navProject" class="nav-item" data-view="project">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                <path d="M7 12H9V17H7V12Z" fill="currentColor"/>
+                <path d="M11 7H13V17H11V7Z" fill="currentColor"/>
+                <path d="M15 9H17V17H15V9Z" fill="currentColor"/>
+            </svg>
+            <span>Projet</span>
+            <div class="nav-indicator"></div>
+        </div>
+    </nav>
+
+    <!-- Desktop Sidebar (Visible on larger screens) -->
+    <div class="desktop-sidebar">
+        <div class="desktop-logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="currentColor"/>
+            </svg>
+            <h1>Projet.JL</h1>
+        </div>
+        <div class="desktop-nav">
+            <div id="desktopNavHome" class="desktop-nav-item active" data-view="home">
+                <svg class="desktop-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                </svg>
+                Accueil
+            </div>
+            <div id="desktopNavExplorer" class="desktop-nav-item" data-view="explorer">
+                <svg class="desktop-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>
+                </svg>
+                Explorateur
+            </div>
+            <div id="desktopNavProject" class="desktop-nav-item" data-view="project">
+                <svg class="desktop-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                    <path d="M7 12H9V17H7V12Z" fill="currentColor"/>
+                    <path d="M11 7H13V17H11V7Z" fill="currentColor"/>
+                    <path d="M15 9H17V17H15V9Z" fill="currentColor"/>
+                </svg>
+                Projet
+            </div>
+        </div>
+        <div class="desktop-settings">
+            <label class="theme-switch">
+                <input type="checkbox" id="desktopToggleTheme">
+                <span class="switch-slider"></span>
+            </label>
+            <span>Mode sombre</span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Home View -->
+            <div id="homeView" class="view active">
+                <div class="project-card slide-up">
+                    <div class="project-card-header">
+                        <div class="project-logo">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h1>Projet.JL</h1>
+                    </div>
+                    <p>Un système de stockage cloud infini, conçu pour la gestion efficace de vos liens et textes importants.</p>
+                    <div class="glossy-card">
+                        <h2>Capacité de stockage: ♾️ Infini</h2>
+                        <p>Aucune limite imposée, stockez autant de liens et de textes que nécessaire.</p>
+                    </div>
+                </div>
+
+                <h2>À propos du projet</h2>
+                <p>Le projet JL est une innovation de Jean-Louis LIKULA, développée pour résoudre un problème simple mais crucial : la conservation efficace de liens web.</p>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>Mes motivations</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>L'infinité du monde web représente pour moi l'infini dans ce monde. Il existe un nombre incalculable de ressources à découvrir, à explorer, toutes accessibles par un simple lien web.</p>
+                        <p>J'ai découvert d'innombrables merveilles grâce à des liens, ces simples chaînes de texte qui ouvrent la porte vers d'immenses possibilités. Malheureusement, j'ai aussi perdu beaucoup de ces trésors faute d'avoir un endroit dédié pour les stocker.</p>
+                        <p>Les gestionnaires de fichiers traditionnels sont limités : ils ne servent qu'à stocker des médias accessibles nativement et sont toujours contraints par le stockage physique ou la connexion internet.</p>
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>Ma solution</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Je devais créer un système qui serait :</p>
+                        <p>• Toujours accessible, n'importe où, n'importe quand</p>
+                        <p>• Sans limites et indépendant de tout système (base de données, stockage, connexion internet)</p>
+                        <p>• En harmonie avec l'infinité du web</p>
+                        <p>C'est ainsi que j'ai développé ce système de stockage infini, accessible hors-ligne, où l'utilisateur contrôle entièrement son univers, sans contraintes.</p>
+                    </div>
+                </div>
+
+                <h2>Comment utiliser ce projet</h2>
+                <p>Le fonctionnement de Projet.JL repose sur l'exportation et l'importation de fichiers JSON qui servent de base de données portable.</p>
+
+                <div class="project-structure">
+                    <div class="structure-item folder-item">- votre_projet</div>
+                    <div class="structure-item structure-indent folder-item">|- data</div>
+                    <div class="structure-item structure-indent file-item">|- index.html</div>
+                    <div class="structure-item structure-indent file-item">|- styles.css</div>
+                    <div class="structure-item structure-indent file-item">|- scripts.js</div>
+                </div>
+
+                <h3>Sauvegarde de vos données</h3>
+                <p>À chaque fois que vous ajoutez du contenu, exportez un fichier JSON dans le dossier data à la racine de votre projet. Le fichier sera nommé automatiquement selon le format :</p>
+                <p><code>backup_YYYY-MM-DD_HH-MM-SS.json</code></p>
+                <p>Par exemple : <code>backup_2025-11-01_10-30-45.json</code></p>
+
+                <h3>Récupération de vos données</h3>
+                <p>Pour restaurer vos données sur un nouvel appareil ou navigateur, utilisez simplement la fonction "Importer" et sélectionnez votre fichier JSON depuis le dossier data.</p>
+
+                <div class="btn-neumorphic" id="startExploreBtn">
+                    Commencer à explorer
+                </div>
+            </div>
+
+            <!-- Explorer View -->
+            <div id="explorerView" class="view">
+                <div class="search-container">
+                    <div class="search-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="Rechercher...">
+                    </div>
+                    <div class="search-filter">
+                        <div class="filter-chip active" data-filter="all">Tous</div>
+                        <div class="filter-chip" data-filter="folder">Dossiers</div>
+                        <div class="filter-chip" data-filter="link">Liens</div>
+                        <div class="filter-chip" data-filter="text">Textes</div>
+                    </div>
+                </div>
+
+                <div class="path-navigation">
+                    <div class="path-segment" data-path="root">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="explorer-toolbar">
+                    <div class="toolbar-group">
+                        <button class="btn btn-icon" id="viewModeBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 19H21V5H3V19ZM11 7H19V9H11V7ZM11 11H19V13H11V11ZM11 15H19V17H11V15ZM5 7H9V17H5V7Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="sortBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 18H9V16H3V18ZM3 6V8H21V6H3ZM3 13H15V11H3V13Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="selectBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                                <path d="M17.99 9L16.58 7.58L9.99 14.17L7.41 11.6L5.99 13.01L9.99 17L17.99 9Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-group selection-options hidden">
+                        <span id="selectionCounter">0 sélectionné</span>
+                        <button class="btn btn-icon" id="selectAllBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 5H21V7H3V5ZM3 11H21V13H3V11ZM3 17H21V19H3V17Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="copyBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="moveBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 7L9 12L14 17V7Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="hideBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 6C15.79 6 19.17 8.13 20.82 11.5C19.17 14.87 15.79 17 12 17C8.21 17 4.83 14.87 3.18 11.5C4.83 8.13 8.21 6 12 6ZM12 4C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 11.5C21.27 7.11 17 4 12 4ZM12 9C13.38 9 14.5 10.12 14.5 11.5C14.5 12.88 13.38 14 12 14C10.62 14 9.5 12.88 9.5 11.5C9.5 10.12 10.62 9 12 9ZM12 7C9.52 7 7.5 9.02 7.5 11.5C7.5 13.98 9.52 16 12 16C14.48 16 16.5 13.98 16.5 11.5C16.5 9.02 14.48 7 12 7Z" fill="currentColor"/>
+                                <path d="M2 4.27L3.28 3L22 21.72L20.73 23L19.46 21.73C17.97 22.54 16.04 23 14 23H10C5.58 23 2 19.42 2 15V9C2 6.96 2.46 5.03 3.27 3.54L2 4.27Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" id="cancelSelectionBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="items-grid">
+                    <!-- Empty state -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h3>Aucun élément</h3>
+                        <p class="empty-state-text">Commencez par créer un dossier ou ajouter un lien ou un texte</p>
+                    </div>
+                </div>
+
+                <button id="addItemBtn" class="btn-fab">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Project View -->
+            <div id="projectView" class="view">
+                <h1>Préservez votre projet</h1>
+                <div class="glossy-card">
+                    <h3>Conseils importants</h3>
+                    <p>Pour assurer la préservation de votre projet, uploadez-le toujours en ligne dans un service cloud. Rendez-le public pour y avoir accès en tout temps et assurez-vous de mettre à jour régulièrement les fichiers JSON qui constituent votre base de données.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lien vers votre stockage cloud</label>
+                    <div class="search-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                        </svg>
+                        <input type="text" id="cloudStorageLink" class="search-input" placeholder="Entrez le lien vers votre projet (GitHub, IPFS, etc.)">
+                    </div>
+                </div>
+
+                <button id="generateQrBtn" class="btn btn-primary">
+                    Générer un QR Code d'accès
+                </button>
+
+                <div class="qr-container" id="qrContainer">
+                    <h3>QR Code d'accès à votre projet</h3>
+                    <div class="qr-code" id="qrCode">
+                        <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="black"/>
+                            <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="black"/>
+                            <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="black"/>
+                            <path d="M21 19H19V21H21V19Z" fill="black"/>
+                            <path d="M15 13H13V15H15V13Z" fill="black"/>
+                            <path d="M17 15H15V17H17V15Z" fill="black"/>
+                            <path d="M15 17H13V19H15V17Z" fill="black"/>
+                            <path d="M17 19H15V21H17V19Z" fill="black"/>
+                            <path d="M19 17H17V19H19V17Z" fill="black"/>
+                            <path d="M19 13H17V15H19V13Z" fill="black"/>
+                            <path d="M21 15H19V17H21V15Z" fill="black"/>
+                        </svg>
+                    </div>
+                    <p>Ce QR code est votre clé d'accès au projet. Gardez-le précieusement comme une carte d'identité ou conservez-le dans un endroit sûr. Il vous permettra d'accéder à votre projet depuis n'importe quel appareil, même en cas de perte d'accès à vos comptes.</p>
+                </div>
+
+                <h2>Plateformes recommandées</h2>
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>GitHub</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>GitHub est idéal pour stocker du code et des fichiers texte. Vous pouvez facilement versionner vos sauvegardes et y accéder depuis n'importe où. De plus, en rendant votre repository public, vous vous assurez un accès permanent.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>Plateformes IPFS</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>IPFS (InterPlanetary File System) est un protocole décentralisé pour stocker et partager des données. Vos fichiers y sont distribués et accessibles via un identifiant unique, garantissant une grande résilience.</p>
+                        <p>Services recommandés : ipfs.io, web3.storage, nft.storage, Pinata Cloud</p>
+                        <p>L'avantage principal est la permanence des données : une fois stockées, elles restent accessibles tant que quelqu'un dans le réseau les maintient.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>Google Drive</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Google Drive offre 15 Go de stockage gratuit et une interface simple. Vous pouvez partager publiquement vos fichiers via un lien et y accéder depuis n'importe quel appareil.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h3>MEGA / Mediafire</h3>
+                        <span class="accordion-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>MEGA offre 20 Go de stockage gratuit avec chiffrement de bout en bout. Mediafire est simple à utiliser et permet de partager facilement des fichiers via des liens.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h2>Gestion des sauvegardes</h2>
+                    <button id="exportJsonBtn" class="btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19Z" fill="currentColor"/>
+                            <path d="M11 14.17L7.41 10.59L6 12L12 18L18 12L16.59 10.58L13 14.17V3H11V14.17Z" fill="currentColor"/>
+                        </svg>
+                        Exporter une sauvegarde
+                    </button>
+                    <button id="importJsonBtn" class="btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19Z" fill="currentColor"/>
+                            <path d="M13 9.83L16.59 13.42L18 12L12 6L6 12L7.41 13.41L11 9.83V21H13V9.83Z" fill="currentColor"/>
+                        </svg>
+                        Importer une sauvegarde
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Sheet Add Item -->
+    <div class="sheet-overlay" id="addItemOverlay"></div>
+    <div class="bottom-sheet" id="addItemSheet">
+        <div class="sheet-header">
+            <div class="sheet-drag-handle"></div>
+            <h3>Ajouter un élément</h3>
+            <button class="btn btn-icon close-sheet">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sheet-content">
+            <div class="btn-neumorphic add-option" data-type="folder">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>
+                </svg>
+                Créer un dossier
+            </div>
+            <div class="btn-neumorphic add-option" data-type="link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                </svg>
+                Ajouter un lien
+            </div>
+            <div class="btn-neumorphic add-option" data-type="text">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="currentColor"/>
+                </svg>
+                Ajouter un texte
+            </div>
+            <div class="btn-neumorphic add-option" data-type="import">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19Z" fill="currentColor"/>
+                    <path d="M13 9.83L16.59 13.42L18 12L12 6L6 12L7.41 13.41L11 9.83V21H13V9.83Z" fill="currentColor"/>
+                </svg>
+                Importer un fichier JSON
+            </div>
+            <div class="btn-neumorphic add-option" data-type="export">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19Z" fill="currentColor"/>
+                    <path d="M11 14.17L7.41 10.59L6 12L12 18L18 12L16.59 10.58L13 14.17V3H11V14.17Z" fill="currentColor"/>
+                </svg>
+                Exporter un fichier JSON
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog Create Folder -->
+    <div class="sheet-overlay" id="createFolderOverlay"></div>
+    <div class="dialog" id="createFolderDialog">
+        <div class="dialog-header">
+            <h3>Créer un dossier</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="folderName">Nom du dossier</label>
+                <input type="text" id="folderName" class="form-control" placeholder="Entrez un nom">
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="createFolderBtn">Créer</button>
+        </div>
+    </div>
+
+    <!-- Dialog Add Link -->
+    <div class="sheet-overlay" id="addLinkOverlay"></div>
+    <div class="dialog" id="addLinkDialog">
+        <div class="dialog-header">
+            <h3>Ajouter un lien</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="linkTitle">Titre du lien</label>
+                <input type="text" id="linkTitle" class="form-control" placeholder="Entrez un titre">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="linkUrl">URL</label>
+                <input type="url" id="linkUrl" class="form-control" placeholder="https://example.com">
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="addLinkBtn">Ajouter</button>
+        </div>
+    </div>
+
+    <!-- Dialog Add Text -->
+    <div class="sheet-overlay" id="addTextOverlay"></div>
+    <div class="dialog" id="addTextDialog">
+        <div class="dialog-header">
+            <h3>Ajouter un texte</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="textTitle">Titre</label>
+                <input type="text" id="textTitle" class="form-control" placeholder="Entrez un titre">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="textContent">Contenu</label>
+                <textarea id="textContent" class="form-control" rows="5" placeholder="Entrez votre texte"></textarea>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="addTextBtn">Ajouter</button>
+        </div>
+    </div>
+
+    <!-- Sort Options Bottom Sheet -->
+    <div class="sheet-overlay" id="sortOptionsOverlay"></div>
+    <div class="bottom-sheet" id="sortOptionsSheet">
+        <div class="sheet-header">
+            <div class="sheet-drag-handle"></div>
+            <h3>Trier les éléments</h3>
+            <button class="btn btn-icon close-sheet">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sheet-content">
+            <div class="btn-neumorphic sort-option" data-sort="name-asc">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.94 4.66H19.94V6.66H14.94V4.66ZM14.94 10.66H19.94V8.66H14.94V10.66ZM4.94 8.66V10.66H9.94V8.66H4.94ZM10.94 4.66H12.94V19.34H10.94V4.66ZM4.94 16.66H9.94V14.66H4.94V16.66ZM4.94 4.66V6.66H9.94V4.66H4.94ZM14.94 14.66H19.94V12.66H14.94V14.66ZM14.94 19.34H19.94V17.34H14.94V19.34Z" fill="currentColor"/>
+                </svg>
+                Ordre alphabétique (A-Z)
+            </div>
+            <div class="btn-neumorphic sort-option" data-sort="name-desc">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.94 19.34H19.94V17.34H14.94V19.34ZM14.94 13.34H19.94V15.34H14.94V13.34ZM4.94 15.34V13.34H9.94V15.34H4.94ZM10.94 19.34H12.94V4.66H10.94V19.34ZM4.94 7.34H9.94V9.34H4.94V7.34ZM4.94 19.34V17.34H9.94V19.34H4.94ZM14.94 9.34H19.94V11.34H14.94V9.34ZM14.94 4.66H19.94V6.66H14.94V4.66Z" fill="currentColor"/>
+                </svg>
+                Ordre alphabétique (Z-A)
+            </div>
+            <div class="btn-neumorphic sort-option" data-sort="date-asc">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H18V1H16V3H8V1H6V3H5C3.89 3 3.01 3.9 3.01 5L3 19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V8H19V19ZM7 10H12V15H7V10Z" fill="currentColor"/>
+                </svg>
+                Plus récent d'abord
+            </div>
+            <div class="btn-neumorphic sort-option" data-sort="date-desc">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H18V1H16V3H8V1H6V3H5C3.89 3 3.01 3.9 3.01 5L3 19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V8H19V19ZM7 10H12V15H7V10Z" fill="currentColor"/>
+                </svg>
+                Plus ancien d'abord
+            </div>
+            <div class="form-group">
+                <div class="form-label">Options d'affichage</div>
+                <label class="form-control">
+                    <input type="checkbox" id="showHiddenItems"> Afficher les éléments masqués
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Details Bottom Sheet -->
+    <div class="sheet-overlay" id="itemDetailsOverlay"></div>
+    <div class="bottom-sheet" id="itemDetailsSheet">
+        <div class="sheet-header">
+            <div class="sheet-drag-handle"></div>
+            <h3>Détails de l'élément</h3>
+            <button class="btn btn-icon close-sheet">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sheet-content" id="itemDetailsContent">
+            <div class="item-detail-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <h3 id="detailsItemName">Nom de l'élément</h3>
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <p id="detailsItemType">Dossier</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chemin</label>
+                <p id="detailsItemPath">/Documents</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date d'ajout</label>
+                <p id="detailsItemCreated">01/11/2025, 10:30</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Dernière modification</label>
+                <p id="detailsItemModified">05/11/2025, 15:45</p>
+            </div>
+            <div class="btn-neumorphic item-action" data-action="open">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 19H5V5H12V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19V19ZM14 3V5H17.59L7.76 14.83L9.17 16.24L19 6.41V10H21V3H14Z" fill="currentColor"/>
+                </svg>
+                Ouvrir
+            </div>
+            <div class="btn-neumorphic item-action" data-action="rename">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor"/>
+                </svg>
+                Renommer
+            </div>
+            <div class="btn-neumorphic item-action" data-action="copy">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                </svg>
+                Copier
+            </div>
+            <div class="btn-neumorphic item-action" data-action="move">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 7L9 12L14 17V7Z" fill="currentColor"/>
+                </svg>
+                Déplacer
+            </div>
+            <div class="btn-neumorphic item-action" data-action="hide">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6C15.79 6 19.17 8.13 20.82 11.5C19.17 14.87 15.79 17 12 17C8.21 17 4.83 14.87 3.18 11.5C4.83 8.13 8.21 6 12 6ZM12 4C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 11.5C21.27 7.11 17 4 12 4ZM12 9C13.38 9 14.5 10.12 14.5 11.5C14.5 12.88 13.38 14 12 14C10.62 14 9.5 12.88 9.5 11.5C9.5 10.12 10.62 9 12 9ZM12 7C9.52 7 7.5 9.02 7.5 11.5C7.5 13.98 9.52 16 12 16C14.48 16 16.5 13.98 16.5 11.5C16.5 9.02 14.48 7 12 7Z" fill="currentColor"/>
+                    <path d="M2 4.27L3.28 3L22 21.72L20.73 23L19.46 21.73C17.97 22.54 16.04 23 14 23H10C5.58 23 2 19.42 2 15V9C2 6.96 2.46 5.03 3.27 3.54L2 4.27Z" fill="currentColor"/>
+                </svg>
+                Masquer
+            </div>
+            <div class="btn-neumorphic item-action" data-action="delete">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 9V19H8V9H16ZM14.5 3H9.5L8.5 4H5V6H19V4H15.5L14.5 3ZM18 7H6V19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7Z" fill="currentColor"/>
+                </svg>
+                Supprimer
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Dialog -->
+    <div class="sheet-overlay" id="renameOverlay"></div>
+    <div class="dialog" id="renameDialog">
+        <div class="dialog-header">
+            <h3>Renommer</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="newName">Nouveau nom</label>
+                <input type="text" id="newName" class="form-control" placeholder="Entrez un nouveau nom">
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="confirmRenameBtn">Renommer</button>
+        </div>
+    </div>
+
+    <!-- Edit Link Dialog -->
+    <div class="sheet-overlay" id="editLinkOverlay"></div>
+    <div class="dialog" id="editLinkDialog">
+        <div class="dialog-header">
+            <h3>Modifier le lien</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="editLinkTitle">Titre du lien</label>
+                <input type="text" id="editLinkTitle" class="form-control" placeholder="Entrez un titre">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="editLinkUrl">URL</label>
+                <input type="url" id="editLinkUrl" class="form-control" placeholder="https://example.com">
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="saveEditLinkBtn">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- Edit Text Dialog -->
+    <div class="sheet-overlay" id="editTextOverlay"></div>
+    <div class="dialog" id="editTextDialog">
+        <div class="dialog-header">
+            <h3>Modifier le texte</h3>
+            <button class="btn btn-icon close-dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="dialog-content">
+            <div class="form-group">
+                <label class="form-label" for="editTextTitle">Titre</label>
+                <input type="text" id="editTextTitle" class="form-control" placeholder="Entrez un titre">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="editTextContent">Contenu</label>
+                <textarea id="editTextContent" class="form-control" rows="5" placeholder="Entrez votre texte"></textarea>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn close-dialog">Annuler</button>
+            <button class="btn btn-primary" id="saveEditTextBtn">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer">
+        <!-- Toasts will be dynamically created and added here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggling
+            const toggleThemeBtn = document.getElementById('toggleTheme');
+            const desktopToggleTheme = document.getElementById('desktopToggleTheme');
+            
+            function setTheme(isDark) {
+                if (isDark) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    if (desktopToggleTheme) desktopToggleTheme.checked = true;
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    if (desktopToggleTheme) desktopToggleTheme.checked = false;
+                }
+            }
+            
+            // Default to dark mode as requested
+            setTheme(true);
+            
+            toggleThemeBtn.addEventListener('click', function() {
+                const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                setTheme(!isDarkMode);
+            });
+            
+            if (desktopToggleTheme) {
+                desktopToggleTheme.addEventListener('change', function() {
+                    setTheme(this.checked);
+                });
+            }
+            
+            // Navigation between views
+            const navItems = document.querySelectorAll('.nav-item, .desktop-nav-item');
+            const views = document.querySelectorAll('.view');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const viewId = this.getAttribute('data-view');
+                    
+                    // Update navigation state
+                    navItems.forEach(navItem => {
+                        if (navItem.getAttribute('data-view') === viewId) {
+                            navItem.classList.add('active');
+                        } else {
+                            navItem.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update view state
+                    views.forEach(view => {
+                        if (view.id === viewId + 'View') {
+                            view.classList.add('active');
+                        } else {
+                            view.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Start exploring button
+            const startExploreBtn = document.getElementById('startExploreBtn');
+            startExploreBtn.addEventListener('click', function() {
+                // Switch to explorer view
+                document.getElementById('navExplorer').click();
+                document.getElementById('desktopNavExplorer').click();
+            });
+            
+            // Accordions
+            const accordions = document.querySelectorAll('.accordion');
+            
+            accordions.forEach(accordion => {
+                const header = accordion.querySelector('.accordion-header');
+                header.addEventListener('click', function() {
+                    accordion.classList.toggle('active');
+                });
+            });
+            
+            // Bottom sheet interactions
+            const addItemBtn = document.getElementById('addItemBtn');
+            const addItemSheet = document.getElementById('addItemSheet');
+            const addItemOverlay = document.getElementById('addItemOverlay');
+            const closeSheetBtns = document.querySelectorAll('.close-sheet');
+            
+            addItemBtn.addEventListener('click', function() {
+                addItemSheet.classList.add('active');
+                addItemOverlay.classList.add('active');
+            });
+            
+            addItemOverlay.addEventListener('click', function() {
+                addItemSheet.classList.remove('active');
+                addItemOverlay.classList.remove('active');
+            });
+            
+            closeSheetBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const sheet = this.closest('.bottom-sheet');
+                    const overlay = document.getElementById(sheet.id.replace('Sheet', 'Overlay'));
+                    
+                    sheet.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            });
+            
+            // Dialog interactions
+            const closeDialogBtns = document.querySelectorAll('.close-dialog');
+            
+            closeDialogBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const dialog = this.closest('.dialog');
+                    const overlay = document.getElementById(dialog.id.replace('Dialog', 'Overlay'));
+                    
+                    dialog.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            });
+            
+            // Add option interactions
+            const addOptions = document.querySelectorAll('.add-option');
+            
+            addOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    
+                    // Close the add item sheet
+                    addItemSheet.classList.remove('active');
+                    addItemOverlay.classList.remove('active');
+                    
+                    // Open the appropriate dialog based on the type
+                    switch (type) {
+                        case 'folder':
+                            const createFolderDialog = document.getElementById('createFolderDialog');
+                            const createFolderOverlay = document.getElementById('createFolderOverlay');
+                            createFolderDialog.classList.add('active');
+                            createFolderOverlay.classList.add('active');
+                            document.getElementById('folderName').focus();
+                            break;
+                        case 'link':
+                            const addLinkDialog = document.getElementById('addLinkDialog');
+                            const addLinkOverlay = document.getElementById('addLinkOverlay');
+                            addLinkDialog.classList.add('active');
+                            addLinkOverlay.classList.add('active');
+                            document.getElementById('linkTitle').focus();
+                            break;
+                        case 'text':
+                            const addTextDialog = document.getElementById('addTextDialog');
+                            const addTextOverlay = document.getElementById('addTextOverlay');
+                            addTextDialog.classList.add('active');
+                            addTextOverlay.classList.add('active');
+                            document.getElementById('textTitle').focus();
+                            break;
+                        case 'import':
+                            showToast('Fonctionnalité d\'import JSON à implémenter');
+                            break;
+                        case 'export':
+                            showToast('Fonctionnalité d\'export JSON à implémenter');
+                            break;
+                    }
+                });
+            });
+            
+            // Sorting interactions
+            const sortBtn = document.getElementById('sortBtn');
+            const sortOptionsSheet = document.getElementById('sortOptionsSheet');
+            const sortOptionsOverlay = document.getElementById('sortOptionsOverlay');
+            
+            sortBtn.addEventListener('click', function() {
+                sortOptionsSheet.classList.add('active');
+                sortOptionsOverlay.classList.add('active');
+            });
+            
+            sortOptionsOverlay.addEventListener('click', function() {
+                sortOptionsSheet.classList.remove('active');
+                sortOptionsOverlay.classList.remove('active');
+            });
+            
+            // View mode toggle
+            const viewModeBtn = document.getElementById('viewModeBtn');
+            const itemsContainer = document.querySelector('.items-grid');
+            
+            viewModeBtn.addEventListener('click', function() {
+                if (itemsContainer.classList.contains('items-grid')) {
+                    itemsContainer.classList.remove('items-grid');
+                    itemsContainer.classList.add('items-list');
+                    viewModeBtn.innerHTML = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 19H9V13H3V19ZM3 11H9V5H3V11ZM11 19H17V13H11V19ZM11 11H17V5H11V11ZM19 19H21V13H19V19ZM19 11H21V5H19V11Z" fill="currentColor"/>
+                        </svg>
+                    `;
+                } else {
+                    itemsContainer.classList.remove('items-list');
+                    itemsContainer.classList.add('items-grid');
+                    viewModeBtn.innerHTML = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 19H21V5H3V19ZM11 7H19V9H11V7ZM11 11H19V13H11V11ZM11 15H19V17H11V15ZM5 7H9V17H5V7Z" fill="currentColor"/>
+                        </svg>
+                    `;
+                }
+            });
+            
+            // Selection mode
+            const selectBtn = document.getElementById('selectBtn');
+            const selectionOptions = document.querySelector('.selection-options');
+            
+            selectBtn.addEventListener('click', function() {
+                const items = document.querySelectorAll('.item:not(.empty-state)');
+                
+                if (!items.length) {
+                    showToast('Aucun élément à sélectionner');
+                    return;
+                }
+                
+                items.forEach(item => {
+                    item.classList.toggle('selectable');
+                });
+                
+                selectionOptions.classList.toggle('hidden');
+                selectBtn.classList.toggle('active');
+            });
+            
+            // Cancel selection
+            const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
+            
+            cancelSelectionBtn.addEventListener('click', function() {
+                const selectableItems = document.querySelectorAll('.item.selectable');
+                
+                selectableItems.forEach(item => {
+                    item.classList.remove('selectable');
+                    item.classList.remove('selected');
+                });
+                
+                selectionOptions.classList.add('hidden');
+                selectBtn.classList.remove('active');
+                updateSelectionCounter();
+            });
+            
+            // Update selection counter
+            function updateSelectionCounter() {
+                const selectedItems = document.querySelectorAll('.item.selected');
+                const totalItems = document.querySelectorAll('.item:not(.empty-state)');
+                
+                document.getElementById('selectionCounter').textContent = 
+                    `${selectedItems.length}/${totalItems.length} sélectionné${selectedItems.length > 1 ? 's' : ''}`;
+            }
+            
+            // Select all items
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            
+            selectAllBtn.addEventListener('click', function() {
+                const selectableItems = document.querySelectorAll('.item.selectable');
+                
+                selectableItems.forEach(item => {
+                    item.classList.add('selected');
+                });
+                
+                updateSelectionCounter();
+            });
+            
+            // QR Code generation
+            const generateQrBtn = document.getElementById('generateQrBtn');
+            const cloudStorageLink = document.getElementById('cloudStorageLink');
+            const qrCode = document.getElementById('qrCode');
+            
+            generateQrBtn.addEventListener('click', function() {
+                const link = cloudStorageLink.value.trim();
+                
+                if (!link) {
+                    showToast('Veuillez entrer un lien');
+                    return;
+                }
+                
+                // This is a placeholder. In a real implementation, we'd generate an actual QR code.
+                // For this prototype, we'll just update the container and show some fake QR code.
+                qrCode.innerHTML = `
+                    <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="24" height="24" fill="white"/>
+                        <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="black"/>
+                        <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="black"/>
+                        <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="black"/>
+                        <path d="M21 19H19V21H21V19Z" fill="black"/>
+                        <path d="M15 13H13V15H15V13Z" fill="black"/>
+                        <path d="M17 15H15V17H17V15Z" fill="black"/>
+                        <path d="M15 17H13V19H15V17Z" fill="black"/>
+                        <path d="M17 19H15V21H17V19Z" fill="black"/>
+                        <path d="M19 17H17V19H19V17Z" fill="black"/>
+                        <path d="M19 13H17V15H19V13Z" fill="black"/>
+                        <path d="M21 15H19V17H21V15Z" fill="black"/>
+                    </svg>
+                `;
+                
+                showToast('QR Code généré pour ' + link);
+            });
+            
+            // Export/Import JSON buttons
+            const exportJsonBtn = document.getElementById('exportJsonBtn');
+            const importJsonBtn = document.getElementById('importJsonBtn');
+            
+            exportJsonBtn.addEventListener('click', function() {
+                const date = new Date();
+                const formattedDate = date.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const fileName = `backup_${formattedDate}.json`;
+                
+                // This is a placeholder. In a real implementation, we'd generate actual JSON data.
+                const jsonData = {
+                    exportDate: date.toISOString(),
+                    items: [] // This would contain the actual items
+                };
+                
+                // Create a download link
+                const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showToast(`Fichier ${fileName} exporté`);
+            });
+            
+            importJsonBtn.addEventListener('click', function() {
+                showToast('Fonctionnalité d\'import JSON à implémenter');
+            });
+            
+            // Toast utility function
+            function showToast(message, duration = 3000) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                
+                const toastContainer = document.getElementById('toastContainer');
+                toastContainer.appendChild(toast);
+                
+                // Trigger a reflow for the animation to work
+                toast.offsetHeight;
+                
+                toast.classList.add('active');
+                
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                    setTimeout(() => {
+                        toastContainer.removeChild(toast);
+                    }, 300);
+                }, duration);
+            }
+
+            // Simulate some items in the explorer
+            function populateExplorer() {
+                const itemsContainer = document.querySelector('.items-grid');
+                // Clear the empty state
+                itemsContainer.innerHTML = '';
+                
+                // Sample data
+                const sampleItems = [
+                    { name: 'Mes Documents', type: 'folder', isEmpty: false },
+                    { name: 'Liens Web', type: 'folder', isEmpty: false },
+                    { name: 'Notes', type: 'folder', isEmpty: false },
+                    { name: 'Projets', type: 'folder', isEmpty: false },
+                    { name: 'Google', type: 'link', url: 'https://google.com' },
+                    { name: 'Définition du projet JL', type: 'text', content: 'Le projet JL est une solution de gestion de liens...' },
+                    { name: 'GitHub', type: 'link', url: 'https://github.com' },
+                    { name: 'Documentation', type: 'folder', isEmpty: true }
+                ];
+                
+                sampleItems.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'item';
+                    
+                    let iconSvg = '';
+                    
+                    switch (item.type) {
+                        case 'folder':
+                            iconSvg = item.isEmpty ? 
+                                '<path d="M20 6H12L10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6ZM20 18H4V8H20V18Z" fill="currentColor"/>' : 
+                                '<path d="M10 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>';
+                            break;
+                        case 'link':
+                            iconSvg = '<path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>';
+                            break;
+                        case 'text':
+                            iconSvg = '<path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="currentColor"/>';
+                            break;
+                    }
+                    
+                    // Create structure for grid view
+                    itemElement.innerHTML = `
+                        <div class="item-select-checkbox"></div>
+                        <div class="item-icon">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                ${iconSvg}
+                            </svg>
+                        </div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-options">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                    `;
+                    
+                    // Event listeners
+                    itemElement.querySelector('.item-options').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        showItemDetails(item);
+                    });
+                    
+                    itemElement.addEventListener('click', function() {
+                        if (itemElement.classList.contains('selectable')) {
+                            itemElement.classList.toggle('selected');
+                            updateSelectionCounter();
+                        } else if (item.type === 'folder') {
+                            navigateToFolder(item.name);
+                        } else if (item.type === 'link') {
+                            showToast(`Ouverture du lien: ${item.url}`);
+                        } else if (item.type === 'text') {
+                            showToast(`Affichage du texte: ${item.name}`);
+                        }
+                    });
+                    
+                    itemsContainer.appendChild(itemElement);
+                });
+            }
+            
+            // Call this on startup to simulate data
+            populateExplorer();
+            
+            // Item details
+            function showItemDetails(item) {
+                const itemDetailsSheet = document.getElementById('itemDetailsSheet');
+                const itemDetailsOverlay = document.getElementById('itemDetailsOverlay');
+                const detailsItemName = document.getElementById('detailsItemName');
+                const detailsItemType = document.getElementById('detailsItemType');
+                const detailsItemPath = document.getElementById('detailsItemPath');
+                const detailsItemCreated = document.getElementById('detailsItemCreated');
+                const detailsItemModified = document.getElementById('detailsItemModified');
+                
+                detailsItemName.textContent = item.name;
+                
+                switch (item.type) {
+                    case 'folder':
+                        detailsItemType.textContent = 'Dossier';
+                        break;
+                    case 'link':
+                        detailsItemType.textContent = 'Lien';
+                        break;
+                    case 'text':
+                        detailsItemType.textContent = 'Texte';
+                        break;
+                }
+                
+                detailsItemPath.textContent = '/';
+                detailsItemCreated.textContent = '01/11/2025, 10:30';
+                detailsItemModified.textContent = '05/11/2025, 15:45';
+                
+                itemDetailsSheet.classList.add('active');
+                itemDetailsOverlay.classList.add('active');
+            }
+            
+            // Navigation to folder
+            function navigateToFolder(folderName) {
+                // Update path navigation
+                const pathNavigation = document.querySelector('.path-navigation');
+                pathNavigation.innerHTML = `
+                    <div class="path-segment" data-path="root">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="path-separator">/</div>
+                    <div class="path-segment" data-path="${folderName}">${folderName}</div>
+                `;
+                
+                // Show a toast
+                showToast(`Navigation vers ${folderName}`);
+                
+                // In a real app, we would load the folder contents here
+            }
+            
+            // Make the bottom sheets draggable
+            const sheets = document.querySelectorAll('.bottom-sheet');
+            
+            sheets.forEach(sheet => {
+                const handle = sheet.querySelector('.sheet-drag-handle');
+                let startY, startHeight, startTranslateY;
+                
+                handle.addEventListener('touchstart', function(e) {
+                    startY = e.touches[0].clientY;
+                    startHeight = sheet.offsetHeight;
+                    startTranslateY = getTranslateY(sheet);
+                    
+                    document.addEventListener('touchmove', onTouchMove);
+                    document.addEventListener('touchend', onTouchEnd);
+                });
+                
+                handle.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    startY = e.clientY;
+                    startHeight = sheet.offsetHeight;
+                    startTranslateY = getTranslateY(sheet);
+                    
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+                
+                function onTouchMove(e) {
+                    const deltaY = e.touches[0].clientY - startY;
+                    const newHeight = startHeight - deltaY;
+                    
+                    if (newHeight > 100) {
+                        sheet.style.height = newHeight + 'px';
+                    }
+                }
+                
+                function onMouseMove(e) {
+                    const deltaY = e.clientY - startY;
+                    const newHeight = startHeight - deltaY;
+                    
+                    if (newHeight > 100) {
+                        sheet.style.height = newHeight + 'px';
+                    }
+                }
+                
+                function onTouchEnd() {
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                    
+                    if (getTranslateY(sheet) > window.innerHeight / 2) {
+                        closeSheet(sheet);
+                    }
+                }
+                
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    
+                    if (getTranslateY(sheet) > window.innerHeight / 2) {
+                        closeSheet(sheet);
+                    }
+                }
+                
+                function getTranslateY(element) {
+                    const style = window.getComputedStyle(element);
+                    const matrix = new WebKitCSSMatrix(style.transform);
+                    return matrix.m42;
+                }
+                
+                function closeSheet(sheet) {
+                    sheet.classList.remove('active');
+                    const overlay = document.getElementById(sheet.id.replace('Sheet', 'Overlay'));
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

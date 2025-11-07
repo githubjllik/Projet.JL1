@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL - Gestionnaire de liens et fichiers</title>
+    <style>
+        :root {
+            /* Système de couleurs dynamique (Material You) */
+            --primary: #7B61FF;
+            --primary-dark: #5A46CC;
+            --secondary: #41B8D5;
+            --background: #121212;
+            --surface: #1E1E1E;
+            --surface-variant: #2A2A2A;
+            --on-primary: #FFFFFF;
+            --on-background: #E1E1E1;
+            --on-surface: #CCCCCC;
+            --on-surface-dim: #999999;
+            --error: #CF6679;
+            --success: #03DAC5;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-pill: 9999px;
+            --shadow-sm: 0 2px 6px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            
+            /* Espacement */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Z-index */
+            --z-bottomsheet: 900;
+            --z-sidebar: 950;
+            --z-dialog: 1000;
+            --z-appbar: 100;
+            --z-tooltip: 1200;
+        }
+
+        [data-theme="light"] {
+            --primary: #6200EE;
+            --primary-dark: #3700B3;
+            --secondary: #03DAC6;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --surface-variant: #EEEEEE;
+            --on-primary: #FFFFFF;
+            --on-background: #121212;
+            --on-surface: #333333;
+            --on-surface-dim: #666666;
+            --error: #B00020;
+            --success: #00C853;
+        }
+
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-background);
+            font-size: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            transition: background-color var(--transition-normal), color var(--transition-normal);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .glass {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Neumorphism */
+        .neumorphic {
+            background: var(--surface);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3),
+                         -5px -5px 10px rgba(70, 70, 70, 0.1);
+            border-radius: var(--radius-md);
+        }
+
+        [data-theme="light"] .neumorphic {
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05),
+                         -5px -5px 10px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Layout */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+            width: 100%;
+        }
+
+        /* App bar */
+        .app-bar {
+            position: sticky;
+            top: 0;
+            background-color: var(--surface);
+            padding: var(--space-md) 0;
+            z-index: var(--z-appbar);
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .app-bar.elevated {
+            box-shadow: var(--shadow-md);
+        }
+
+        .app-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .app-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        /* Content area */
+        .main-content {
+            flex: 1;
+            padding: var(--space-lg) 0;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            padding: var(--space-sm) 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: var(--z-appbar);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-sm);
+            color: var(--on-surface-dim);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+            font-size: 0.75rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--on-primary);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(123, 97, 255, 0.1);
+        }
+
+        .btn-icon {
+            padding: var(--space-sm);
+            border-radius: 50%;
+            color: var(--on-surface);
+            background-color: transparent;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--surface-variant);
+        }
+
+        .btn-pill {
+            border-radius: var(--radius-pill);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--on-surface);
+        }
+
+        /* Item list styles */
+        .item-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .list-view .item-list {
+            grid-template-columns: 1fr;
+        }
+
+        .compact-view .item-list {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: var(--space-sm);
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            background-color: var(--surface-variant);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            user-select: none;
+        }
+
+        .item:hover {
+            background-color: rgba(123, 97, 255, 0.1);
+        }
+
+        .item.selected {
+            background-color: rgba(123, 97, 255, 0.2);
+            border: 2px solid var(--primary);
+        }
+
+        .item-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--on-surface);
+        }
+
+        .folder-icon {
+            color: var(--primary);
+        }
+
+        .link-icon {
+            color: var(--secondary);
+        }
+
+        .text-icon {
+            color: var(--on-surface-dim);
+        }
+
+        .item-name {
+            font-size: 0.875rem;
+            text-align: center;
+            color: var(--on-surface);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .item-actions {
+            position: absolute;
+            top: var(--space-xs);
+            right: var(--space-xs);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .item:hover .item-actions {
+            opacity: 1;
+        }
+
+        /* Bottom sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            z-index: var(--z-bottomsheet);
+            transform: translateY(100%);
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .bottom-sheet.visible {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 5px;
+            background-color: var(--on-surface-dim);
+            border-radius: 3px;
+            margin: var(--space-sm) auto;
+        }
+
+        .sheet-content {
+            padding: var(--space-md) var(--space-md) calc(var(--space-xl) * 2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Side panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 300px;
+            background-color: var(--surface);
+            z-index: var(--z-sidebar);
+            transform: translateX(100%);
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .side-panel.visible {
+            transform: translateX(0);
+        }
+
+        .panel-header {
+            padding: var(--space-lg) var(--space-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-content {
+            padding: var(--space-md);
+            height: calc(100% - 80px);
+            overflow-y: auto;
+        }
+
+        /* Dialog */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: var(--z-dialog);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-normal);
+        }
+
+        .dialog-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dialog {
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform var(--transition-normal);
+        }
+
+        .dialog-overlay.visible .dialog {
+            transform: scale(1);
+        }
+
+        .dialog-header {
+            padding: var(--space-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dialog-content {
+            padding: var(--space-md);
+        }
+
+        .dialog-actions {
+            padding: var(--space-md);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: var(--space-md);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--on-surface-dim);
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            background-color: var(--surface-variant);
+            border: none;
+            border-bottom: 2px solid var(--on-surface-dim);
+            border-radius: var(--radius-sm);
+            color: var(--on-surface);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-bottom-color: var(--primary);
+            background-color: rgba(123, 97, 255, 0.05);
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: var(--space-md);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            z-index: 10;
+            transition: all var(--transition-fast);
+        }
+
+        .fab:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .fab-mini {
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Accordion */
+        .accordion {
+            margin-bottom: var(--space-md);
+        }
+
+        .accordion-header {
+            padding: var(--space-md);
+            background-color: var(--surface-variant);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color var(--transition-fast);
+        }
+
+        .accordion-header:hover {
+            background-color: rgba(123, 97, 255, 0.1);
+        }
+
+        .accordion-content {
+            padding: 0 var(--space-md);
+            max-height: 0;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .accordion.open .accordion-content {
+            max-height: 1000px;
+            padding: var(--space-md);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            padding: var(--space-md) 0;
+            flex-wrap: wrap;
+            gap: var(--space-xs);
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            color: var(--on-surface-dim);
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 var(--space-xs);
+            color: var(--on-surface-dim);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: var(--space-md);
+        }
+
+        .tab {
+            padding: var(--space-md);
+            cursor: pointer;
+            color: var(--on-surface-dim);
+            transition: all var(--transition-fast);
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* QR Code */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-lg);
+            background-color: var(--surface-variant);
+            border-radius: var(--radius-lg);
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface-variant);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--on-surface-dim);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+
+            .sidebar {
+                display: flex;
+                width: 240px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                background-color: var(--surface);
+                z-index: var(--z-sidebar);
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 240px;
+            }
+
+            .item-list {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .item-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        /* Animation & Transitions */
+        .fade-enter {
+            opacity: 0;
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+            transition: opacity var(--transition-normal);
+        }
+
+        .fade-exit {
+            opacity: 1;
+        }
+
+        .fade-exit-active {
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        /* Parallax effect */
+        .parallax-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            transform: translateY(0);
+            will-change: transform;
+        }
+
+        .parallax-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: var(--space-xl);
+            color: var(--on-primary);
+        }
+
+        /* Page sections - Home, Explorer, Project */
+        #home, #explorer, #project {
+            display: none;
+        }
+
+        #home.active, #explorer.active, #project.active {
+            display: block;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        
+        p {
+            margin-bottom: var(--space-md);
+        }
+        
+        .text-primary {
+            color: var(--primary);
+        }
+        
+        .text-secondary {
+            color: var(--secondary);
+        }
+        
+        .text-success {
+            color: var(--success);
+        }
+        
+        .text-error {
+            color: var(--error);
+        }
+        
+        .text-dim {
+            color: var(--on-surface-dim);
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        /* Selection mode */
+        .selection-toolbar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: var(--space-md);
+            background-color: var(--surface);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: var(--z-bottomsheet);
+        }
+        
+        .selection-mode .selection-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .selection-mode .bottom-nav {
+            display: none;
+        }
+        
+        .selection-mode .item {
+            cursor: pointer;
+        }
+        
+        .selection-count {
+            font-weight: 500;
+        }
+        
+        .selection-actions {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        /* File tree visualization */
+        .file-tree {
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: var(--space-md);
+            background-color: var(--surface-variant);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+        }
+        
+        .file-tree-item {
+            display: flex;
+        }
+        
+        .file-tree-item::before {
+            content: "";
+            margin-right: var(--space-sm);
+        }
+        
+        .file-tree-folder::before {
+            content: "📁";
+        }
+        
+        .file-tree-file::before {
+            content: "📄";
+        }
+        
+        .file-tree-json::before {
+            content: "🔢";
+        }
+        
+        .file-tree-html::before {
+            content: "🌐";
+        }
+        
+        .file-tree-css::before {
+            content: "🎨";
+        }
+        
+        .file-tree-js::before {
+            content: "⚙️";
+        }
+        
+        .file-tree-indent {
+            margin-left: var(--space-lg);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="app">
+        <!-- App Bar -->
+        <header class="app-bar">
+            <div class="container app-bar-content">
+                <div class="app-title">Projet.JL</div>
+                <div class="app-actions">
+                    <button class="btn btn-icon toggle-search" aria-label="Rechercher">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                    <button class="btn btn-icon toggle-theme" aria-label="Changer de thème">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content container">
+            <!-- Home Section -->
+            <section id="home" class="active">
+                <div class="parallax-container">
+                    <div class="parallax-bg"></div>
+                    <div class="parallax-content">
+                        <h1>Bienvenue sur Projet.JL</h1>
+                        <p>Votre gestionnaire de liens et textes avec capacité de stockage infinie</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>À propos du projet JL</h2>
+                    <p>Le projet JL est un système de stockage conçu par Jean-Louis LIKULA pour résoudre un problème spécifique : conserver et organiser efficacement des liens web et des notes textuelles.</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <span>Mes motivations</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="accordion-content">
+                            <ul>
+                                <li>L'infinité du monde web représente l'infini dans notre monde, avec un nombre incalculable de ressources à découvrir</li>
+                                <li>Un simple lien web peut ouvrir la porte à des merveilles insoupçonnées</li>
+                                <li>Trop souvent, ces trésors sont perdus faute d'un système adapté pour les conserver</li>
+                                <li>Les gestionnaires de fichiers classiques sont limités et ne sont pas conçus pour ce type de contenu</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <span>La solution Projet.JL</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="accordion-content">
+                            <p>J'ai créé ce système pour qu'il soit :</p>
+                            <ul>
+                                <li>Toujours accessible (n'importe où, n'importe quand)</li>
+                                <li>Non limité et non dépendant d'un système spécifique (base de données, stockage, connexion internet)</li>
+                                <li>À l'image de l'infinité du web lui-même</li>
+                                <li>Accessible hors-ligne et portable</li>
+                                <li>Entièrement sous le contrôle de l'utilisateur</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Comment utiliser Projet.JL</h2>
+                    <p>Voici les étapes essentielles pour tirer le meilleur parti de cette application :</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <span>Premiers pas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="accordion-content">
+                            <ol>
+                                <li>Commencez par créer des dossiers pour organiser vos contenus</li>
+                                <li>Ajoutez vos premiers liens et textes</li>
+                                <li>Naviguez dans l'interface pour vous familiariser avec les fonctionnalités</li>
+                                <li>N'oubliez pas d'exporter régulièrement vos données</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <span>Exportation et importation</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Pour préserver vos données, vous devez exporter régulièrement un fichier JSON qui contient toutes vos informations :</p>
+                            <div class="file-tree">
+                                <div class="file-tree-item file-tree-folder">votre_projet</div>
+                                <div class="file-tree-indent">
+                                    <div class="file-tree-item file-tree-folder">data</div>
+                                    <div class="file-tree-indent">
+                                        <div class="file-tree-item file-tree-json">backup_2025-11-05_15-30-45.json</div>
+                                    </div>
+                                    <div class="file-tree-item file-tree-html">index.html</div>
+                                    <div class="file-tree-item file-tree-css">styles.css</div>
+                                    <div class="file-tree-item file-tree-js">scripts.js</div>
+                                </div>
+                            </div>
+                            <p>Le format de nom par défaut inclut la date et l'heure d'exportation pour faciliter la gestion de multiples sauvegardes.</p>
+                            <p>Pour restaurer vos données, utilisez simplement la fonction d'importation et sélectionnez votre fichier JSON.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Explorer Section -->
+            <section id="explorer">
+                <div class="breadcrumb">
+                    <div class="breadcrumb-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </div>
+                    <span class="breadcrumb-separator">/</span>
+                    <div class="breadcrumb-item">Documents</div>
+                    <span class="breadcrumb-separator">/</span>
+                    <div class="breadcrumb-item active">Projet Web</div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active">Tous</div>
+                    <div class="tab">Dossiers</div>
+                    <div class="tab">Liens</div>
+                    <div class="tab">Textes</div>
+                </div>
+
+                <div class="item-list">
+                    <div class="item">
+                        <div class="item-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="item-name">Ressources UI</div>
+                        <div class="item-actions">
+                            <button class="btn btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <div class="item-icon folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="item-name">Tutoriels</div>
+                        <div class="item-actions">
+                            <button class="btn btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <div class="item-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                        </div>
+                        <div class="item-name">MDN Web Docs</div>
+                        <div class="item-actions">
+                            <button class="btn btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <div class="item-icon link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                        </div>
+                        <div class="item-name">CSS Tricks</div>
+                        <div class="item-actions">
+                            <button class="btn btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <div class="item-icon text-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="item-name">Notes réunion</div>
+                        <div class="item-actions">
+                            <button class="btn btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Project Section -->
+            <section id="project">
+                <div class="card neumorphic">
+                    <h2>Espace Projet</h2>
+                    <p>Pour préserver votre projet et y accéder de n'importe où, stockez-le en ligne et générez un QR code pour un accès rapide.</p>
+                    
+                    <div class="alert" style="background-color: rgba(123, 97, 255, 0.1); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md); border-left: 4px solid var(--primary);">
+                        <h3>Conseil important</h3>
+                        <p>Uploadez toujours votre projet en ligne dans un espace cloud et rendez-le public pour y avoir accès même en cas d'oubli des identifiants. Mettez à jour régulièrement vos fichiers JSON pour conserver vos données.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Lien vers votre projet en ligne</label>
+                        <input type="text" class="form-control" placeholder="https://github.com/username/projet-jl">
+                    </div>
+                    
+                    <button class="btn btn-primary btn-pill">Générer un QR code</button>
+                    
+                    <div class="qr-container">
+                        <h3>Votre carte d'accès au projet</h3>
+                        <div class="qr-code">
+                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                                <!-- Simulated QR code -->
+                                <rect x="0" y="0" width="200" height="200" fill="#FFFFFF" />
+                                <rect x="20" y="20" width="40" height="40" fill="#000000" />
+                                <rect x="140" y="20" width="40" height="40" fill="#000000" />
+                                <rect x="20" y="140" width="40" height="40" fill="#000000" />
+                                <rect x="70" y="70" width="60" height="60" fill="#000000" />
+                                <!-- Plus patterns would be here in a real QR code -->
+                            </svg>
+                        </div>
+                        <p>Ce QR code est votre clé d'accès permanent à votre projet. Conservez-le dans un endroit sûr.</p>
+                    </div>
+                    
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <span>Plateformes recommandées</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="accordion-content">
+                            <h3>GitHub</h3>
+                            <p>Parfait pour les projets web avec contrôle de version intégré et accès via GitHub Pages.</p>
+                            
+                            <h3>Plateformes IPFS</h3>
+                            <p>Le système de fichiers interplanétaire (IPFS) offre un stockage décentralisé, parfait pour l'accessibilité perpétuelle :</p>
+                            <ul>
+                                <li>ipfs.io - Le portail principal pour IPFS</li>
+                                <li>web3.storage - Stockage gratuit avec accès via IPFS</li>
+                                <li>nft.storage - Optimisé pour la persistance à long terme</li>
+                                <li>Pinata Cloud - Service d'épinglage IPFS professionnel</li>
+                            </ul>
+                            
+                            <h3>Google Drive</h3>
+                            <p>Simple d'utilisation et largement accessible.</p>
+                            
+                            <h3>MEGA</h3>
+                            <p>Offre un chiffrement de bout en bout et un espace de stockage généreux.</p>
+                            
+                            <h3>MediaFire</h3>
+                            <p>Facile à utiliser avec des options de partage flexibles.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a class="nav-item active" data-target="home">
+                <div class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item" data-target="explorer">
+                <div class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <span>Explorateur</span>
+            </a>
+            <a class="nav-item" data-target="project">
+                <div class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <span>Projet</span>
+            </a>
+        </nav>
+
+        <!-- FAB -->
+        <button class="fab" id="add-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+
+        <!-- Bottom Sheet -->
+        <div class="bottom-sheet" id="add-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-content">
+                <h3>Ajouter un élément</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md); margin-top: var(--space-lg);">
+                    <div class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-lg); gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>Dossier</span>
+                    </div>
+                    <div class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-lg); gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        <span>Lien</span>
+                    </div>
+                    <div class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-lg); gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>Texte</span>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); margin: var(--space-lg) 0;"></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                    <div class="btn btn-outline" style="display: flex; align-items: center; justify-content: center; gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Importer JSON</span>
+                    </div>
+                    <div class="btn btn-outline" style="display: flex; align-items: center; justify-content: center; gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Exporter JSON</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog - Create Folder -->
+        <div class="dialog-overlay" id="folder-dialog">
+            <div class="dialog">
+                <div class="dialog-header">
+                    <h3>Créer un dossier</h3>
+                    <button class="btn btn-icon close-dialog">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="dialog-content">
+                    <div class="form-group">
+                        <label class="form-label">Nom du dossier</label>
+                        <input type="text" class="form-control" placeholder="Nouveau dossier">
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button class="btn btn-outline close-dialog">Annuler</button>
+                    <button class="btn btn-primary">Créer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog - Add Link -->
+        <div class="dialog-overlay" id="link-dialog">
+            <div class="dialog">
+                <div class="dialog-header">
+                    <h3>Ajouter un lien</h3>
+                    <button class="btn btn-icon close-dialog">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="dialog-content">
+                    <div class="form-group">
+                        <label class="form-label">Titre</label>
+                        <input type="text" class="form-control" placeholder="Mon site web">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">URL</label>
+                        <input type="url" class="form-control" placeholder="https://exemple.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (optionnel)</label>
+                        <textarea class="form-control" rows="3" placeholder="Une brève description..."></textarea>
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button class="btn btn-outline close-dialog">Annuler</button>
+                    <button class="btn btn-primary">Ajouter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog - Add Text -->
+        <div class="dialog-overlay" id="text-dialog">
+            <div class="dialog">
+                <div class="dialog-header">
+                    <h3>Ajouter un texte</h3>
+                    <button class="btn btn-icon close-dialog">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="dialog-content">
+                    <div class="form-group">
+                        <label class="form-label">Titre</label>
+                        <input type="text" class="form-control" placeholder="Notes importantes">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contenu</label>
+                        <textarea class="form-control" rows="10" placeholder="Votre texte ici..."></textarea>
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button class="btn btn-outline close-dialog">Annuler</button>
+                    <button class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Side panel - Item options -->
+        <div class="side-panel" id="item-options">
+            <div class="panel-header">
+                <h3>Options</h3>
+                <button class="btn btn-icon close-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="panel-content">
+                <div class="form-group">
+                    <label class="form-label">Nom complet</label>
+                    <input type="text" class="form-control" value="Ressources UI">
+                </div>
+                
+                <div class="btn btn-outline" style="width: 100%; margin-bottom: var(--space-md); display: flex; align-items: center; justify-content: center; gap: var(--space-sm);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Ouvrir</span>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Détails</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: var(--space-sm) var(--space-md);">
+                            <span class="text-dim">Type:</span>
+                            <span>Dossier</span>
+                            
+                            <span class="text-dim">Chemin:</span>
+                            <span>/Documents/Projet Web/Ressources UI</span>
+                            
+                            <span class="text-dim">Créé le:</span>
+                            <span>05/11/2025 à 10:23</span>
+                            
+                            <span class="text-dim">Modifié le:</span>
+                            <span>05/11/2025 à 15:47</span>
+                            
+                            <span class="text-dim">Contenu:</span>
+                            <span>5 éléments</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: var(--space-lg);">
+                    <div class="btn btn-outline" style="width: 100%; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copier</span>
+                    </div>
+                    
+                    <div class="btn btn-outline" style="width: 100%; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 3 21 3 21 8"></polyline>
+                            <line x1="4" y1="20" x2="21" y2="3"></line>
+                            <path d="M21 13v8H3v-8"></path>
+                        </svg>
+                        <span>Déplacer</span>
+                    </div>
+                    
+                    <div class="btn btn-outline" style="width: 100%; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); color: var(--error);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                        <span>Masquer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selection toolbar -->
+        <div class="selection-toolbar">
+            <div class="selection-count">3/5 éléments sélectionnés</div>
+            <div class="selection-actions">
+                <button class="btn btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 3 21 3 21 8"></polyline>
+                        <line x1="4" y1="20" x2="21" y2="3"></line>
+                        <path d="M21 13v8H3v-8"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('section');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = item.getAttribute('data-target');
+                    
+                    // Update active nav item
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Show active section
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === target) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Theme toggle
+            const themeToggle = document.querySelector('.toggle-theme');
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+            });
+            
+            // Bottom sheet
+            const addButton = document.getElementById('add-button');
+            const addSheet = document.getElementById('add-sheet');
+            
+            addButton.addEventListener('click', () => {
+                addSheet.classList.add('visible');
+            });
+            
+            addSheet.querySelector('.sheet-handle').addEventListener('click', () => {
+                addSheet.classList.remove('visible');
+            });
+            
+            // Make bottom sheet draggable
+            let startY, startTransform;
+            const handle = addSheet.querySelector('.sheet-handle');
+            
+            handle.addEventListener('touchstart', e => {
+                startY = e.touches[0].clientY;
+                startTransform = addSheet.getBoundingClientRect().top;
+                document.body.style.overflow = 'hidden'; // Prevent scrolling while dragging
+            });
+            
+            handle.addEventListener('touchmove', e => {
+                const deltaY = e.touches[0].clientY - startY;
+                if (deltaY > 0) { // Only allow dragging down
+                    addSheet.style.transform = `translateY(${deltaY}px)`;
+                }
+            });
+            
+            handle.addEventListener('touchend', e => {
+                document.body.style.overflow = ''; // Restore scrolling
+                const deltaY = e.changedTouches[0].clientY - startY;
+                
+                if (deltaY > 100) { // If dragged down far enough, close the sheet
+                    addSheet.classList.remove('visible');
+                    setTimeout(() => {
+                        addSheet.style.transform = '';
+                    }, 300);
+                } else {
+                    addSheet.style.transform = ''; // Snap back to open position
+                }
+            });
+            
+            // Dialogs
+            const closeDialogButtons = document.querySelectorAll('.close-dialog');
+            const dialogs = document.querySelectorAll('.dialog-overlay');
+            
+            closeDialogButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const dialog = button.closest('.dialog-overlay');
+                    dialog.classList.remove('visible');
+                });
+            });
+            
+            // Item actions - show side panel
+            const itemOptions = document.querySelectorAll('.item-actions .btn');
+            const itemPanel = document.getElementById('item-options');
+            const closePanel = document.querySelector('.close-panel');
+            
+            itemOptions.forEach(option => {
+                option.addEventListener('click', e => {
+                    e.stopPropagation(); // Prevent triggering item click
+                    itemPanel.classList.add('visible');
+                });
+            });
+            
+            closePanel.addEventListener('click', () => {
+                itemPanel.classList.remove('visible');
+            });
+            
+            // Accordion functionality
+            const accordions = document.querySelectorAll('.accordion');
+            
+            accordions.forEach(accordion => {
+                const header = accordion.querySelector('.accordion-header');
+                
+                header.addEventListener('click', () => {
+                    accordion.classList.toggle('open');
+                });
+            });
+            
+            // Selection mode
+            const selectModeButton = document.createElement('button');
+            selectModeButton.className = 'btn btn-icon';
+            selectModeButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+            `;
+            
+            document.querySelector('.app-actions').prepend(selectModeButton);
+            
+            selectModeButton.addEventListener('click', () => {
+                document.body.classList.toggle('selection-mode');
+            });
+            
+            // Item selection
+            const items = document.querySelectorAll('.item');
+            
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (document.body.classList.contains('selection-mode')) {
+                        item.classList.toggle('selected');
+                        updateSelectionCount();
+                    }
+                });
+            });
+            
+            function updateSelectionCount() {
+                const selectedItems = document.querySelectorAll('.item.selected');
+                const totalItems = document.querySelectorAll('.item');
+                const selectionCount = document.querySelector('.selection-count');
+                
+                selectionCount.textContent = `${selectedItems.length}/${totalItems.length} éléments sélectionnés`;
+            }
+            
+            // Parallax scrolling effect
+            const parallaxBg = document.querySelector('.parallax-bg');
+            
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+                const parallaxContainer = document.querySelector('.parallax-container');
+                const containerPosition = parallaxContainer.getBoundingClientRect();
+                
+                if (containerPosition.bottom > 0 && containerPosition.top < window.innerHeight) {
+                    const scrollPercentage = 1 - (containerPosition.top / window.innerHeight);
+                    parallaxBg.style.transform = `translateY(-${scrollPercentage * 30}px)`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

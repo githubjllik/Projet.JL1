@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL - Stockage Cloud Infini</title>
+    <style>
+        :root {
+            --primary: #6d5dfc;
+            --primary-light: #8abdff;
+            --primary-dark: #5b0eeb;
+            --white: #FFFFFF;
+            --text-light: #E0E0E0;
+            --text: #B8B8B8;
+            --text-dark: #848484;
+            --surface: #121212;
+            --surface-1: #1E1E1E;
+            --surface-2: #222222;
+            --surface-3: #242424;
+            --surface-4: #272727;
+            --elevation-1: 0px 2px 4px rgba(0, 0, 0, 0.2);
+            --elevation-2: 0px 4px 8px rgba(0, 0, 0, 0.4);
+            --radius-small: 8px;
+            --radius-medium: 12px;
+            --radius-large: 16px;
+            --radius-pill: 9999px;
+            --transition-regular: all 0.3s ease;
+            --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --primary: #6d5dfc;
+            --primary-light: #8abdff;
+            --primary-dark: #5b0eeb;
+            --white: #FFFFFF;
+            --text-light: #2C2C2C;
+            --text: #444444;
+            --text-dark: #555555;
+            --surface: #F5F5F5;
+            --surface-1: #FFFFFF;
+            --surface-2: #F0F0F0;
+            --surface-3: #E8E8E8;
+            --surface-4: #DEDEDE;
+            --elevation-1: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            --elevation-2: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: var(--font-main);
+            background-color: var(--surface);
+            color: var(--text);
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism & Neumorphism Styles */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .neumorphic {
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3),
+                        -5px -5px 15px rgba(255, 255, 255, 0.05);
+            background: var(--surface-2);
+            border-radius: var(--radius-medium);
+        }
+
+        /* App Bar Styles */
+        .app-bar {
+            height: 60px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            background: var(--surface-1);
+            position: relative;
+            z-index: 10;
+            box-shadow: var(--elevation-1);
+            transition: var(--transition-regular);
+        }
+
+        .app-bar.expanded {
+            height: 120px;
+        }
+
+        .app-bar__title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-left: 8px;
+            flex-grow: 1;
+        }
+
+        .app-bar__subtitle {
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .app-bar.expanded .app-bar__subtitle {
+            display: block;
+        }
+
+        .app-bar__actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: var(--surface-2);
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--surface-4);
+            border-radius: var(--radius-pill);
+        }
+
+        .content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            height: 56px;
+            background: var(--surface-1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-nav__item {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            color: var(--text-dark);
+            transition: var(--transition-regular);
+            cursor: pointer;
+        }
+
+        .bottom-nav__item.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav__item-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .bottom-nav__item-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-regular);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn--icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn--text {
+            background: transparent;
+            color: var(--primary);
+            padding: 8px;
+        }
+
+        .btn--text:hover {
+            background: rgba(109, 93, 252, 0.1);
+        }
+
+        .btn--fab {
+            position: fixed;
+            right: 24px;
+            bottom: 80px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: var(--elevation-2);
+            z-index: 9;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--surface-2);
+            border-radius: var(--radius-medium);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--elevation-1);
+            transition: var(--transition-regular);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--elevation-2);
+        }
+
+        .card__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .card__content {
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        /* File Explorer */
+        .explorer {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .explorer__path {
+            background: var(--surface-2);
+            border-radius: var(--radius-medium);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .explorer__path-separator {
+            margin: 0 4px;
+            color: var(--text-dark);
+        }
+
+        .explorer__path-item {
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition-regular);
+        }
+
+        .explorer__path-item:hover {
+            color: var(--primary);
+        }
+
+        .explorer__path-item.active {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .explorer__items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            transition: var(--transition-regular);
+        }
+
+        .explorer__items.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            border-radius: var(--radius-medium);
+            background: var(--surface-3);
+            cursor: pointer;
+            transition: var(--transition-regular);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item:hover {
+            background: var(--surface-4);
+        }
+
+        .item.selected {
+            outline: 2px solid var(--primary);
+        }
+
+        .item__icon {
+            font-size: 36px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .item__icon.folder {
+            color: #FFC107;
+        }
+
+        .item__icon.link {
+            color: #4CAF50;
+        }
+
+        .item__icon.text {
+            color: #2196F3;
+        }
+
+        .item__name {
+            font-size: 0.8rem;
+            color: var(--text);
+            text-align: center;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .explorer__items.list-view .item {
+            flex-direction: row;
+            padding: 12px 16px;
+            align-items: center;
+        }
+
+        .explorer__items.list-view .item__icon {
+            margin-right: 12px;
+            margin-bottom: 0;
+            font-size: 24px;
+        }
+
+        .explorer__items.list-view .item__name {
+            text-align: left;
+            flex-grow: 1;
+        }
+
+        .item__actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            opacity: 0;
+            transition: var(--transition-regular);
+        }
+
+        .item:hover .item__actions {
+            opacity: 1;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface-1);
+            border-radius: 16px 16px 0 0;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+        }
+
+        .bottom-sheet.visible {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet__handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 4px;
+            margin: 12px auto;
+        }
+
+        .bottom-sheet__content {
+            padding: 0 16px 24px;
+            max-height: calc(80vh - 32px);
+            overflow-y: auto;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 80%;
+            max-width: 320px;
+            background: var(--surface-1);
+            z-index: 100;
+            box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.visible {
+            transform: translateX(0);
+        }
+
+        .side-panel__header {
+            padding: 16px;
+            border-bottom: 1px solid var(--surface-3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .side-panel__title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .side-panel__content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: var(--radius-medium);
+            background: var(--surface-2);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition-regular);
+            border-bottom: 2px solid transparent;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: var(--surface-3);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-dark);
+        }
+
+        /* Tabbed Interface */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--surface-3);
+            margin-bottom: 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            color: var(--text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-regular);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        /* Accordion */
+        .accordion {
+            border-radius: var(--radius-medium);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .accordion__item {
+            border-bottom: 1px solid var(--surface-3);
+        }
+
+        .accordion__item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion__header {
+            padding: 16px;
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition-regular);
+        }
+
+        .accordion__header:hover {
+            background: var(--surface-3);
+        }
+
+        .accordion__title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .accordion__icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion__item.active .accordion__icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion__content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .accordion__item.active .accordion__content {
+            padding: 16px;
+            max-height: 500px;
+        }
+
+        /* QR Code */
+        .qr-code {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            background: var(--white);
+            border-radius: var(--radius-medium);
+            margin: 24px auto;
+            max-width: 240px;
+        }
+
+        .qr-code__image {
+            width: 200px;
+            height: 200px;
+            background: #000;
+            margin-bottom: 16px;
+        }
+
+        .qr-code__text {
+            font-size: 0.9rem;
+            color: #000;
+            text-align: center;
+        }
+
+        /* Selection Mode */
+        .selection-bar {
+            position: fixed;
+            bottom: 56px;
+            left: 0;
+            width: 100%;
+            background: var(--surface-1);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translateY(100%);
+            transition: var(--transition-regular);
+            z-index: 9;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .selection-bar.visible {
+            transform: translateY(0);
+        }
+
+        .selection-bar__count {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .selection-bar__actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface-3);
+            color: var(--text-light);
+            padding: 12px 24px;
+            border-radius: var(--radius-pill);
+            box-shadow: var(--elevation-2);
+            z-index: 1000;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface-1);
+            padding: 12px 16px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(-100%);
+            transition: var(--transition-regular);
+            box-shadow: var(--elevation-1);
+        }
+
+        .search-bar.visible {
+            transform: translateY(0);
+        }
+
+        .search-bar__input {
+            flex: 1;
+            background: var(--surface-2);
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 8px 16px;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .search-bar__input:focus {
+            outline: none;
+            background: var(--surface-3);
+        }
+
+        /* Tree View */
+        .tree-view {
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 24px;
+        }
+
+        .tree-item {
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .tree-item::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background: var(--surface-3);
+        }
+
+        .tree-item:last-child::before {
+            height: 12px;
+        }
+
+        .tree-item-header {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            cursor: pointer;
+        }
+
+        .tree-item-toggle {
+            margin-right: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .tree-item.expanded > .tree-item-header .tree-item-toggle {
+            transform: rotate(90deg);
+        }
+
+        .tree-item-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .tree-item.expanded > .tree-item-content {
+            max-height: 500px;
+        }
+
+        .tree-item-icon {
+            margin-right: 8px;
+            color: var(--text-dark);
+        }
+
+        /* Loader */
+        .loader {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--surface-3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Dark/Light Mode Toggle */
+        .mode-toggle {
+            width: 48px;
+            height: 24px;
+            background: var(--surface-3);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition-regular);
+        }
+
+        .mode-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--white);
+            transition: var(--transition-regular);
+        }
+
+        [data-theme="light"] .mode-toggle::after {
+            left: 26px;
+        }
+
+        /* Transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Page Transition */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 56px);
+            overflow-y: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            transform: translateX(100%);
+            display: none;
+            padding: 16px;
+            padding-top: 60px; /* Account for app bar */
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+            display: block;
+        }
+
+        .page.prev {
+            transform: translateX(-100%);
+        }
+
+        /* Editor styles */
+        .text-editor {
+            width: 100%;
+            height: 300px;
+            background: var(--surface-2);
+            border-radius: var(--radius-medium);
+            padding: 16px;
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.5;
+            border: none;
+            resize: vertical;
+        }
+
+        .text-editor:focus {
+            outline: none;
+            background: var(--surface-3);
+        }
+
+        /* Parallax elements */
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.03;
+        }
+
+        .parallax-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .parallax-circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+        }
+
+        .parallax-circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: -200px;
+            right: -200px;
+            background: var(--primary-light);
+        }
+
+        /* Media queries for responsive design */
+        @media (min-width: 768px) {
+            .explorer__items {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+
+            .bottom-sheet {
+                max-width: 600px;
+                left: 50%;
+                margin-left: -300px;
+            }
+
+            .app-bar__subtitle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .bottom-nav {
+                display: none;
+            }
+
+            body {
+                display: grid;
+                grid-template-columns: 240px 1fr;
+                grid-template-rows: 60px 1fr;
+                grid-template-areas:
+                    "app-bar app-bar"
+                    "sidebar content";
+            }
+
+            .app-bar {
+                grid-area: app-bar;
+            }
+
+            .content {
+                grid-area: content;
+                height: 100%;
+                padding: 24px;
+            }
+
+            .side-nav {
+                grid-area: sidebar;
+                background: var(--surface-1);
+                display: flex;
+                flex-direction: column;
+                padding: 24px 0;
+            }
+
+            .side-nav__item {
+                display: flex;
+                align-items: center;
+                padding: 12px 24px;
+                color: var(--text);
+                transition: var(--transition-regular);
+                cursor: pointer;
+            }
+
+            .side-nav__item.active {
+                background: var(--surface-2);
+                color: var(--primary);
+                border-left: 3px solid var(--primary);
+            }
+
+            .side-nav__item-icon {
+                margin-right: 16px;
+                font-size: 20px;
+            }
+
+            .page {
+                height: 100%;
+                padding-top: 24px;
+            }
+
+            .btn--fab {
+                bottom: 24px;
+            }
+
+            .selection-bar {
+                bottom: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-bg">
+        <div class="parallax-circle"></div>
+        <div class="parallax-circle"></div>
+    </div>
+
+    <!-- App Bar -->
+    <div class="app-bar">
+        <div class="app-bar__title">
+            Projet.JL
+            <div class="app-bar__subtitle">Stockage Cloud Infini</div>
+        </div>
+        <div class="app-bar__actions">
+            <button class="btn btn--icon btn--text mode-toggle-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <button class="btn btn--icon btn--text search-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <div class="side-nav">
+        <div class="side-nav__item active" data-page="home">
+            <svg class="side-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Accueil
+        </div>
+        <div class="side-nav__item" data-page="explorer">
+            <svg class="side-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Explorateur
+        </div>
+        <div class="side-nav__item" data-page="project">
+            <svg class="side-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Espace Projet
+        </div>
+    </div>
+
+    <!-- Page Container -->
+    <div class="content">
+        <!-- Home Page -->
+        <div class="page active fade-in" id="home">
+            <div class="card neumorphic">
+                <div class="card__title">Capacité de Stockage: ♾️ Infini</div>
+                <div class="card__content">
+                    Bienvenue dans une application sans limite, conçue pour stocker et organiser vos liens web et textes importants.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__title">Le Projet JL - Qu'est-ce que c'est?</div>
+                <div class="card__content">
+                    <p>Le projet JL est une solution innovante conçue par Jean-Louis LIKULA pour résoudre un problème simple mais crucial : la conservation et l'organisation des liens web.</p>
+                    <br>
+                    <div class="accordion">
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">Mes motivations</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <ul style="padding-left: 20px;">
+                                    <li>L'infinité du monde web - le web représente l'infini dans ce monde, avec un nombre incalculable de ressources à découvrir.</li>
+                                    <li>Tout passe par un chemin : un lien web.</li>
+                                    <li>J'ai découvert tant de merveilles grâce à de simples liens, qui ne sont qu'une forme de texte court mais qui ouvrent des portes immenses.</li>
+                                    <li>J'ai aussi perdu tant de ces merveilles parce que je n'avais pas d'endroit pour les stocker efficacement.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">Le problème</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <p>Les gestionnaires de fichiers classiques :</p>
+                                <ul style="padding-left: 20px;">
+                                    <li>Servent principalement à stocker des vidéos, images, et d'autres types de fichiers accessibles nativement</li>
+                                    <li>Sont limités en termes de capacité de stockage</li>
+                                    <li>Sont souvent restreints à un appareil ou à un support de stockage spécifique</li>
+                                    <li>Ne sont pas optimisés pour organiser et accéder rapidement à des liens web</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">La solution</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <p>J'ai créé un système qui est :</p>
+                                <ul style="padding-left: 20px;">
+                                    <li>Toujours accessible (n'importe où, n'importe quand)</li>
+                                    <li>Non limité, indépendant d'un système spécifique (base de données, stockage, connexion internet)</li>
+                                    <li>En harmonie avec l'infinité du web</li>
+                                    <li>Accessible hors-ligne</li>
+                                    <li>Portable et adaptable</li>
+                                </ul>
+                                <p>Une solution où l'utilisateur est maître de tout, modelant son propre monde numérique sans limites.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__title">Comment utiliser ce projet?</div>
+                <div class="card__content">
+                    <p>Voici comment tirer le meilleur parti de cette application :</p>
+                    <br>
+                    
+                    <div class="accordion">
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">Premiers pas</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <ol style="padding-left: 20px;">
+                                    <li>Commencez par ajouter votre premier lien ou créer votre premier dossier</li>
+                                    <li>Organisez vos liens selon vos préférences</li>
+                                    <li>Ajoutez du texte pour contextualiser vos liens ou noter des informations importantes</li>
+                                    <li><strong>Important :</strong> N'oubliez pas d'exporter régulièrement un fichier JSON pour sauvegarder votre travail</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">Structure du projet</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <div class="tree-view">
+                                    <div class="tree-item expanded">
+                                        <div class="tree-item-header">
+                                            <svg class="tree-item-toggle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="9 18 15 12 9 6"></polyline>
+                                            </svg>
+                                            <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                            </svg>
+                                            votre projet
+                                        </div>
+                                        <div class="tree-item-content">
+                                            <div class="tree-item expanded">
+                                                <div class="tree-item-header">
+                                                    <svg class="tree-item-toggle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                                    </svg>
+                                                    <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                                    </svg>
+                                                    data
+                                                </div>
+                                                <div class="tree-item-content">
+                                                    <div class="tree-item">
+                                                        <div class="tree-item-header">
+                                                            <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                                <path d="M4 13h4"></path>
+                                                                <path d="M8 13v4"></path>
+                                                                <path d="M4 17h8"></path>
+                                                            </svg>
+                                                            backup_2025-11-01_10-30-45.json
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="tree-item-header">
+                                                    <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                                                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                                                    </svg>
+                                                    index.html
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="tree-item-header">
+                                                    <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                                                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                                                    </svg>
+                                                    styles.css
+                                                </div>
+                                            </div>
+                                            <div class="tree-item">
+                                                <div class="tree-item-header">
+                                                    <svg class="tree-item-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                                                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                                                    </svg>
+                                                    scripts.js
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion__item">
+                            <div class="accordion__header">
+                                <div class="accordion__title">Sauvegarde et restauration</div>
+                                <svg class="accordion__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="accordion__content">
+                                <p>Le format des sauvegardes suit la convention :</p>
+                                <code>backup_YYYY-MM-DD_HH-MM-SS.json</code>
+                                <p>Par exemple : <code>backup_2025-11-01_10-30-45.json</code></p>
+                                <p>Pour restaurer vos données :</p>
+                                <ol style="padding-left: 20px;">
+                                    <li>Allez dans l'explorateur</li>
+                                    <li>Cliquez sur l'icône d'importation</li>
+                                    <li>Sélectionnez votre fichier de sauvegarde JSON</li>
+                                </ol>
+                                <p>Vos données seront immédiatement restaurées dans l'application.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explorer Page -->
+        <div class="page" id="explorer">
+            <div class="explorer">
+                <div class="explorer__path">
+                    <div class="explorer__path-item active">Accueil</div>
+                </div>
+                
+                <div class="explorer__items">
+                    <!-- Les éléments seront générés dynamiquement ici -->
+                    <div class="item">
+                        <div class="item__icon folder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="item__name">Mes Favoris</div>
+                        <div class="item__actions">
+                            <button class="btn btn--icon btn--text item-menu-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="item">
+                        <div class="item__icon folder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="item__name">Ressources Dev</div>
+                        <div class="item__actions">
+                            <button class="btn btn--icon btn--text item-menu-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="item">
+                        <div class="item__icon link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                        </div>
+                        <div class="item__name">GitHub</div>
+                        <div class="item__actions">
+                            <button class="btn btn--icon btn--text item-menu-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="item">
+                        <div class="item__icon text">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="item__name">Notes importantes</div>
+                        <div class="item__actions">
+                            <button class="btn btn--icon btn--text item-menu-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAB Button -->
+            <button class="btn btn--fab add-item-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+
+            <!-- Selection Bar -->
+            <div class="selection-bar">
+                <div class="selection-bar__count">3 éléments sélectionnés</div>
+                <div class="selection-bar__actions">
+                    <button class="btn btn--text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copier
+                    </button>
+                    <button class="btn btn--text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="17 11 12 6 7 11"></polyline>
+                            <polyline points="17 18 12 13 7 18"></polyline>
+                        </svg>
+                        Déplacer
+                    </button>
+                    <button class="btn btn--text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line x1="4.22" y1="19.78" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        Masquer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Page -->
+        <div class="page" id="project">
+            <div class="card">
+                <div class="card__title">Préservation du Projet</div>
+                <div class="card__content">
+                    <p>Pour assurer la préservation et l'accessibilité permanente de votre projet, suivez ces conseils :</p>
+                    <ul style="padding-left: 20px; margin: 16px 0;">
+                        <li>Uploadez régulièrement votre projet en ligne dans le cloud</li>
+                        <li>Privilégiez les dépôts publics pour un accès permanent</li>
+                        <li>Effectuez des mises à jour régulières, surtout pour les fichiers JSON qui contiennent vos données</li>
+                        <li>Conservez une copie de secours dans plusieurs emplacements</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__title">Plateformes recommandées</div>
+                <div class="tabs">
+                    <div class="tab active" data-platform="github">GitHub</div>
+                    <div class="tab" data-platform="ipfs">IPFS</div>
+                    <div class="tab" data-platform="gdrive">Google Drive</div>
+                    <div class="tab" data-platform="mega">Mega</div>
+                    <div class="tab" data-platform="mediafire">Mediafire</div>
+                </div>
+
+                <div class="platform-content active" id="github-content">
+                    <p>GitHub est idéal pour les projets de code. Vous bénéficiez d'un contrôle de version, d'une collaboration facile et d'une disponibilité exceptionnelle. Parfait pour les développeurs.</p>
+                </div>
+
+                <div class="platform-content" id="ipfs-content">
+                    <p>Les plateformes IPFS (InterPlanetary File System) offrent un stockage décentralisé persistant. Vos données sont distribuées sur plusieurs nœuds, ce qui les rend résistantes à la censure et aux pannes.</p>
+                    <p>Options recommandées : ipfs.io, web3.storage, nft.storage, pinata cloud.</p>
+                </div>
+
+                <div class="platform-content" id="gdrive-content">
+                    <p>Google Drive est facile à utiliser et offre 15GB d'espace gratuit. Il est accessible depuis n'importe quel appareil et propose des fonctionnalités de partage simples.</p>
+                </div>
+
+                <div class="platform-content" id="mega-content">
+                    <p>Mega offre 20GB gratuits avec un chiffrement de bout en bout. C'est une bonne option pour la confidentialité et le stockage sécurisé.</p>
+                </div>
+
+                <div class="platform-content" id="mediafire-content">
+                    <p>MediaFire est simple et rapide avec 10GB gratuits. Il est idéal pour le partage de fichiers et l'accessibilité multi-plateformes.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__title">Générer un QR code d'accès</div>
+                <div class="card__content">
+                    <p>Entrez l'URL où votre projet est stocké pour générer un QR code d'accès rapide.</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">URL du projet</label>
+                        <input type="text" class="form-input" id="project-url" placeholder="https://github.com/username/projet-jl">
+                    </div>
+                    
+                    <button class="btn" id="generate-qr">Générer QR Code</button>
+                    
+                    <div class="qr-code" id="qr-code-container" style="display: none;">
+                        <div class="qr-code__image" id="qr-code-image"></div>
+                        <div class="qr-code__text">Scannez ce code pour accéder à votre projet</div>
+                    </div>
+                    
+                    <p style="margin-top: 16px;">
+                        Ce QR code est votre clé d'accès universelle. Même si vous oubliez vos identifiants ou perdez l'accès à votre compte, ce code vous permettra de retrouver votre projet. Conservez-le précieusement, comme une carte d'identité numérique pour votre projet.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <div class="bottom-nav">
+        <div class="bottom-nav__item active" data-page="home">
+            <svg class="bottom-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span class="bottom-nav__item-label">Accueil</span>
+        </div>
+        <div class="bottom-nav__item" data-page="explorer">
+            <svg class="bottom-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="bottom-nav__item-label">Explorateur</span>
+        </div>
+        <div class="bottom-nav__item" data-page="project">
+            <svg class="bottom-nav__item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span class="bottom-nav__item-label">Projet</span>
+        </div>
+    </div>
+
+    <!-- Bottom Sheets -->
+    <div class="bottom-sheet" id="add-item-sheet">
+        <div class="bottom-sheet__handle"></div>
+        <div class="bottom-sheet__content">
+            <h3 style="margin: 16px 0;">Ajouter un élément</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn" id="create-folder-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        <line x1="12" y1="11" x2="12" y2="17"></line>
+                        <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                    Créer un dossier
+                </button>
+                
+                <button class="btn" id="add-link-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    Ajouter un lien
+                </button>
+                
+                <button class="btn" id="add-text-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Ajouter du texte
+                </button>
+                
+                <div style="border-top: 1px solid var(--surface-3); margin: 8px 0;"></div>
+                
+                <button class="btn" id="import-json-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Importer un fichier JSON
+                </button>
+                
+                <button class="btn" id="export-json-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exporter un fichier JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-sheet" id="item-menu-sheet">
+        <div class="bottom-sheet__handle"></div>
+        <div class="bottom-sheet__content">
+            <h3 style="margin: 16px 0;" id="item-menu-title">Ressources Dev</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn" id="rename-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    Renommer
+                </button>
+                
+                <button class="btn" id="open-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    Ouvrir
+                </button>
+                
+                <button class="btn" id="details-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Détails
+                </button>
+                
+                <div style="border-top: 1px solid var(--surface-3); margin: 8px 0;"></div>
+                
+                <button class="btn" id="copy-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copier
+                </button>
+                
+                <button class="btn" id="move-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    Déplacer
+                </button>
+                
+                <button class="btn" id="hide-item-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <line x1="4.22" y1="19.78" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    Masquer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panels -->
+    <div class="side-panel" id="create-folder-panel">
+        <div class="side-panel__header">
+            <div class="side-panel__title">Créer un dossier</div>
+            <button class="btn btn--icon btn--text close-panel-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="side-panel__content">
+            <div class="form-group">
+                <label class="form-label">Nom du dossier</label>
+                <input type="text" class="form-input" id="folder-name" placeholder="Mon nouveau dossier">
+            </div>
+            
+            <button class="btn" id="create-folder-submit">Créer</button>
+        </div>
+    </div>
+    
+    <div class="side-panel" id="add-link-panel">
+        <div class="side-panel__header">
+            <div class="side-panel__title">Ajouter un lien</div>
+            <button class="btn btn--icon btn--text close-panel-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="side-panel__content">
+            <div class="form-group">
+                <label class="form-label">Nom du lien</label>
+                <input type="text" class="form-input" id="link-name" placeholder="Mon site préféré">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">URL</label>
+                <input type="url" class="form-input" id="link-url" placeholder="https://example.com">
+            </div>
+            
+            <button class="btn" id="add-link-submit">Ajouter</button>
+        </div>
+    </div>
+    
+    <div class="side-panel" id="add-text-panel">
+        <div class="side-panel__header">
+            <div class="side-panel__title">Ajouter du texte</div>
+            <button class="btn btn--icon btn--text close-panel-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="side-panel__content">
+            <div class="form-group">
+                <label class="form-label">Titre</label>
+                <input type="text" class="form-input" id="text-title" placeholder="Ma note">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Contenu</label>
+                <textarea class="text-editor" id="text-content" placeholder="Écrivez votre texte ici..."></textarea>
+            </div>
+            
+            <button class="btn" id="add-text-submit">Enregistrer</button>
+        </div>
+    </div>
+    
+    <div class="side-panel" id="item-details-panel">
+        <div class="side-panel__header">
+            <div class="side-panel__title">Détails</div>
+            <button class="btn btn--icon btn--text close-panel-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="side-panel__content">
+            <div class="form-group">
+                <label class="form-label">Nom</label>
+                <div style="padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-medium);">Ressources Dev</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <div style="padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-medium);">Dossier</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Chemin</label>
+                <div style="padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-medium);">/Accueil/Ressources Dev</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Créé le</label>
+                <div style="padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-medium);">2025-11-01 à 10:30</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Modifié le</label>
+                <div style="padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-medium);">2025-11-06 à 15:45</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <button class="btn btn--icon btn--text close-search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <input type="text" class="search-bar__input" placeholder="Rechercher...">
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Élément créé avec succès!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const body = document.body;
+            const bottomNav = document.querySelector('.bottom-nav');
+            const sideNav = document.querySelector('.side-nav');
+            const pages = document.querySelectorAll('.page');
+            const bottomNavItems = document.querySelectorAll('.bottom-nav__item');
+            const sideNavItems = document.querySelectorAll('.side-nav__item');
+            const modeToggleBtn = document.querySelector('.mode-toggle-btn');
+            const searchBtn = document.querySelector('.search-btn');
+            const searchBar = document.querySelector('.search-bar');
+            const closeSearchBtn = document.querySelector('.close-search-btn');
+            const bottomSheets = document.querySelectorAll('.bottom-sheet');
+            const addItemBtn = document.querySelector('.add-item-btn');
+            const addItemSheet = document.getElementById('add-item-sheet');
+            const itemMenuBtns = document.querySelectorAll('.item-menu-btn');
+            const itemMenuSheet = document.getElementById('item-menu-sheet');
+            const sidePanels = document.querySelectorAll('.side-panel');
+            const closePanelBtns = document.querySelectorAll('.close-panel-btn');
+            const createFolderBtn = document.getElementById('create-folder-btn');
+            const createFolderPanel = document.getElementById('create-folder-panel');
+            const addLinkBtn = document.getElementById('add-link-btn');
+            const addLinkPanel = document.getElementById('add-link-panel');
+            const addTextBtn = document.getElementById('add-text-btn');
+            const addTextPanel = document.getElementById('add-text-panel');
+            const detailsItemBtn = document.getElementById('details-item-btn');
+            const itemDetailsPanel = document.getElementById('item-details-panel');
+            const accordionHeaders = document.querySelectorAll('.accordion__header');
+            const tabs = document.querySelectorAll('.tab');
+            const platformContents = document.querySelectorAll('.platform-content');
+            const treeItemHeaders = document.querySelectorAll('.tree-item-header');
+            const toast = document.getElementById('toast');
+            const generateQrBtn = document.getElementById('generate-qr');
+            const qrCodeContainer = document.getElementById('qr-code-container');
+            const qrCodeImage = document.getElementById('qr-code-image');
+
+            // Current theme state
+            let isDarkMode = true;
+
+            // Navigation
+            function navigateTo(pageId) {
+                pages.forEach(page => {
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                        page.classList.remove('prev');
+                    } else {
+                        if (page.classList.contains('active')) {
+                            page.classList.add('prev');
+                        }
+                        page.classList.remove('active');
+                    }
+                });
+
+                // Update navigation
+                bottomNavItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === pageId);
+                });
+
+                sideNavItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === pageId);
+                });
+
+                // Close any open sheets or panels
+                closeAllBottomSheets();
+                closeAllSidePanels();
+            }
+
+            // Attach navigation event listeners
+            bottomNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navigateTo(item.dataset.page);
+                });
+            });
+
+            sideNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navigateTo(item.dataset.page);
+                });
+            });
+
+            // Theme Toggle
+            modeToggleBtn.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            });
+
+            // Search Bar
+            searchBtn.addEventListener('click', () => {
+                searchBar.classList.add('visible');
+                searchBar.querySelector('input').focus();
+            });
+
+            closeSearchBtn.addEventListener('click', () => {
+                searchBar.classList.remove('visible');
+            });
+
+            // Bottom Sheets
+            function closeAllBottomSheets() {
+                bottomSheets.forEach(sheet => {
+                    sheet.classList.remove('visible');
+                });
+            }
+
+            // Add a touch-based drag to bottom sheets
+            bottomSheets.forEach(sheet => {
+                const handle = sheet.querySelector('.bottom-sheet__handle');
+                let startY, startTransform, currentTransform;
+
+                handle.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    const transform = window.getComputedStyle(sheet).getPropertyValue('transform');
+                    const matrix = new DOMMatrixReadOnly(transform);
+                    startTransform = matrix.m42;
+                    sheet.style.transition = 'none';
+                });
+
+                handle.addEventListener('touchmove', (e) => {
+                    const deltaY = e.touches[0].clientY - startY;
+                    currentTransform = Math.min(0, startTransform + deltaY);
+                    sheet.style.transform = `translateY(${currentTransform}px)`;
+                });
+
+                handle.addEventListener('touchend', () => {
+                    sheet.style.transition = 'transform 0.3s ease-out';
+                    if (currentTransform < -50) {
+                        sheet.style.transform = 'translateY(0)';
+                    } else {
+                        sheet.style.transform = 'translateY(100%)';
+                        sheet.classList.remove('visible');
+                    }
+                });
+            });
+
+            // Add Item Button
+            addItemBtn.addEventListener('click', () => {
+                addItemSheet.classList.add('visible');
+            });
+
+            // Item Menu Buttons
+            itemMenuBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const itemName = btn.closest('.item').querySelector('.item__name').textContent;
+                    document.getElementById('item-menu-title').textContent = itemName;
+                    itemMenuSheet.classList.add('visible');
+                });
+            });
+
+            // Side Panels
+            function closeAllSidePanels() {
+                sidePanels.forEach(panel => {
+                    panel.classList.remove('visible');
+                });
+            }
+
+            closePanelBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.side-panel').classList.remove('visible');
+                });
+            });
+
+            // Create Folder
+            createFolderBtn.addEventListener('click', () => {
+                closeAllBottomSheets();
+                createFolderPanel.classList.add('visible');
+            });
+
+            // Add Link
+            addLinkBtn.addEventListener('click', () => {
+                closeAllBottomSheets();
+                addLinkPanel.classList.add('visible');
+            });
+
+            // Add Text
+            addTextBtn.addEventListener('click', () => {
+                closeAllBottomSheets();
+                addTextPanel.classList.add('visible');
+            });
+
+            // Item Details
+            detailsItemBtn.addEventListener('click', () => {
+                closeAllBottomSheets();
+                itemDetailsPanel.classList.add('visible');
+            });
+
+            // Accordion
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const item = header.parentElement;
+                    item.classList.toggle('active');
+                });
+            });
+
+            // Tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    platformContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    const platform = tab.dataset.platform;
+                    document.getElementById(`${platform}-content`).classList.add('active');
+                });
+            });
+
+            // Tree View
+            treeItemHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const item = header.parentElement;
+                    item.classList.toggle('expanded');
+                });
+            });
+
+            // Toast Notification
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('visible');
+                setTimeout(() => {
+                    toast.classList.remove('visible');
+                }, 3000);
+            }
+
+            // Form Submissions
+            document.getElementById('create-folder-submit').addEventListener('click', () => {
+                const folderName = document.getElementById('folder-name').value;
+                if (folderName.trim()) {
+                    closeAllSidePanels();
+                    showToast(`Dossier "${folderName}" créé avec succès!`);
+                    document.getElementById('folder-name').value = '';
+                }
+            });
+
+            document.getElementById('add-link-submit').addEventListener('click', () => {
+                const linkName = document.getElementById('link-name').value;
+                const linkUrl = document.getElementById('link-url').value;
+                if (linkName.trim() && linkUrl.trim()) {
+                    closeAllSidePanels();
+                    showToast(`Lien "${linkName}" ajouté avec succès!`);
+                    document.getElementById('link-name').value = '';
+                    document.getElementById('link-url').value = '';
+                }
+            });
+
+            document.getElementById('add-text-submit').addEventListener('click', () => {
+                const textTitle = document.getElementById('text-title').value;
+                const textContent = document.getElementById('text-content').value;
+                if (textTitle.trim() && textContent.trim()) {
+                    closeAllSidePanels();
+                    showToast(`Texte "${textTitle}" enregistré avec succès!`);
+                    document.getElementById('text-title').value = '';
+                    document.getElementById('text-content').value = '';
+                }
+            });
+
+            // QR Code Generator
+            generateQrBtn.addEventListener('click', () => {
+                const url = document.getElementById('project-url').value;
+                if (url.trim()) {
+                    // Simple QR Code rendering simulation
+                    qrCodeImage.style.background = '#FFFFFF';
+                    
+                    // Create a simple QR code representation
+                    qrCodeImage.innerHTML = '';
+                    const size = 8; // 8x8 grid for simplicity
+                    const qrGrid = document.createElement('div');
+                    qrGrid.style.display = 'grid';
+                    qrGrid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+                    qrGrid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+                    qrGrid.style.width = '100%';
+                    qrGrid.style.height = '100%';
+                    
+                    // Generate a deterministic pattern based on the URL
+                    let seed = 0;
+                    for (let i = 0; i < url.length; i++) {
+                        seed += url.charCodeAt(i);
+                    }
+                    
+                    // Create the QR code cells
+                    for (let i = 0; i < size * size; i++) {
+                        const cell = document.createElement('div');
+                        // Position markers (corners)
+                        if (
+                            (i < size * 3 && i % size < 3) || // Top-left
+                            (i < size * 3 && i % size >= size - 3) || // Top-right
+                            (i >= size * (size - 3) && i % size < 3) // Bottom-left
+                        ) {
+                            cell.style.background = '#000';
+                        } else {
+                            // Random cells based on URL seed
+                            cell.style.background = ((i * seed) % 3 === 0) ? '#000' : '#fff';
+                        }
+                        qrGrid.appendChild(cell);
+                    }
+                    
+                    qrCodeImage.appendChild(qrGrid);
+                    qrCodeContainer.style.display = 'flex';
+                    
+                    showToast('QR Code généré avec succès!');
+                }
+            });
+
+            // Export/Import JSON
+            document.getElementById('export-json-btn').addEventListener('click', () => {
+                closeAllBottomSheets();
+                
+                // Create a dummy data object
+                const data = {
+                    version: "1.0.0",
+                    timestamp: new Date().toISOString(),
+                    items: [
+                        {
+                            id: "folder1",
+                            type: "folder",
+                            name: "Mes Favoris",
+                            path: "/Accueil",
+                            created: "2025-11-01T10:30:45Z",
+                            modified: "2025-11-01T10:30:45Z"
+                        },
+                        {
+                            id: "folder2",
+                            type: "folder",
+                            name: "Ressources Dev",
+                            path: "/Accueil",
+                            created: "2025-11-01T10:35:12Z",
+                            modified: "2025-11-06T15:45:23Z"
+                        },
+                        {
+                            id: "link1",
+                            type: "link",
+                            name: "GitHub",
+                            url: "https://github.com",
+                            path: "/Accueil",
+                            created: "2025-11-01T11:20:33Z",
+                            modified: "2025-11-01T11:20:33Z"
+                        },
+                        {
+                            id: "text1",
+                            type: "text",
+                            name: "Notes importantes",
+                            content: "Ne pas oublier de sauvegarder régulièrement!",
+                            path: "/Accueil",
+                            created: "2025-11-02T09:15:47Z",
+                            modified: "2025-11-05T14:22:10Z"
+                        }
+                    ]
+                };
+                
+                // Create and download the JSON file
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const date = new Date();
+                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}-${String(date.getSeconds()).padStart(2, '0')}`;
+                const exportFileDefaultName = `backup_${formattedDate}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showToast('Fichier JSON exporté avec succès!');
+            });
+            
+            document.getElementById('import-json-btn').addEventListener('click', () => {
+                closeAllBottomSheets();
+                
+                // Create a file input element
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        showToast('Fichier JSON importé avec succès!');
+                    }
+                }
+                
+                input.click();
+            });
+
+            // Parallax effect
+            const parallaxBg = document.querySelector('.parallax-bg');
+            document.addEventListener('mousemove', (e) => {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                parallaxBg.style.transform = `translate(${x * -20}px, ${y * -20}px)`;
+            });
+
+            // Initialize the application
+            navigateTo('home');
+        });
+    </script>
+</body>
+</html>
