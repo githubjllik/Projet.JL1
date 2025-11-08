@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet.JL - Stockage de liens infini</title>
+    <style>
+        /* Variables et thèmes */
+        :root {
+            /* Dark mode (défaut) */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: rgba(255, 255, 255, 0.87);
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --accent-color: #bb86fc;
+            --accent-variant: #3700b3;
+            --surface: #121212;
+            --error: #cf6679;
+            --success: #03dac6;
+            
+            /* Styles d'éléments d'interface */
+            --card-radius: 16px;
+            --button-radius: 24px;
+            --input-radius: 12px;
+            --transition-speed: 0.3s;
+            --shadow-elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --shadow-elevation-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+            --glass-bg: rgba(30, 30, 30, 0.7);
+            --neumorph-shadow: 5px 5px 10px #0f0f0f, -5px -5px 10px #1f1f1f;
+            
+            /* Layout */
+            --app-bar-height: 56px;
+            --bottom-nav-height: 64px;
+            --side-panel-width: 280px;
+            --bottom-sheet-max-height: 90vh;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #e5e5e5;
+            --bg-tertiary: #d5d5d5;
+            --text-primary: rgba(0, 0, 0, 0.87);
+            --text-secondary: rgba(0, 0, 0, 0.6);
+            --accent-color: #6200ee;
+            --accent-variant: #3700b3;
+            --surface: #ffffff;
+            --error: #b00020;
+            --success: #018786;
+            --glass-bg: rgba(230, 230, 230, 0.7);
+            --neumorph-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+        }
+
+        /* Reset & Fondamentaux */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--accent-variant);
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color var(--transition-speed);
+        }
+
+        a:hover {
+            color: var(--accent-variant);
+        }
+
+        /* Layout de base */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-top: var(--app-bar-height);
+            margin-bottom: var(--bottom-nav-height);
+            transition: transform var(--transition-speed), margin var(--transition-speed);
+        }
+
+        /* Conteneurs */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        /* App bars */
+        .app-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--app-bar-height);
+            background-color: var(--bg-secondary);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: var(--shadow-elevation-1);
+            transition: transform var(--transition-speed), background-color var(--transition-speed);
+        }
+
+        .app-bar.scrolled {
+            backdrop-filter: blur(10px);
+            background-color: var(--glass-bg);
+        }
+
+        .app-bar-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0;
+            flex: 1;
+        }
+
+        .app-bar-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sub-app-bar {
+            position: fixed;
+            top: var(--app-bar-height);
+            left: 0;
+            right: 0;
+            height: var(--app-bar-height);
+            background-color: var(--bg-secondary);
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: var(--shadow-elevation-1);
+            transition: transform var(--transition-speed);
+        }
+
+        /* Navigation du bas */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background-color: var(--bg-secondary);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: var(--text-secondary);
+            transition: color var(--transition-speed);
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+            box-shadow: var(--shadow-elevation-3);
+            z-index: 1000;
+            max-height: var(--bottom-sheet-max-height);
+            transform: translateY(100%);
+            transition: transform var(--transition-speed);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-header {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--bg-tertiary);
+            position: relative;
+        }
+
+        .bottom-sheet-handle {
+            position: absolute;
+            top: 0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: var(--text-secondary);
+        }
+
+        .bottom-sheet-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .bottom-sheet-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--side-panel-width);
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform var(--transition-speed);
+            box-shadow: var(--shadow-elevation-3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            transform: translateX(0);
+        }
+
+        .side-panel-header {
+            height: var(--app-bar-height);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .side-panel-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .side-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* Tab Interface */
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .tabs-header {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background-color: var(--bg-secondary);
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+        }
+
+        .tabs-header::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-item {
+            padding: 1rem 1.5rem;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            position: relative;
+            font-weight: 500;
+        }
+
+        .tab-item.active {
+            color: var(--accent-color);
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tabs-content {
+            background-color: var(--bg-tertiary);
+            border-radius: 0 0 var(--card-radius) var(--card-radius);
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--card-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-elevation-1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elevation-2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--button-radius);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            border: none;
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn:hover {
+            background: var(--accent-variant);
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            background: transparent;
+            color: var(--text-primary);
+            border: none;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-pill {
+            border-radius: 100px;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .btn-flat {
+            background: transparent;
+            color: var(--accent-color);
+        }
+
+        .btn-flat:hover {
+            background: rgba(var(--accent-color-rgb), 0.1);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--input-radius);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            transition: all var(--transition-speed);
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .input-label {
+            position: absolute;
+            left: 1rem;
+            top: 0.75rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: all var(--transition-speed);
+            font-size: 1rem;
+        }
+
+        .input:focus ~ .input-label,
+        .input:not(:placeholder-shown) ~ .input-label {
+            top: -0.5rem;
+            left: 0.5rem;
+            font-size: 0.75rem;
+            background-color: var(--bg-tertiary);
+            padding: 0 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .input-underlined {
+            border: none;
+            border-bottom: 2px solid var(--bg-tertiary);
+            border-radius: 0;
+            padding: 0.75rem 0;
+            background: transparent;
+        }
+
+        .input-underlined:focus {
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* Accordion */
+        .accordion {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background-color: var(--bg-secondary);
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .accordion-icon {
+            transition: transform var(--transition-speed);
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-speed);
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 1000px;
+        }
+
+        .accordion-body {
+            padding: 1rem;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        /* File Explorer Elements */
+        .explorer-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .path-breadcrumb {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            white-space: nowrap;
+        }
+
+        .path-breadcrumb::-webkit-scrollbar {
+            display: none;
+        }
+
+        .path-item {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-secondary);
+        }
+
+        .path-separator {
+            margin: 0 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .path-item.active {
+            color: var(--accent-color);
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .explorer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--card-radius);
+            background-color: var(--bg-tertiary);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            text-align: center;
+            position: relative;
+        }
+
+        .explorer-item:hover {
+            background-color: var(--bg-primary);
+            box-shadow: var(--shadow-elevation-1);
+        }
+
+        .explorer-item.selected {
+            border: 2px solid var(--accent-color);
+        }
+
+        .item-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .item-name {
+            font-size: 0.875rem;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-options {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+        }
+
+        .item-list-view {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: var(--card-radius);
+            background-color: var(--bg-tertiary);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .item-list-view:hover {
+            background-color: var(--bg-primary);
+            box-shadow: var(--shadow-elevation-1);
+        }
+
+        .item-list-view .item-icon {
+            margin-right: 0.75rem;
+            margin-bottom: 0;
+            font-size: 1.5rem;
+        }
+
+        .item-list-view .item-name {
+            flex: 1;
+            text-align: left;
+        }
+
+        /* QR Code */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            padding: 1rem;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-elevation-2);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+        }
+
+        /* Neumorphism */
+        .neumorphic {
+            background: var(--bg-primary);
+            box-shadow: var(--neumorph-shadow);
+            border-radius: var(--card-radius);
+        }
+
+        /* File tree visualization */
+        .file-tree {
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+
+        .file-tree ul {
+            list-style-type: none;
+            padding-left: 1.5rem;
+        }
+
+        .file-tree li {
+            position: relative;
+            padding: 0.25rem 0;
+        }
+
+        .tree-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tree-toggle::before {
+            content: '►';
+            display: inline-block;
+            margin-right: 0.5rem;
+            transition: transform var(--transition-speed);
+        }
+
+        .tree-toggle.open::before {
+            transform: rotate(90deg);
+        }
+
+        .tree-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-speed);
+        }
+
+        .tree-toggle.open + .tree-content {
+            max-height: 1000px;
+        }
+
+        .file-icon {
+            margin-right: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        /* Page transitions */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform var(--transition-speed), opacity var(--transition-speed);
+            overflow-y: auto;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .page.previous {
+            transform: translateX(-100%);
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + 1rem);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: calc(100% - 2rem);
+            max-width: 400px;
+        }
+
+        .toast {
+            padding: 1rem;
+            border-radius: var(--card-radius);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-elevation-2);
+            display: flex;
+            align-items: center;
+            animation: toast-in 0.3s ease-out;
+        }
+
+        .toast.success {
+            background-color: var(--success);
+            color: #000;
+        }
+
+        .toast.error {
+            background-color: var(--error);
+            color: #fff;
+        }
+
+        .toast-icon {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        @keyframes toast-in {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsive adaptations */
+        @media (min-width: 768px) {
+            /* Tablettes */
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            main {
+                margin-bottom: 0;
+            }
+            
+            .bottom-nav {
+                transform: translateY(100%);
+            }
+            
+            .side-panel {
+                width: 320px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            /* Desktop */
+            :root {
+                --app-bar-height: 64px;
+                --side-panel-width: 320px;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            main {
+                margin-left: var(--side-panel-width);
+                padding: 2rem;
+            }
+            
+            .side-panel {
+                transform: translateX(0);
+                left: 0;
+                width: var(--side-panel-width);
+                box-shadow: none;
+                border-right: 1px solid var(--bg-tertiary);
+            }
+            
+            .app-bar {
+                left: var(--side-panel-width);
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+
+            /* Pour basculer en mode plein écran */
+            .side-panel.collapsed {
+                transform: translateX(-100%);
+            }
+            
+            .app-bar.full-width {
+                left: 0;
+            }
+            
+            main.full-width {
+                margin-left: 0;
+            }
+        }
+        
+        /* Animation et transitions */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn var(--transition-speed) ease-in-out;
+        }
+        
+        .slide-in {
+            animation: slideIn var(--transition-speed) ease-in-out;
+        }
+    
+    /* Modifier le comportement du conteneur explorer pour éviter le scroll global */
+.explorer-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: calc(100vh - var(--app-bar-height) - 2rem); /* Hauteur maximale */
+    overflow: hidden; /* Empêche le débordement */
+}
+
+/* Adapter la structure des tabs pour permettre le défilement interne */
+.tabs-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%; /* Utiliser toute la hauteur disponible */
+    max-height: calc(100vh - var(--app-bar-height) - var(--bottom-nav-height) - 4rem); /* Tenir compte du bottom-nav */
+}
+
+/* Modifier tabs-content pour y activer le scroll */
+.tabs-content {
+    background-color: var(--bg-tertiary);
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto; /* Activer le défilement vertical */
+    max-height: 100%; /* Utiliser l'espace disponible */
+}
+
+/* Assurer que la path-breadcrumb reste visible */
+.path-breadcrumb {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+    position: sticky; /* Garder visible lors du défilement */
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-primary);
+}
+
+/* Assurer que la tabs-header reste visible */
+.tabs-header {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background-color: var(--bg-secondary);
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    position: sticky; /* Garder visible lors du défilement */
+    top: 0;
+    z-index: 10;
+}
+
+/* Adapter le comportement sur mobile */
+@media (max-width: 768px) {
+    .tabs-container {
+        max-height: calc(100vh - var(--app-bar-height) - var(--bottom-nav-height) - 3rem); /* Ajuster pour mobile */
+    }
+    
+    .explorer-container {
+        max-height: calc(100vh - var(--app-bar-height) - var(--bottom-nav-height) - 2rem);
+    }
+}
+/* Modifier le comportement de la page explorer */
+#explorer {
+    overflow: hidden; /* Empêcher le défilement de la page */
+    height: 100%; /* Utiliser toute la hauteur */
+    display: flex;
+    flex-direction: column;
+}
+
+#explorer .container {
+    height: 100%;
+    overflow: hidden;
+}
+/* S'assurer que les éléments de la grille s'affichent correctement */
+.items-grid, .items-list {
+    width: 100%;
+}
+
+/* S'assurer que chaque élément est visible en entier */
+.explorer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--card-radius);
+    background-color: var(--bg-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    text-align: center;
+    position: relative;
+    margin-bottom: 1rem; /* Ajouter de l'espace entre les éléments */
+}
+
+    </style>
+</head>
+<body data-theme="dark">
+    <div id="app">
+        <!-- App Bar -->
+        <div class="app-bar">
+            <button class="btn-icon toggle-sidebar-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 18H21V16H3V18ZM3 13H21V11H3V13ZM3 6V8H21V6H3Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <h1 class="app-bar-title">Projet.JL</h1>
+            <div class="app-bar-actions">
+                <button class="btn-icon theme-toggle-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3ZM12 19C8.13 19 5 15.87 5 12C5 8.13 8.13 5 12 5C15.87 5 19 8.13 19 12C19 15.87 15.87 19 12 19Z" fill="currentColor"/>
+                        <path d="M12 7V17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="btn-icon search-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="btn-icon more-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <div class="side-panel-header">
+                <h2 class="side-panel-title">Projet.JL</h2>
+                <button class="btn-icon close-sidebar-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="side-panel-body">
+                <nav class="sidebar-nav">
+                    <a href="#accueil" class="sidebar-nav-item active" data-page="accueil">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                        </svg>
+                        <span>Accueil</span>
+                    </a>
+                    <a href="#explorer" class="sidebar-nav-item" data-page="explorer">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                        </svg>
+                        <span>Explorateur</span>
+                    </a>
+                    <a href="#projet" class="sidebar-nav-item" data-page="projet">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 10H9V17H7V10ZM11 7H13V17H11V7ZM15 13H17V17H15V13Z" fill="currentColor"/>
+                        </svg>
+                        <span>Espace Projet</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main>
+            <div class="page-container">
+                <!-- Page Accueil -->
+                <div class="page active" id="accueil">
+                    <div class="container">
+                        <div class="card glass slide-in">
+                            <h2>Bienvenue sur Projet.JL</h2>
+                            <p>Votre espace de stockage <strong>infini ♾️</strong> pour tous vos liens web.</p>
+                        </div>
+                        
+                        <div class="card neumorphic fade-in">
+                            <h3>Qu'est-ce que le Projet JL?</h3>
+                            <p>Le projet JL est un système conçu par Jean-Louis LIKULA pour résoudre un problème fondamental : la conservation et l'organisation des liens web dans un espace infini et toujours accessible.</p>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>Lire plus</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>L'infinité du monde web est selon moi ce qui représente l'infini dans ce monde. Il y a tellement un nombre incalculable de ressources à découvrir, à offrir, à explorer. Et tout passe par un chemin : <strong>un lien web</strong>.</p>
+                                        
+                                        <p>Vous n'imaginez pas combien de merveilles j'ai pu découvrir grâce à de simples liens, qui sont juste une sorte de textes courts mais qui font d'immenses choses. Vous n'imaginez pas non plus combien de ces merveilles j'ai pu oublier ou perdre, tout ça parce que je n'avais pas un endroit où les stocker.</p>
+                                        
+                                        <p>Les gestionnaires de fichiers classiques ne servent qu'à stocker des vidéos, images, et d'autres types de fichiers accessibles nativement et surtout ils sont toujours limités au nombre de stockage, à l'appareil, ou au support de stockage...</p>
+                                        
+                                        <p>Je devais créer ce système, trouver une solution qui serait à la fois :</p>
+                                        <ul>
+                                            <li>Toujours accessible (n'importe où, n'importe quand)</li>
+                                            <li>Non limitée, non dépendante d'un système (base de données, stockage, connexion internet)</li>
+                                        </ul>
+                                        
+                                        <p>Je devais trouver des solutions qui représentent, qui concordent avec l'infinité du web, quelque chose qui peut devenir le web à sa façon : pas besoin de dépendre d'une base de données, d'un système, d'une plateforme, d'une connexion internet.</p>
+                                        
+                                        <p>Voilà pourquoi j'ai créé ce système de stockage infini, accessible n'importe où, n'importe quand, hors-ligne, qui peut se trouver partout à la fois et où l'utilisateur est le maître de tout, un dieu qui contrôle son propre monde, qui est responsable de tout, qui modélise tout à sa façon, sans limites.</p>
+                                        
+                                        <p>C'est ça l'infini.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Comment utiliser ce projet ?</h3>
+                            <p>Projet.JL est simple à utiliser mais nécessite quelques étapes pour préserver vos données.</p>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>Guide d'utilisation</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <ol>
+                                            <li>Créez votre premier dossier, ajoutez votre premier lien ou texte.</li>
+                                            <li>Avant de quitter l'application, exportez un fichier JSON qui servira de base de données.</li>
+                                            <li>Placez ce fichier dans le dossier <code>data</code> à la racine de votre projet.</li>
+                                        </ol>
+                                        
+                                        <p>L'arborescence de votre projet devrait ressembler à ceci :</p>
+                                        
+                                        <div class="file-tree">
+                                            <ul>
+                                                <li>
+                                                    <span class="tree-toggle">votre-projet</span>
+                                                    <div class="tree-content">
+                                                        <ul>
+                                                            <li>
+                                                                <span class="tree-toggle">data</span>
+                                                                <div class="tree-content">
+                                                                    <ul>
+                                                                        <li>
+                                                                            <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" fill="currentColor"/>
+                                                                                <path d="M14 3V8H19" fill="var(--bg-secondary)"/>
+                                                                            </svg>
+                                                                            backup_2025-11-01_10-30-45.json
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                            <li>
+                                                                <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" fill="currentColor"/>
+                                                                    <path d="M14 3V8H19" fill="var(--bg-secondary)"/>
+                                                                </svg>
+                                                                index.html
+                                                            </li>
+                                                            <li>
+                                                                <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" fill="currentColor"/>
+                                                                    <path d="M14 3V8H19" fill="var(--bg-secondary)"/>
+                                                                </svg>
+                                                                styles.css
+                                                            </li>
+                                                            <li>
+                                                                <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" fill="currentColor"/>
+                                                                    <path d="M14 3V8H19" fill="var(--bg-secondary)"/>
+                                                                </svg>
+                                                                scripts.js
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <p>Le nom du fichier par défaut suit le format : <code>backup_YYYY-MM-DD_HH-MM-SS.json</code></p>
+                                        
+                                        <p>Si vous changez de navigateur ou d'appareil, importez simplement ce fichier JSON pour retrouver toutes vos données.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Explorateur -->
+                <div class="page" id="explorer">
+                    <div class="container">
+                        <div class="explorer-container">
+                            <div class="path-breadcrumb">
+                                <div class="path-item active">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                                    </svg>
+                                    <span>Accueil</span>
+                                </div>
+                            </div>
+                            
+                            <div class="explorer-actions">
+                                <div class="tabs-container">
+                                    <div class="tabs-header">
+                                        <div class="tab-item active" data-tab="all">Tous</div>
+                                        <div class="tab-item" data-tab="folders">Dossiers</div>
+                                        <div class="tab-item" data-tab="links">Liens</div>
+                                        <div class="tab-item" data-tab="texts">Textes</div>
+                                    </div>
+                                    
+                                    <div class="tabs-content">
+                                        <div class="tab-panel active" data-tab-content="all">
+                                            <div class="items-grid">
+                                                <div class="explorer-item" data-type="folder">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Projets Web</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="folder">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Tutoriels</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="link">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">MDN Web Docs</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="link">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">GitHub</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="text">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Notes JavaScript</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="tab-panel" data-tab-content="folders">
+                                            <div class="items-grid">
+                                                <div class="explorer-item" data-type="folder">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Projets Web</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="folder">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Tutoriels</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="tab-panel" data-tab-content="links">
+                                            <div class="items-grid">
+                                                <div class="explorer-item" data-type="link">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">MDN Web Docs</div>
+                                                </div>
+                                                
+                                                <div class="explorer-item" data-type="link">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">GitHub</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="tab-panel" data-tab-content="texts">
+                                            <div class="items-grid">
+                                                <div class="explorer-item" data-type="text">
+                                                    <div class="item-icon">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="item-name">Notes JavaScript</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Projet -->
+                <div class="page" id="projet">
+                    <div class="container">
+                        <div class="card glass">
+                            <h2>Espace Projet</h2>
+                            <p>Préservez votre travail et accédez à votre projet depuis n'importe où.</p>
+                        </div>
+                        
+                        <div class="card neumorphic">
+                            <h3>Recommandations importantes</h3>
+                            <p>Pour préserver votre projet en cas d'oubli de compte ou mot de passe :</p>
+                            <ul>
+                                <li>Uploadez toujours votre projet quelque part en ligne (cloud)</li>
+                                <li>Rendez le projet public pour y avoir accès plus facilement</li>
+                                <li>Mettez régulièrement à jour votre projet, surtout les fichiers JSON</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Plateformes de stockage recommandées</h3>
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>GitHub</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>Idéal pour le code source, avec contrôle de versions. Créez un dépôt public pour un accès facile.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>Plateformes IPFS</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>IPFS (InterPlanetary File System) est un système décentralisé pour stocker et accéder aux fichiers. Les fichiers stockés sur IPFS sont permanents, résistants à la censure et distribués globalement.</p>
+                                        <p>Options recommandées :</p>
+                                        <ul>
+                                            <li>IPFS.io - Service principal</li>
+                                            <li>Web3.Storage - Stockage gratuit jusqu'à 1TB</li>
+                                            <li>NFT.Storage - Optimisé pour les contenus permanents</li>
+                                            <li>Pinata Cloud - Interface simple et plans gratuits</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>Google Drive</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>Solution cloud populaire avec 15GB gratuits. Facile à partager et accessible sur tous les appareils.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>Mega</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>Offre 20GB de stockage gratuit avec chiffrement de bout en bout pour plus de sécurité.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion">
+                                <div class="accordion-header">
+                                    <span>MediaFire</span>
+                                    <div class="accordion-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="accordion-body">
+                                        <p>10GB gratuits avec téléchargement direct et liens de partage simples.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Générer un QR code pour accéder à votre projet</h3>
+                            <p>Insérez le lien de votre projet pour créer un QR code portable :</p>
+                            <div class="input-group">
+                                <input type="text" class="input" id="project-link" placeholder=" ">
+                                <label for="project-link" class="input-label">Lien du projet</label>
+                            </div>
+                            <button class="btn btn-pill" id="generate-qr">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                    <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="white"/>
+                                    <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="white"/>
+                                    <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="white"/>
+                                    <path d="M21 19H19V21H21V19Z" fill="white"/>
+                                    <path d="M15 13H13V15H15V13Z" fill="white"/>
+                                    <path d="M17 15H15V17H17V15Z" fill="white"/>
+                                    <path d="M15 17H13V19H15V17Z" fill="white"/>
+                                    <path d="M17 19H15V21H17V19Z" fill="white"/>
+                                    <path d="M19 17H17V19H19V17Z" fill="white"/>
+                                    <path d="M19 13H17V15H19V13Z" fill="white"/>
+                                    <path d="M21 15H19V17H21V15Z" fill="white"/>
+                                </svg>
+                                Générer QR Code
+                            </button>
+                            
+                            <div class="qr-container" id="qr-output" style="display: none;">
+                                <div class="qr-code" id="qr-code">
+                                    <!-- QR code sera généré ici -->
+                                </div>
+                                <p class="qr-info">
+                                    Ce QR code est votre "carte d'identité" de projet. Conservez-le précieusement (impression, stockage sécurisé) pour retrouver votre projet même sans appareil personnel.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <a href="#accueil" class="nav-item active" data-page="accueil">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Accueil</div>
+            </a>
+            <a href="#explorer" class="nav-item" data-page="explorer">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Explorateur</div>
+            </a>
+            <a href="#projet" class="nav-item" data-page="projet">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 10H9V17H7V10ZM11 7H13V17H11V7ZM15 13H17V17H15V13Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Espace Projet</div>
+            </a>
+        </div>
+
+        <!-- Bottom Sheet -->
+        <div class="bottom-sheet" id="add-sheet">
+            <div class="bottom-sheet-header">
+                <div class="bottom-sheet-handle"></div>
+                <h3 class="bottom-sheet-title">Ajouter un élément</h3>
+                <button class="btn-icon close-sheet-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="bottom-sheet-body">
+                <div class="card">
+                    <h4>Créer un dossier</h4>
+                    <div class="input-group">
+                        <input type="text" class="input" id="folder-name" placeholder=" ">
+                        <label for="folder-name" class="input-label">Nom du dossier</label>
+                    </div>
+                    <button class="btn btn-pill">Créer</button>
+                </div>
+                
+                <div class="card">
+                    <h4>Ajouter un lien</h4>
+                    <div class="input-group">
+                        <input type="text" class="input" id="link-name" placeholder=" ">
+                        <label for="link-name" class="input-label">Nom du lien</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="url" class="input" id="link-url" placeholder=" ">
+                        <label for="link-url" class="input-label">URL</label>
+                    </div>
+                    <button class="btn btn-pill">Ajouter</button>
+                </div>
+                
+                <div class="card">
+                    <h4>Ajouter un texte</h4>
+                    <div class="input-group">
+                        <input type="text" class="input" id="text-name" placeholder=" ">
+                        <label for="text-name" class="input-label">Titre</label>
+                    </div>
+                    <div class="input-group">
+                        <textarea class="input" id="text-content" rows="4" placeholder=" "></textarea>
+                        <label for="text-content" class="input-label">Contenu</label>
+                    </div>
+                    <button class="btn btn-pill">Ajouter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel Actions -->
+        <div class="side-panel" id="actions-panel">
+            <div class="side-panel-header">
+                <h3 class="side-panel-title">Actions</h3>
+                <button class="btn-icon close-panel-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="side-panel-body">
+                <div class="card">
+                    <button class="btn btn-pill" id="add-item-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white"/>
+                        </svg>
+                        Ajouter un élément
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h4>Importer/Exporter</h4>
+                    <button class="btn" id="import-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M5 20H19V18H5V20ZM19 9H15V3H9V9H5L12 16L19 9Z" fill="white"/>
+                        </svg>
+                        Importer JSON
+                    </button>
+                    <button class="btn" id="export-btn" style="margin-top: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z" fill="white"/>
+                        </svg>
+                        Exporter JSON
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h4>Affichage</h4>
+                    <button class="btn btn-flat" id="view-grid-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M3 3V11H11V3H3ZM9 9H5V5H9V9ZM3 13V21H11V13H3ZM9 19H5V15H9V19ZM13 3V11H21V3H13ZM19 9H15V5H19V9ZM13 13V21H21V13H13ZM19 19H15V15H19V19Z" fill="currentColor"/>
+                        </svg>
+                        Grille
+                    </button>
+                    <button class="btn btn-flat" id="view-list-btn" style="margin-top: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M3 13H5V11H3V13ZM3 17H5V15H3V17ZM3 9H5V7H3V9ZM7 13H21V11H7V13ZM7 17H21V15H7V17ZM7 7V9H21V7H7Z" fill="currentColor"/>
+                        </svg>
+                        Liste
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h4>Tri</h4>
+                    <button class="btn btn-flat" id="sort-az-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M14.94 4.66H19.94L12.94 19.66H7.94L14.94 4.66ZM10.25 19.66V16.05L5.07 7.59H3.25V4.66H11.13V7.59H9.1L14.07 16.05V19.66H10.25Z" fill="currentColor"/>
+                        </svg>
+                        A → Z
+                    </button>
+                    <button class="btn btn-flat" id="sort-za-btn" style="margin-top: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M7.41 8.58L12 13.17L16.59 8.58L18 10L12 16L6 10L7.41 8.58Z" fill="currentColor"/>
+                        </svg>
+                        Z → A
+                    </button>
+                    <button class="btn btn-flat" id="sort-new-btn" style="margin-top: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20ZM12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
+                        </svg>
+                        Plus récent
+                    </button>
+                    <button class="btn btn-flat" id="sort-old-btn" style="margin-top: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20ZM12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
+                        </svg>
+                        Plus ancien
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h4>Éléments masqués</h4>
+                    <div class="input-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="show-hidden" style="margin-right: 8px;">
+                            <span>Afficher les éléments masqués</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toast-container"></div>
+
+        <!-- Search Panel -->
+        <div class="side-panel" id="search-panel">
+            <div class="side-panel-header">
+                <h3 class="side-panel-title">Recherche</h3>
+                <button class="btn-icon close-search-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="side-panel-body">
+                <div class="input-group">
+                    <input type="text" class="input" id="search-input" placeholder=" ">
+                    <label for="search-input" class="input-label">Rechercher...</label>
+                </div>
+                
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <div class="tab-item active" data-tab="search-all">Tous</div>
+                        <div class="tab-item" data-tab="search-folders">Dossiers</div>
+                        <div class="tab-item" data-tab="search-links">Liens</div>
+                        <div class="tab-item" data-tab="search-texts">Textes</div>
+                    </div>
+                    
+                    <div class="tabs-content">
+                        <div class="tab-panel active" data-tab-content="search-all">
+                            <p>Saisissez un terme de recherche ci-dessus.</p>
+                        </div>
+                        
+                        <div class="tab-panel" data-tab-content="search-folders">
+                            <p>Recherche limitée aux dossiers.</p>
+                        </div>
+                        
+                        <div class="tab-panel" data-tab-content="search-links">
+                            <p>Recherche limitée aux liens.</p>
+                        </div>
+                        
+                        <div class="tab-panel" data-tab-content="search-texts">
+                            <p>Recherche limitée aux textes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <div style="position: fixed; right: 1rem; bottom: calc(var(--bottom-nav-height) + 1rem); z-index: 99;">
+            <button class="btn-icon" id="fab-btn" style="width: 56px; height: 56px; background-color: var(--accent-color); color: white; box-shadow: var(--shadow-elevation-2);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables for DOM elements
+            const app = document.getElementById('app');
+            const main = document.querySelector('main');
+            const pages = document.querySelectorAll('.page');
+            const navItems = document.querySelectorAll('.nav-item, .sidebar-nav-item');
+            const sidePanel = document.querySelector('.side-panel');
+            const appBar = document.querySelector('.app-bar');
+            const toggleSidebarBtn = document.querySelector('.toggle-sidebar-btn');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+            const addSheet = document.getElementById('add-sheet');
+            const fabBtn = document.getElementById('fab-btn');
+            const closeSheetBtn = document.querySelector('.close-sheet-btn');
+            const actionsPanel = document.getElementById('actions-panel');
+            const moreBtn = document.querySelector('.more-btn');
+            const closePanelBtn = document.querySelector('.close-panel-btn');
+            const searchPanel = document.getElementById('search-panel');
+            const searchBtn = document.querySelector('.search-btn');
+            const closeSearchBtn = document.querySelector('.close-search-btn');
+            const tabItems = document.querySelectorAll('.tab-item');
+            const accordions = document.querySelectorAll('.accordion-header');
+            const treeToggles = document.querySelectorAll('.tree-toggle');
+            const toastContainer = document.getElementById('toast-container');
+            const generateQrBtn = document.getElementById('generate-qr');
+            const qrOutput = document.getElementById('qr-output');
+            const qrCode = document.getElementById('qr-code');
+            const addItemBtn = document.getElementById('add-item-btn');
+            const viewGridBtn = document.getElementById('view-grid-btn');
+            const viewListBtn = document.getElementById('view-list-btn');
+            
+            // Mobile detection
+            const isMobile = window.innerWidth < 768;
+            
+            // Theme management
+            function toggleTheme() {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                
+                // Show toast
+                showToast(newTheme === 'dark' ? 'Mode sombre activé' : 'Mode clair activé');
+            }
+            
+            themeToggleBtn.addEventListener('click', toggleTheme);
+            
+            // Page navigation
+            function navigateTo(pageId) {
+                pages.forEach(page => {
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                        page.classList.remove('previous');
+                    } else {
+                        if (page.classList.contains('active')) {
+                            page.classList.add('previous');
+                        } else {
+                            page.classList.remove('previous');
+                        }
+                        page.classList.remove('active');
+                    }
+                });
+                
+                navItems.forEach(item => {
+                    if (item.getAttribute('data-page') === pageId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                // On mobile, close the side panel after navigation
+                if (isMobile && sidePanel.classList.contains('open')) {
+                    sidePanel.classList.remove('open');
+                }
+            }
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = item.getAttribute('data-page');
+                    navigateTo(pageId);
+                    history.pushState({ page: pageId }, '', item.getAttribute('href'));
+                });
+            });
+            
+            // Handle browser back/forward
+            window.addEventListener('popstate', (e) => {
+                if (e.state && e.state.page) {
+                    navigateTo(e.state.page);
+                }
+            });
+            
+            // Side panel toggle
+            function toggleSidePanel() {
+                if (window.innerWidth >= 1024) {
+                    // Desktop behavior - toggle collapsed state
+                    sidePanel.classList.toggle('collapsed');
+                    appBar.classList.toggle('full-width');
+                    main.classList.toggle('full-width');
+                } else {
+                    // Mobile behavior - open/close panel
+                    sidePanel.classList.toggle('open');
+                }
+            }
+            
+            toggleSidebarBtn.addEventListener('click', toggleSidePanel);
+            closeSidebarBtn.addEventListener('click', () => {
+                if (window.innerWidth < 1024) {
+                    sidePanel.classList.remove('open');
+                }
+            });
+            
+            // Bottom sheet
+            function toggleBottomSheet() {
+                addSheet.classList.toggle('open');
+            }
+            
+            fabBtn.addEventListener('click', toggleBottomSheet);
+            closeSheetBtn.addEventListener('click', toggleBottomSheet);
+            
+            // Add touch/drag for bottom sheet
+            let startY, currentY, initialOffsetY;
+            let isDragging = false;
+            
+            addSheet.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                startY = touch.clientY;
+                initialOffsetY = addSheet.getBoundingClientRect().top;
+                isDragging = true;
+                
+                addSheet.style.transition = 'none';
+            });
+            
+            addSheet.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                
+                const touch = e.touches[0];
+                currentY = touch.clientY;
+                const deltaY = currentY - startY;
+                
+                if (deltaY > 0) { // Only allow dragging down
+                    addSheet.style.transform = `translateY(${deltaY}px)`;
+                }
+            });
+            
+            addSheet.addEventListener('touchend', () => {
+                isDragging = false;
+                addSheet.style.transition = `transform var(--transition-speed)`;
+                
+                if (currentY - startY > 100) { // If dragged down more than 100px
+                    addSheet.classList.remove('open');
+                } else {
+                    addSheet.style.transform = '';
+                }
+            });
+            
+            // Actions panel
+            moreBtn.addEventListener('click', () => {
+                actionsPanel.classList.add('open');
+            });
+            
+            closePanelBtn.addEventListener('click', () => {
+                actionsPanel.classList.remove('open');
+            });
+            
+            // Search panel
+            searchBtn.addEventListener('click', () => {
+                searchPanel.classList.add('open');
+                document.getElementById('search-input').focus();
+            });
+            
+            closeSearchBtn.addEventListener('click', () => {
+                searchPanel.classList.remove('open');
+            });
+            
+            // Add item button
+            addItemBtn.addEventListener('click', () => {
+                actionsPanel.classList.remove('open');
+                toggleBottomSheet();
+            });
+            
+            // Tabs interface
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabGroup = tab.parentElement.querySelectorAll('.tab-item');
+                    const tabId = tab.getAttribute('data-tab');
+                    const tabContent = document.querySelectorAll(`[data-tab-content="${tabId}"]`);
+                    
+                    tabGroup.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const allTabContent = document.querySelectorAll(`[data-tab-content]`);
+                    allTabContent.forEach(content => {
+                        if (content.getAttribute('data-tab-content') === tabId) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Accordions
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', () => {
+                    const parent = accordion.parentElement;
+                    parent.classList.toggle('active');
+                });
+            });
+            
+            // File tree toggles
+            treeToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    toggle.classList.toggle('open');
+                });
+            });
+            
+            // Show toast message
+            function showToast(message, type = 'default') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let icon = '';
+                if (type === 'success') {
+                    icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+                    </svg>`;
+                } else if (type === 'error') {
+                    icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                    </svg>`;
+                }
+                
+                toast.innerHTML = `
+                    ${icon}
+                    <div class="toast-message">${message}</div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Remove toast after 3 seconds
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(100%)';
+                    
+                    // Remove from DOM after animation
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            // QR code generator (simulated)
+            generateQrBtn.addEventListener('click', () => {
+                const projectLink = document.getElementById('project-link').value;
+                
+                if (!projectLink) {
+                    showToast('Veuillez entrer un lien valide', 'error');
+                    return;
+                }
+                
+                // Simple QR code simulation
+                qrCode.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px;">
+                        ${Array(25).fill().map((_, i) => {
+                            // Generate a random pattern that looks like a QR code
+                            const shouldFill = Math.random() > 0.5;
+                            return `<div style="background-color: ${shouldFill ? 'black' : 'white'};"></div>`;
+                        }).join('')}
+                    </div>
+                `;
+                
+                qrOutput.style.display = 'flex';
+                showToast('QR code généré avec succès', 'success');
+            });
+            
+            // Change view mode (grid/list)
+            viewGridBtn.addEventListener('click', () => {
+                const itemsContainer = document.querySelector('.items-grid');
+                if (itemsContainer) {
+                    itemsContainer.classList.remove('items-list');
+                    itemsContainer.classList.add('items-grid');
+                }
+                showToast('Vue en grille activée');
+            });
+            
+            viewListBtn.addEventListener('click', () => {
+                const itemsContainer = document.querySelector('.items-grid');
+                if (itemsContainer) {
+                    itemsContainer.classList.remove('items-grid');
+                    itemsContainer.classList.add('items-list');
+                }
+                showToast('Vue en liste activée');
+            });
+            
+            // Export button simulation
+            const exportBtn = document.getElementById('export-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    // Get current date and time for filename
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    
+                    const fileName = `backup_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.json`;
+                    
+                    showToast(`Fichier ${fileName} exporté avec succès`, 'success');
+                });
+            }
+            
+            // Import button simulation
+            const importBtn = document.getElementById('import-btn');
+            if (importBtn) {
+                importBtn.addEventListener('click', () => {
+                    showToast('Importation de fichier JSON réussie', 'success');
+                });
+            }
+            
+            // Initialize page based on URL hash
+            const initPage = () => {
+                let pageId = 'accueil'; // Default
+                const hash = window.location.hash;
+                
+                if (hash) {
+                    const targetPageId = hash.substring(1);
+                    const targetPage = document.getElementById(targetPageId);
+                    
+                    if (targetPage) {
+                        pageId = targetPageId;
+                    }
+                }
+                
+                navigateTo(pageId);
+                history.replaceState({ page: pageId }, '', `#${pageId}`);
+            };
+            
+            initPage();
+            
+            // App bar scroll effect
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    appBar.classList.add('scrolled');
+                } else {
+                    appBar.classList.remove('scrolled');
+                }
+            });
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                const isNowMobile = window.innerWidth < 768;
+                
+                if (isNowMobile !== isMobile) {
+                    location.reload(); // Reload to adapt layout correctly
+                }
+            });
+            
+            // Explorer items click handler
+            const explorerItems = document.querySelectorAll('.explorer-item');
+            explorerItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const type = item.getAttribute('data-type');
+                    const name = item.querySelector('.item-name').textContent;
+                    
+                    if (type === 'folder') {
+                        // Update breadcrumb
+                        const breadcrumb = document.querySelector('.path-breadcrumb');
+                        const currentItems = breadcrumb.querySelectorAll('.path-item');
+                        
+                        // Remove active class from current
+                        currentItems.forEach(item => item.classList.remove('active'));
+                        
+                        // Add new breadcrumb item
+                        const newItem = document.createElement('div');
+                        newItem.className = 'path-item active';
+                        newItem.innerHTML = `
+                            <span class="path-separator">/</span>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                            </svg>
+                            <span>${name}</span>
+                        `;
+                        
+                        breadcrumb.appendChild(newItem);
+                        
+                        // Show empty folder message
+                        const tabContent = document.querySelector('.tab-panel.active');
+                        if (tabContent) {
+                            tabContent.innerHTML = `
+                                <div class="empty-folder-message" style="text-align: center; padding: 3rem 0;">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1rem; opacity: 0.6;">
+                                        <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                                    </svg>
+                                    <p>Ce dossier est vide</p>
+                                    <button class="btn btn-pill" style="margin-top: 1rem;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white"/>
+                                        </svg>
+                                        Ajouter un élément
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else if (type === 'link') {
+                        showToast(`Ouverture du lien: ${name}`);
+                    } else if (type === 'text') {
+                        showToast(`Ouverture du texte: ${name}`);
+                    }
+                });
+            });
+        
+          
+          // Fonction pour ajuster la hauteur du conteneur tabs-content
+function adjustExplorerHeight() {
+    const explorerContainer = document.querySelector('.explorer-container');
+    const tabsContainer = document.querySelector('.tabs-container');
+    const bottomNav = document.querySelector('.bottom-nav');
+    const appBar = document.querySelector('.app-bar');
+    
+    if (explorerContainer && tabsContainer) {
+        const windowHeight = window.innerHeight;
+        const bottomNavHeight = bottomNav ? bottomNav.offsetHeight : 0;
+        const appBarHeight = appBar ? appBar.offsetHeight : 0;
+        
+        // Calculer la hauteur disponible
+        const availableHeight = windowHeight - appBarHeight - bottomNavHeight - 20; // 20px pour les marges
+        
+        // Appliquer la hauteur
+        explorerContainer.style.maxHeight = `${availableHeight}px`;
+        tabsContainer.style.maxHeight = `${availableHeight - 60}px`; // 60px pour breadcrumb et autres éléments
+    }
+}
+
+// Appeler la fonction lors du chargement et du redimensionnement
+adjustExplorerHeight();
+window.addEventListener('resize', adjustExplorerHeight);
+
+// Appeler également lors du changement d'onglet dans l'explorateur
+document.querySelectorAll('.tab-item[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+        setTimeout(adjustExplorerHeight, 100); // Délai pour permettre le rendu
+    });
+});
+
+          
+        });
+    </script>
+</body>
+</html>
