@@ -1127,6 +1127,258 @@
     }
 }
 
+    
+    /* Nouvelle interface de création d'éléments */
+.creation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-speed), opacity var(--transition-speed);
+    transform: translateY(100%);
+    opacity: 0;
+    overflow: hidden;
+}
+
+.creation-overlay.active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.creation-header {
+    height: var(--app-bar-height);
+    background-color: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    position: relative;
+}
+
+.creation-path {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-tertiary);
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.creation-path::-webkit-scrollbar {
+    display: none;
+}
+
+.creation-options {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+}
+
+.creation-option {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    background-color: var(--bg-secondary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.creation-option:hover {
+    background-color: var(--bg-tertiary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevation-2);
+}
+
+.creation-option-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+.creation-option-content {
+    flex: 1;
+}
+
+.creation-option-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.creation-option-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Interfaces de création spécifiques */
+.folder-creation, .link-creation, .text-creation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-speed), opacity var(--transition-speed);
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.folder-creation.active, .link-creation.active, .text-creation.active {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.folder-creation-content, .link-creation-content {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Éditeur de texte */
+.text-editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.text-editor-toolbar {
+    display: flex;
+    padding: 0.5rem;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--bg-tertiary);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.text-editor-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+.toolbar-btn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: var(--button-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-btn:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--bg-tertiary);
+    margin: 0 0.5rem;
+}
+
+.text-editor {
+    flex: 1;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    overflow-y: auto;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--text-primary);
+    font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+.text-editor:focus {
+    outline: none;
+}
+
+.creation-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+/* Animation de transition */
+.slide-in-right {
+    animation: slideInRight var(--transition-speed) forwards;
+}
+
+.slide-out-right {
+    animation: slideOutRight var(--transition-speed) forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* Adaptations responsives */
+@media (max-width: 768px) {
+    .creation-options {
+        padding: 1rem;
+    }
+    
+    .creation-option {
+        padding: 1rem;
+    }
+    
+    .creation-option-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 1rem;
+    }
+    
+    .folder-creation-content, .link-creation-content {
+        padding: 1rem;
+    }
+}
+
     </style>
 </head>
 <body data-theme="dark">
@@ -1827,542 +2079,900 @@
                 </svg>
             </button>
         </div>
+    
+    <!-- Nouvelle interface de création d'éléments -->
+<div class="creation-overlay" id="creation-overlay">
+    <div class="creation-header">
+        <div class="back-btn btn-icon" id="creation-back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <h3>Ajouter un élément</h3>
+        <div class="btn-icon"></div> <!-- Élément vide pour l'équilibre -->
+    </div>
+    
+    <div class="creation-path" id="creation-path">
+        Accueil
+    </div>
+    
+    <div class="creation-options">
+        <div class="creation-option" id="folder-option">
+            <div class="creation-option-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="white"/>
+                </svg>
+            </div>
+            <div class="creation-option-content">
+                <div class="creation-option-title">Dossier</div>
+                <div class="creation-option-description">Créer un nouveau dossier pour organiser vos liens et fichiers.</div>
+            </div>
+        </div>
+        
+        <div class="creation-option" id="link-option">
+            <div class="creation-option-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z" fill="white"/>
+                </svg>
+            </div>
+            <div class="creation-option-content">
+                <div class="creation-option-title">Lien</div>
+                <div class="creation-option-description">Ajouter un nouveau lien vers un site web ou une ressource en ligne.</div>
+            </div>
+        </div>
+        
+        <div class="creation-option" id="text-option">
+            <div class="creation-option-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="white"/>
+                </svg>
+            </div>
+            <div class="creation-option-content">
+                <div class="creation-option-title">Texte</div>
+                <div class="creation-option-description">Créer une note ou un document texte avec un éditeur complet.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interface de création de dossier -->
+<div class="folder-creation" id="folder-creation">
+    <div class="creation-header">
+        <div class="back-btn btn-icon" id="folder-creation-back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <h3>Nouveau dossier</h3>
+        <div class="btn-icon"></div>
+    </div>
+    
+    <div class="folder-creation-content">
+        <div class="card glass">
+            <h3>Créer un dossier</h3>
+            <p>Donnez un nom à votre nouveau dossier pour l'organiser.</p>
+            <div class="input-group" style="margin-top: 1.5rem;">
+                <input type="text" class="input" id="new-folder-name" placeholder=" ">
+                <label for="new-folder-name" class="input-label">Nom du dossier</label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="creation-footer">
+        <button class="btn btn-flat" id="folder-creation-cancel">Annuler</button>
+        <button class="btn" id="folder-creation-save">Créer</button>
+    </div>
+</div>
+
+<!-- Interface de création de lien -->
+<div class="link-creation" id="link-creation">
+    <div class="creation-header">
+        <div class="back-btn btn-icon" id="link-creation-back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <h3 id="link-creation-title">Nouveau lien - Étape 1/2</h3>
+        <div class="btn-icon"></div>
+    </div>
+    
+    <div class="link-creation-content">
+        <div class="card glass link-step-1">
+            <h3>Entrez le lien</h3>
+            <p>Collez l'adresse URL que vous souhaitez enregistrer.</p>
+            <div class="input-group" style="margin-top: 1.5rem;">
+                <input type="url" class="input" id="new-link-url" placeholder=" ">
+                <label for="new-link-url" class="input-label">URL du lien</label>
+            </div>
+        </div>
+        
+        <div class="card glass link-step-2" style="display: none;">
+            <h3>Nommez votre lien</h3>
+            <p>Donnez un nom à ce lien pour le retrouver facilement.</p>
+            <div class="input-group" style="margin-top: 1.5rem;">
+                <input type="text" class="input" id="new-link-name" placeholder=" ">
+                <label for="new-link-name" class="input-label">Nom du lien</label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="creation-footer">
+        <button class="btn btn-flat" id="link-creation-cancel">Annuler</button>
+        <button class="btn" id="link-step-next">Continuer</button>
+        <button class="btn" id="link-step-save" style="display: none;">Enregistrer</button>
+    </div>
+</div>
+
+<!-- Interface de création de texte -->
+<div class="text-creation" id="text-creation">
+    <div class="creation-header">
+        <div class="back-btn btn-icon" id="text-creation-back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <h3 id="text-creation-title">Nouveau texte</h3>
+        <div class="btn-icon" id="text-save-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="text-editor-container">
+        <div class="text-editor-toolbar">
+            <button class="toolbar-btn" data-command="bold">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.6 10.79C16.57 10.12 17.25 9.02 17.25 8C17.25 5.74 15.5 4 13.25 4H7V18H14.04C16.13 18 17.75 16.3 17.75 14.21C17.75 12.69 16.89 11.39 15.6 10.79ZM10 6.5H13C13.83 6.5 14.5 7.17 14.5 8C14.5 8.83 13.83 9.5 13 9.5H10V6.5ZM13.5 15.5H10V12.5H13.5C14.33 12.5 15 13.17 15 14C15 14.83 14.33 15.5 13.5 15.5Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="italic">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 4V7H12.21L8.79 15H6V18H14V15H11.79L15.21 7H18V4H10Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="underline">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 17C15.31 17 18 14.31 18 11V3H15.5V11C15.5 12.93 13.93 14.5 12 14.5C10.07 14.5 8.5 12.93 8.5 11V3H6V11C6 14.31 8.69 17 12 17ZM5 19V21H19V19H5Z" fill="currentColor"/>
+                </svg>
+            </button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <button class="toolbar-btn" data-command="justifyLeft">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 15H3V17H15V15ZM15 7H3V9H15V7ZM3 13H21V11H3V13ZM3 21H21V19H3V21ZM3 3V5H21V3H3Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="justifyCenter">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 15V17H17V15H7ZM3 21H21V19H3V21ZM3 13H21V11H3V13ZM7 7V9H17V7H7ZM3 3V5H21V3H3Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="justifyRight">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 21H21V19H3V21ZM9 17H21V15H9V17ZM3 13H21V11H3V13ZM9 9H21V7H9V9ZM3 3V5H21V3H3Z" fill="currentColor"/>
+                </svg>
+            </button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <button class="toolbar-btn" data-command="insertUnorderedList">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 10.5C3.17 10.5 2.5 11.17 2.5 12C2.5 12.83 3.17 13.5 4 13.5C4.83 13.5 5.5 12.83 5.5 12C5.5 11.17 4.83 10.5 4 10.5ZM4 4.5C3.17 4.5 2.5 5.17 2.5 6C2.5 6.83 3.17 7.5 4 7.5C4.83 7.5 5.5 6.83 5.5 6C5.5 5.17 4.83 4.5 4 4.5ZM4 16.5C3.17 16.5 2.5 17.18 2.5 18C2.5 18.82 3.18 19.5 4 19.5C4.82 19.5 5.5 18.82 5.5 18C5.5 17.18 4.83 16.5 4 16.5ZM7 19H21V17H7V19ZM7 13H21V11H7V13ZM7 5V7H21V5H7Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="insertOrderedList">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 17H4V17.5H3V18.5H4V19H2V20H5V16H2V17ZM3 8H4V4H2V5H3V8ZM2 11H3.8L2 13.1V14H5V13H3.2L5 10.9V10H2V11ZM7 5V7H21V5H7ZM7 19H21V17H7V19ZM7 13H21V11H7V13Z" fill="currentColor"/>
+                </svg>
+            </button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <button class="toolbar-btn" data-command="undo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.5 8C9.85 8 7.45 8.99 5.6 10.6L2 7V16H11L7.38 12.38C8.77 11.22 10.54 10.5 12.5 10.5C16.04 10.5 19.05 12.81 20.1 16L22.47 15.22C21.08 11.03 17.15 8 12.5 8Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" data-command="redo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8C6.85 8 2.92 11.03 1.54 15.22L3.9 16C4.95 12.81 7.95 10.5 11.5 10.5C13.45 10.5 15.23 11.22 16.62 12.38L13 16H22V7L18.4 10.6Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="text-editor" id="text-editor" contenteditable="true"></div>
+    </div>
+    
+    <div class="text-naming-dialog" id="text-naming-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1200; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="width: 90%; max-width: 400px; padding: 1.5rem;">
+            <h3>Enregistrer le texte</h3>
+            <p>Donnez un nom à votre note pour la retrouver facilement.</p>
+            <div class="input-group" style="margin: 1.5rem 0;">
+                <input type="text" class="input" id="new-text-name" placeholder=" ">
+                <label for="new-text-name" class="input-label">Nom du document</label>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                <button class="btn btn-flat" id="text-naming-cancel">Annuler</button>
+                <button class="btn" id="text-naming-save">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Variables for DOM elements
-            const app = document.getElementById('app');
-            const main = document.querySelector('main');
-            const pages = document.querySelectorAll('.page');
-            const navItems = document.querySelectorAll('.nav-item, .sidebar-nav-item');
-            const sidePanel = document.querySelector('.side-panel');
-            const appBar = document.querySelector('.app-bar');
-            const toggleSidebarBtn = document.querySelector('.toggle-sidebar-btn');
-            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
-            const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-            const addSheet = document.getElementById('add-sheet');
-            const fabBtn = document.getElementById('fab-btn');
-            const closeSheetBtn = document.querySelector('.close-sheet-btn');
-            const actionsPanel = document.getElementById('actions-panel');
-            const moreBtn = document.querySelector('.more-btn');
-            const closePanelBtn = document.querySelector('.close-panel-btn');
-            const searchPanel = document.getElementById('search-panel');
-            const searchBtn = document.querySelector('.search-btn');
-            const closeSearchBtn = document.querySelector('.close-search-btn');
-            const tabItems = document.querySelectorAll('.tab-item');
-            const accordions = document.querySelectorAll('.accordion-header');
-            const treeToggles = document.querySelectorAll('.tree-toggle');
-            const toastContainer = document.getElementById('toast-container');
-            const generateQrBtn = document.getElementById('generate-qr');
-            const qrOutput = document.getElementById('qr-output');
-            const qrCode = document.getElementById('qr-code');
-            const addItemBtn = document.getElementById('add-item-btn');
-            const viewGridBtn = document.getElementById('view-grid-btn');
-            const viewListBtn = document.getElementById('view-list-btn');
-            
-            // Mobile detection
-            const isMobile = window.innerWidth < 768;
-            
-            // Theme management
-            function toggleTheme() {
-                const currentTheme = document.body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.body.setAttribute('data-theme', newTheme);
-                
-                // Show toast
-                showToast(newTheme === 'dark' ? 'Mode sombre activé' : 'Mode clair activé');
-            }
-            
-            themeToggleBtn.addEventListener('click', toggleTheme);
-            
-            // Page navigation
-            function navigateTo(pageId) {
-                pages.forEach(page => {
-                    if (page.id === pageId) {
-                        page.classList.add('active');
-                        page.classList.remove('previous');
-                    } else {
-                        if (page.classList.contains('active')) {
-                            page.classList.add('previous');
-                        } else {
-                            page.classList.remove('previous');
-                        }
-                        page.classList.remove('active');
-                    }
-                });
-                
-                navItems.forEach(item => {
-                    if (item.getAttribute('data-page') === pageId) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                    }
-                });
-                
-                // On mobile, close the side panel after navigation
-                if (isMobile && sidePanel.classList.contains('open')) {
-                    sidePanel.classList.remove('open');
-                }
-            }
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = item.getAttribute('data-page');
-                    navigateTo(pageId);
-                    history.pushState({ page: pageId }, '', item.getAttribute('href'));
-                });
-            });
-            
-            // Handle browser back/forward
-            window.addEventListener('popstate', (e) => {
-                if (e.state && e.state.page) {
-                    navigateTo(e.state.page);
-                }
-            });
-            
-            // Side panel toggle
-            function toggleSidePanel() {
-                if (window.innerWidth >= 1024) {
-                    // Desktop behavior - toggle collapsed state
-                    sidePanel.classList.toggle('collapsed');
-                    appBar.classList.toggle('full-width');
-                    main.classList.toggle('full-width');
-                } else {
-                    // Mobile behavior - open/close panel
-                    sidePanel.classList.toggle('open');
-                }
-            }
-            
-            toggleSidebarBtn.addEventListener('click', toggleSidePanel);
-            closeSidebarBtn.addEventListener('click', () => {
-                if (window.innerWidth < 1024) {
-                    sidePanel.classList.remove('open');
-                }
-            });
-            
-            // Bottom sheet
-            function toggleBottomSheet() {
-                addSheet.classList.toggle('open');
-            }
-            
-            fabBtn.addEventListener('click', toggleBottomSheet);
-            closeSheetBtn.addEventListener('click', toggleBottomSheet);
-            
-            // Add touch/drag for bottom sheet
-let startY, currentY, initialTop;
-let isDragging = false;
-
-// Récupérer le header pour les événements tactiles
-const bottomSheetHeader = document.querySelector('.bottom-sheet-header');
-
-// Gestionnaire d'événements pour le header du bottom sheet
-bottomSheetHeader.addEventListener('touchstart', handleTouchStart);
-bottomSheetHeader.addEventListener('mousedown', handleMouseStart);
-
-// Ajout des gestionnaires d'événements pour le document entier
-document.addEventListener('touchmove', handleTouchMove, { passive: false });
-document.addEventListener('touchend', handleTouchEnd);
-document.addEventListener('mousemove', handleMouseMove);
-document.addEventListener('mouseup', handleMouseEnd);
-
-function handleTouchStart(e) {
-    startY = e.touches[0].clientY;
-    handleStart();
-}
-
-function handleMouseStart(e) {
-    startY = e.clientY;
-    handleStart();
+    // Variables for DOM elements
+    const app = document.getElementById('app');
+    const main = document.querySelector('main');
+    const pages = document.querySelectorAll('.page');
+    const navItems = document.querySelectorAll('.nav-item, .sidebar-nav-item');
+    const sidePanel = document.querySelector('.side-panel');
+    const appBar = document.querySelector('.app-bar');
+    const toggleSidebarBtn = document.querySelector('.toggle-sidebar-btn');
+    const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+    const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+    const addSheet = document.getElementById('add-sheet');
+    const fabBtn = document.getElementById('fab-btn');
+    const closeSheetBtn = document.querySelector('.close-sheet-btn');
+    const actionsPanel = document.getElementById('actions-panel');
+    const moreBtn = document.querySelector('.more-btn');
+    const closePanelBtn = document.querySelector('.close-panel-btn');
+    const searchPanel = document.getElementById('search-panel');
+    const searchBtn = document.querySelector('.search-btn');
+    const closeSearchBtn = document.querySelector('.close-search-btn');
+    const tabItems = document.querySelectorAll('.tab-item');
+    const accordions = document.querySelectorAll('.accordion-header');
+    const treeToggles = document.querySelectorAll('.tree-toggle');
+    const toastContainer = document.getElementById('toast-container');
+    const generateQrBtn = document.getElementById('generate-qr');
+    const qrOutput = document.getElementById('qr-output');
+    const qrCode = document.getElementById('qr-code');
+    const addItemBtn = document.getElementById('add-item-btn');
+    const viewGridBtn = document.getElementById('view-grid-btn');
+    const viewListBtn = document.getElementById('view-list-btn');
     
-    // Empêcher la sélection de texte pendant le drag
-    e.preventDefault();
-}
-
-function handleStart() {
-    isDragging = true;
+    // Éléments de l'interface de création
+    const creationOverlay = document.getElementById('creation-overlay');
+    const creationBackBtn = document.getElementById('creation-back-btn');
+    const creationPath = document.getElementById('creation-path');
     
-    // Capture la position actuelle du bottom sheet
-    const rect = addSheet.getBoundingClientRect();
-    initialTop = rect.top;
+    // Options de création
+    const folderOption = document.getElementById('folder-option');
+    const linkOption = document.getElementById('link-option');
+    const textOption = document.getElementById('text-option');
     
-    // Désactiver les transitions pour un mouvement fluide
-    addSheet.style.transition = 'none';
+    // Interface de création de dossier
+    const folderCreation = document.getElementById('folder-creation');
+    const folderCreationBackBtn = document.getElementById('folder-creation-back-btn');
+    const folderCreationCancel = document.getElementById('folder-creation-cancel');
+    const folderCreationSave = document.getElementById('folder-creation-save');
+    const newFolderName = document.getElementById('new-folder-name');
     
-    // Ajouter une classe pour indiquer l'état de drag
-    addSheet.classList.add('dragging');
-}
-
-function handleTouchMove(e) {
-    if (!isDragging) return;
+    // Interface de création de lien
+    const linkCreation = document.getElementById('link-creation');
+    const linkCreationBackBtn = document.getElementById('link-creation-back-btn');
+    const linkCreationCancel = document.getElementById('link-creation-cancel');
+    const linkCreationTitle = document.getElementById('link-creation-title');
+    const linkStepNext = document.getElementById('link-step-next');
+    const linkStepSave = document.getElementById('link-step-save');
+    const linkStep1 = document.querySelector('.link-step-1');
+    const linkStep2 = document.querySelector('.link-step-2');
+    const newLinkUrl = document.getElementById('new-link-url');
+    const newLinkName = document.getElementById('new-link-name');
     
-    currentY = e.touches[0].clientY;
-    handleMove(e);
-}
-
-function handleMouseMove(e) {
-    if (!isDragging) return;
+    // Interface de création de texte
+    const textCreation = document.getElementById('text-creation');
+    const textCreationBackBtn = document.getElementById('text-creation-back-btn');
+    const textEditor = document.getElementById('text-editor');
+    const textSaveBtn = document.getElementById('text-save-btn');
+    const textNamingDialog = document.getElementById('text-naming-dialog');
+    const textNamingCancel = document.getElementById('text-naming-cancel');
+    const textNamingSave = document.getElementById('text-naming-save');
+    const newTextName = document.getElementById('new-text-name');
+    const toolbarBtns = document.querySelectorAll('.toolbar-btn');
     
-    currentY = e.clientY;
-    handleMove(e);
-}
-
-function handleMove(e) {
-    if (!isDragging) return;
+    // Mobile detection
+    const isMobile = window.innerWidth < 768;
     
-    // Calculer le déplacement
-    const deltaY = currentY - startY;
+    // Initialisation du chemin actuel
+    let currentPath = 'Accueil';
     
-    // Limite le déplacement vers le haut (ne pas dépasser le haut du viewport)
-    const maxHeight = window.innerHeight * 0.9; // 90% de la hauteur de la fenêtre
-    const minTop = window.innerHeight - maxHeight;
-    
-    let newTop = initialTop + deltaY;
-    if (newTop < minTop) newTop = minTop;
-    
-    // Calculer la nouvelle position en transformY
-    // Plus la valeur est élevée, plus le sheet descend
-    const sheetHeight = addSheet.offsetHeight;
-    const windowHeight = window.innerHeight;
-    const translateY = newTop - windowHeight + sheetHeight;
-    
-    // Appliquer la transformation
-    addSheet.style.transform = `translateY(${translateY > 0 ? translateY : 0}px)`;
-    
-    // Empêcher le défilement de la page pendant le drag
-    e.preventDefault();
-}
-
-function handleTouchEnd() {
-    if (!isDragging) return;
-    handleEnd();
-}
-
-function handleMouseEnd() {
-    if (!isDragging) return;
-    handleEnd();
-}
-
-function handleEnd() {
-    isDragging = false;
-    
-    // Restaurer les transitions
-    addSheet.style.transition = `transform var(--transition-speed)`;
-    
-    // Retirer la classe de drag
-    addSheet.classList.remove('dragging');
-    
-    // Calculer la distance parcourue
-    const deltaY = currentY - startY;
-    
-    // Seuil de détection pour fermer/ouvrir (30% de la hauteur du sheet)
-    const threshold = addSheet.offsetHeight * 0.3;
-    
-    if (deltaY > threshold) {
-        // Si tiré vers le bas, fermer le panel
-        addSheet.classList.remove('open');
-        addSheet.style.transform = '';
-    } else {
-        // Sinon, remettre en position ouverte
-        addSheet.style.transform = '';
+    // Theme management
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        
+        // Show toast
+        showToast(newTheme === 'dark' ? 'Mode sombre activé' : 'Mode clair activé');
     }
-}
-
-            
-            // Actions panel
-            moreBtn.addEventListener('click', () => {
-                actionsPanel.classList.add('open');
-            });
-            
-            closePanelBtn.addEventListener('click', () => {
-                actionsPanel.classList.remove('open');
-            });
-            
-            // Search panel
-            searchBtn.addEventListener('click', () => {
-                searchPanel.classList.add('open');
-                document.getElementById('search-input').focus();
-            });
-            
-            closeSearchBtn.addEventListener('click', () => {
-                searchPanel.classList.remove('open');
-            });
-            
-            // Add item button
-            addItemBtn.addEventListener('click', () => {
-                actionsPanel.classList.remove('open');
-                toggleBottomSheet();
-            });
-            
-            // Tabs interface
-            tabItems.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabGroup = tab.parentElement.querySelectorAll('.tab-item');
-                    const tabId = tab.getAttribute('data-tab');
-                    const tabContent = document.querySelectorAll(`[data-tab-content="${tabId}"]`);
-                    
-                    tabGroup.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    const allTabContent = document.querySelectorAll(`[data-tab-content]`);
-                    allTabContent.forEach(content => {
-                        if (content.getAttribute('data-tab-content') === tabId) {
-                            content.classList.add('active');
-                        } else {
-                            content.classList.remove('active');
-                        }
-                    });
-                });
-            });
-            
-            // Accordions
-            accordions.forEach(accordion => {
-                accordion.addEventListener('click', () => {
-                    const parent = accordion.parentElement;
-                    parent.classList.toggle('active');
-                });
-            });
-            
-            // File tree toggles
-            treeToggles.forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    toggle.classList.toggle('open');
-                });
-            });
-            
-            // Show toast message
-            function showToast(message, type = 'default') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                
-                let icon = '';
-                if (type === 'success') {
-                    icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
-                    </svg>`;
-                } else if (type === 'error') {
-                    icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
-                    </svg>`;
-                }
-                
-                toast.innerHTML = `
-                    ${icon}
-                    <div class="toast-message">${message}</div>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Remove toast after 3 seconds
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(100%)';
-                    
-                    // Remove from DOM after animation
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 300);
-                }, 3000);
-            }
-            
-            // QR code generator (simulated)
-            generateQrBtn.addEventListener('click', () => {
-                const projectLink = document.getElementById('project-link').value;
-                
-                if (!projectLink) {
-                    showToast('Veuillez entrer un lien valide', 'error');
-                    return;
-                }
-                
-                // Simple QR code simulation
-                qrCode.innerHTML = `
-                    <div style="width: 100%; height: 100%; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px;">
-                        ${Array(25).fill().map((_, i) => {
-                            // Generate a random pattern that looks like a QR code
-                            const shouldFill = Math.random() > 0.5;
-                            return `<div style="background-color: ${shouldFill ? 'black' : 'white'};"></div>`;
-                        }).join('')}
-                    </div>
-                `;
-                
-                qrOutput.style.display = 'flex';
-                showToast('QR code généré avec succès', 'success');
-            });
-            
-            // Change view mode (grid/list)
-            viewGridBtn.addEventListener('click', () => {
-                const itemsContainer = document.querySelector('.items-grid');
-                if (itemsContainer) {
-                    itemsContainer.classList.remove('items-list');
-                    itemsContainer.classList.add('items-grid');
-                }
-                showToast('Vue en grille activée');
-            });
-            
-            viewListBtn.addEventListener('click', () => {
-                const itemsContainer = document.querySelector('.items-grid');
-                if (itemsContainer) {
-                    itemsContainer.classList.remove('items-grid');
-                    itemsContainer.classList.add('items-list');
-                }
-                showToast('Vue en liste activée');
-            });
-            
-            // Export button simulation
-            const exportBtn = document.getElementById('export-btn');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', () => {
-                    // Get current date and time for filename
-                    const now = new Date();
-                    const year = now.getFullYear();
-                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                    const day = String(now.getDate()).padStart(2, '0');
-                    const hours = String(now.getHours()).padStart(2, '0');
-                    const minutes = String(now.getMinutes()).padStart(2, '0');
-                    const seconds = String(now.getSeconds()).padStart(2, '0');
-                    
-                    const fileName = `backup_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.json`;
-                    
-                    showToast(`Fichier ${fileName} exporté avec succès`, 'success');
-                });
-            }
-            
-            // Import button simulation
-            const importBtn = document.getElementById('import-btn');
-            if (importBtn) {
-                importBtn.addEventListener('click', () => {
-                    showToast('Importation de fichier JSON réussie', 'success');
-                });
-            }
-            
-            // Initialize page based on URL hash
-            const initPage = () => {
-                let pageId = 'accueil'; // Default
-                const hash = window.location.hash;
-                
-                if (hash) {
-                    const targetPageId = hash.substring(1);
-                    const targetPage = document.getElementById(targetPageId);
-                    
-                    if (targetPage) {
-                        pageId = targetPageId;
-                    }
-                }
-                
-                navigateTo(pageId);
-                history.replaceState({ page: pageId }, '', `#${pageId}`);
-            };
-            
-            initPage();
-            
-            // App bar scroll effect
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 10) {
-                    appBar.classList.add('scrolled');
+    
+    themeToggleBtn.addEventListener('click', toggleTheme);
+    
+    // Page navigation
+    function navigateTo(pageId) {
+        pages.forEach(page => {
+            if (page.id === pageId) {
+                page.classList.add('active');
+                page.classList.remove('previous');
+            } else {
+                if (page.classList.contains('active')) {
+                    page.classList.add('previous');
                 } else {
-                    appBar.classList.remove('scrolled');
+                    page.classList.remove('previous');
                 }
-            });
+                page.classList.remove('active');
+            }
+        });
+        
+        navItems.forEach(item => {
+            if (item.getAttribute('data-page') === pageId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        
+        // On mobile, close the side panel after navigation
+        if (isMobile && sidePanel.classList.contains('open')) {
+            sidePanel.classList.remove('open');
+        }
+    }
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = item.getAttribute('data-page');
+            navigateTo(pageId);
+            history.pushState({ page: pageId }, '', item.getAttribute('href'));
+        });
+    });
+    
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.page) {
+            navigateTo(e.state.page);
+        }
+    });
+    
+    // Side panel toggle
+    function toggleSidePanel() {
+        if (window.innerWidth >= 1024) {
+            // Desktop behavior - toggle collapsed state
+            sidePanel.classList.toggle('collapsed');
+            appBar.classList.toggle('full-width');
+            main.classList.toggle('full-width');
+        } else {
+            // Mobile behavior - open/close panel
+            sidePanel.classList.toggle('open');
+        }
+    }
+    
+    toggleSidebarBtn.addEventListener('click', toggleSidePanel);
+    closeSidebarBtn.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+            sidePanel.classList.remove('open');
+        }
+    });
+    
+    // Nouvelle interface de création d'éléments
+    function showCreationOverlay() {
+        // Mettre à jour le chemin actuel
+        creationPath.textContent = currentPath;
+        
+        // Afficher l'interface de création
+        creationOverlay.classList.add('active');
+        
+        // Masquer le bottom sheet obsolète
+        if (addSheet.classList.contains('open')) {
+            addSheet.classList.remove('open');
+        }
+    }
+    
+    function hideCreationOverlay() {
+        creationOverlay.classList.remove('active');
+    }
+    
+    // Gestionnaires d'événements pour l'interface de création
+    creationBackBtn.addEventListener('click', hideCreationOverlay);
+    
+    // Option de création de dossier
+    folderOption.addEventListener('click', () => {
+        folderCreation.classList.add('active');
+        setTimeout(() => {
+            newFolderName.focus();
+        }, 300);
+    });
+    
+    folderCreationBackBtn.addEventListener('click', () => {
+        folderCreation.classList.remove('active');
+    });
+    
+    folderCreationCancel.addEventListener('click', () => {
+        folderCreation.classList.remove('active');
+        hideCreationOverlay();
+    });
+    
+    folderCreationSave.addEventListener('click', () => {
+        const folderName = newFolderName.value.trim();
+        
+        if (folderName) {
+            // Simuler la création du dossier
+            showToast(`Dossier "${folderName}" créé avec succès`, 'success');
             
-            // Handle resize
-            window.addEventListener('resize', () => {
-                const isNowMobile = window.innerWidth < 768;
+            // Réinitialiser le champ
+            newFolderName.value = '';
+            
+            // Fermer les interfaces
+            folderCreation.classList.remove('active');
+            hideCreationOverlay();
+        } else {
+            showToast('Veuillez entrer un nom de dossier', 'error');
+        }
+    });
+    
+    // Option de création de lien
+    linkOption.addEventListener('click', () => {
+        // Réinitialiser à l'étape 1
+        linkCreationTitle.textContent = 'Nouveau lien - Étape 1/2';
+        linkStep1.style.display = 'block';
+        linkStep2.style.display = 'none';
+        linkStepNext.style.display = 'block';
+        linkStepSave.style.display = 'none';
+        
+        linkCreation.classList.add('active');
+        setTimeout(() => {
+            newLinkUrl.focus();
+        }, 300);
+    });
+    
+    linkCreationBackBtn.addEventListener('click', () => {
+        // Vérifier si on est à l'étape 2, revenir à l'étape 1
+        if (linkStep2.style.display === 'block') {
+            linkCreationTitle.textContent = 'Nouveau lien - Étape 1/2';
+            linkStep1.style.display = 'block';
+            linkStep2.style.display = 'none';
+            linkStepNext.style.display = 'block';
+            linkStepSave.style.display = 'none';
+        } else {
+            // Sinon, revenir à la sélection du type
+            linkCreation.classList.remove('active');
+        }
+    });
+    
+    linkCreationCancel.addEventListener('click', () => {
+        linkCreation.classList.remove('active');
+        hideCreationOverlay();
+    });
+    
+    linkStepNext.addEventListener('click', () => {
+        const linkUrl = newLinkUrl.value.trim();
+        
+        if (linkUrl) {
+            // Passer à l'étape 2
+            linkCreationTitle.textContent = 'Nouveau lien - Étape 2/2';
+            linkStep1.style.display = 'none';
+            linkStep2.style.display = 'block';
+            linkStepNext.style.display = 'none';
+            linkStepSave.style.display = 'block';
+            
+            // Focus sur le nom du lien
+            setTimeout(() => {
+                newLinkName.focus();
                 
-                if (isNowMobile !== isMobile) {
-                    location.reload(); // Reload to adapt layout correctly
+                // Essayer d'extraire un nom à partir de l'URL
+                try {
+                    const url = new URL(linkUrl);
+                    newLinkName.value = url.hostname.replace('www.', '');
+                } catch (e) {
+                    // URL invalide, ignorer
+                }
+            }, 300);
+        } else {
+            showToast('Veuillez entrer une URL valide', 'error');
+        }
+    });
+    
+    linkStepSave.addEventListener('click', () => {
+        const linkUrl = newLinkUrl.value.trim();
+        const linkName = newLinkName.value.trim();
+        
+        if (linkUrl && linkName) {
+            // Simuler l'ajout du lien
+            showToast(`Lien "${linkName}" ajouté avec succès`, 'success');
+            
+            // Réinitialiser les champs
+            newLinkUrl.value = '';
+            newLinkName.value = '';
+            
+            // Fermer les interfaces
+            linkCreation.classList.remove('active');
+            hideCreationOverlay();
+        } else {
+            showToast('Veuillez remplir tous les champs', 'error');
+        }
+    });
+    
+    // Option de création de texte
+    textOption.addEventListener('click', () => {
+        textCreation.classList.add('active');
+        setTimeout(() => {
+            textEditor.focus();
+        }, 300);
+    });
+    
+    textCreationBackBtn.addEventListener('click', () => {
+        if (textEditor.textContent.trim() !== '') {
+            if (confirm('Voulez-vous quitter sans enregistrer votre texte ?')) {
+                textEditor.innerHTML = '';
+                textCreation.classList.remove('active');
+            }
+        } else {
+            textCreation.classList.remove('active');
+        }
+    });
+    
+    // Fonctionnalités de l'éditeur de texte
+    toolbarBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            const command = button.getAttribute('data-command');
+            
+            if (command) {
+                document.execCommand(command, false, null);
+                textEditor.focus();
+            }
+        });
+    });
+    
+    // Enregistrement du texte
+    textSaveBtn.addEventListener('click', () => {
+        if (textEditor.innerHTML.trim() === '') {
+            showToast('Veuillez écrire du texte avant d\'enregistrer', 'error');
+            return;
+        }
+        
+        textNamingDialog.style.display = 'flex';
+        setTimeout(() => {
+            newTextName.focus();
+        }, 300);
+    });
+    
+    textNamingCancel.addEventListener('click', () => {
+        textNamingDialog.style.display = 'none';
+    });
+    
+    textNamingSave.addEventListener('click', () => {
+        const textName = newTextName.value.trim();
+        
+        if (textName) {
+            // Simuler l'enregistrement du texte
+            showToast(`Texte "${textName}" enregistré avec succès`, 'success');
+            
+            // Réinitialiser les champs
+            textEditor.innerHTML = '';
+            newTextName.value = '';
+            
+            // Fermer les interfaces
+            textNamingDialog.style.display = 'none';
+            textCreation.classList.remove('active');
+            hideCreationOverlay();
+        } else {
+            showToast('Veuillez entrer un nom pour votre texte', 'error');
+        }
+    });
+    
+    // Remplacer les événements du bouton d'ajout et du bottom sheet
+    fabBtn.addEventListener('click', showCreationOverlay);
+    addItemBtn.addEventListener('click', () => {
+        actionsPanel.classList.remove('open');
+        showCreationOverlay();
+    });
+    
+    // Bottom sheet
+    function toggleBottomSheet() {
+        addSheet.classList.toggle('open');
+    }
+    
+    closeSheetBtn.addEventListener('click', toggleBottomSheet);
+    
+    // Actions panel
+    moreBtn.addEventListener('click', () => {
+        actionsPanel.classList.add('open');
+    });
+    
+    closePanelBtn.addEventListener('click', () => {
+        actionsPanel.classList.remove('open');
+    });
+    
+    // Search panel
+    searchBtn.addEventListener('click', () => {
+        searchPanel.classList.add('open');
+        document.getElementById('search-input').focus();
+    });
+    
+    closeSearchBtn.addEventListener('click', () => {
+        searchPanel.classList.remove('open');
+    });
+    
+    // Tabs interface
+    tabItems.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabGroup = tab.parentElement.querySelectorAll('.tab-item');
+            const tabId = tab.getAttribute('data-tab');
+            const tabContent = document.querySelectorAll(`[data-tab-content="${tabId}"]`);
+            
+            tabGroup.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            const allTabContent = document.querySelectorAll(`[data-tab-content]`);
+            allTabContent.forEach(content => {
+                if (content.getAttribute('data-tab-content') === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
                 }
             });
+        });
+    });
+    
+    // Accordions
+    accordions.forEach(accordion => {
+        accordion.addEventListener('click', () => {
+            const parent = accordion.parentElement;
+            parent.classList.toggle('active');
+        });
+    });
+    
+    // File tree toggles
+    treeToggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+        });
+    });
+    
+    // Show toast message
+    function showToast(message, type = 'default') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = '';
+        if (type === 'success') {
+            icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+            </svg>`;
+        } else if (type === 'error') {
+            icon = `<svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+            </svg>`;
+        }
+        
+        toast.innerHTML = `
+            ${icon}
+            <div class="toast-message">${message}</div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(100%)';
             
-            // Explorer items click handler
-            const explorerItems = document.querySelectorAll('.explorer-item');
-            explorerItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const type = item.getAttribute('data-type');
-                    const name = item.querySelector('.item-name').textContent;
-                    
-                    if (type === 'folder') {
-                        // Update breadcrumb
-                        const breadcrumb = document.querySelector('.path-breadcrumb');
-                        const currentItems = breadcrumb.querySelectorAll('.path-item');
-                        
-                        // Remove active class from current
-                        currentItems.forEach(item => item.classList.remove('active'));
-                        
-                        // Add new breadcrumb item
-                        const newItem = document.createElement('div');
-                        newItem.className = 'path-item active';
-                        newItem.innerHTML = `
-                            <span class="path-separator">/</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            // Remove from DOM after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // QR code generator (simulated)
+    generateQrBtn.addEventListener('click', () => {
+        const projectLink = document.getElementById('project-link').value;
+        
+        if (!projectLink) {
+            showToast('Veuillez entrer un lien valide', 'error');
+            return;
+        }
+        
+        // Simple QR code simulation
+        qrCode.innerHTML = `
+            <div style="width: 100%; height: 100%; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px;">
+                ${Array(25).fill().map((_, i) => {
+                    // Generate a random pattern that looks like a QR code
+                    const shouldFill = Math.random() > 0.5;
+                    return `<div style="background-color: ${shouldFill ? 'black' : 'white'};"></div>`;
+                }).join('')}
+            </div>
+        `;
+        
+        qrOutput.style.display = 'flex';
+        showToast('QR code généré avec succès', 'success');
+    });
+    
+    // Change view mode (grid/list)
+    viewGridBtn.addEventListener('click', () => {
+        const itemsContainer = document.querySelector('.items-grid');
+        if (itemsContainer) {
+            itemsContainer.classList.remove('items-list');
+            itemsContainer.classList.add('items-grid');
+        }
+        showToast('Vue en grille activée');
+    });
+    
+    viewListBtn.addEventListener('click', () => {
+        const itemsContainer = document.querySelector('.items-grid');
+        if (itemsContainer) {
+            itemsContainer.classList.remove('items-grid');
+            itemsContainer.classList.add('items-list');
+        }
+        showToast('Vue en liste activée');
+    });
+    
+    // Export button simulation
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            // Get current date and time for filename
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const fileName = `backup_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.json`;
+            
+            showToast(`Fichier ${fileName} exporté avec succès`, 'success');
+        });
+    }
+    
+    // Import button simulation
+    const importBtn = document.getElementById('import-btn');
+    if (importBtn) {
+        importBtn.addEventListener('click', () => {
+            showToast('Importation de fichier JSON réussie', 'success');
+        });
+    }
+    
+    // Initialize page based on URL hash
+    const initPage = () => {
+        let pageId = 'accueil'; // Default
+        const hash = window.location.hash;
+        
+        if (hash) {
+            const targetPageId = hash.substring(1);
+            const targetPage = document.getElementById(targetPageId);
+            
+            if (targetPage) {
+                pageId = targetPageId;
+            }
+        }
+        
+        navigateTo(pageId);
+        history.replaceState({ page: pageId }, '', `#${pageId}`);
+    };
+    
+    initPage();
+    
+    // App bar scroll effect
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+            appBar.classList.add('scrolled');
+        } else {
+            appBar.classList.remove('scrolled');
+        }
+    });
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+        const isNowMobile = window.innerWidth < 768;
+        
+        if (isNowMobile !== isMobile) {
+            location.reload(); // Reload to adapt layout correctly
+        }
+    });
+    
+    // Explorer items click handler
+    const explorerItems = document.querySelectorAll('.explorer-item');
+    explorerItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const type = item.getAttribute('data-type');
+            const name = item.querySelector('.item-name').textContent;
+            
+            if (type === 'folder') {
+                // Mettre à jour le chemin actuel
+                currentPath = currentPath + ' / ' + name;
+                
+                // Update breadcrumb
+                const breadcrumb = document.querySelector('.path-breadcrumb');
+                const currentItems = breadcrumb.querySelectorAll('.path-item');
+                
+                // Remove active class from current
+                currentItems.forEach(item => item.classList.remove('active'));
+                
+                // Add new breadcrumb item
+                const newItem = document.createElement('div');
+                newItem.className = 'path-item active';
+                newItem.innerHTML = `
+                    <span class="path-separator">/</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                    </svg>
+                    <span>${name}</span>
+                `;
+                
+                breadcrumb.appendChild(newItem);
+                
+                // Show empty folder message
+                const tabContent = document.querySelector('.tab-panel.active');
+                if (tabContent) {
+                    tabContent.innerHTML = `
+                        <div class="empty-folder-message" style="text-align: center; padding: 3rem 0;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1rem; opacity: 0.6;">
                                 <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
                             </svg>
-                            <span>${name}</span>
-                        `;
-                        
-                        breadcrumb.appendChild(newItem);
-                        
-                        // Show empty folder message
-                        const tabContent = document.querySelector('.tab-panel.active');
-                        if (tabContent) {
-                            tabContent.innerHTML = `
-                                <div class="empty-folder-message" style="text-align: center; padding: 3rem 0;">
-                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1rem; opacity: 0.6;">
-                                        <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
-                                    </svg>
-                                    <p>Ce dossier est vide</p>
-                                    <button class="btn btn-pill" style="margin-top: 1rem;">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
-                                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white"/>
-                                        </svg>
-                                        Ajouter un élément
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    } else if (type === 'link') {
-                        showToast(`Ouverture du lien: ${name}`);
-                    } else if (type === 'text') {
-                        showToast(`Ouverture du texte: ${name}`);
+                            <p>Ce dossier est vide</p>
+                            <button class="btn btn-pill add-empty-folder-btn" style="margin-top: 1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="white"/>
+                                </svg>
+                                Ajouter un élément
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Ajouter un gestionnaire pour le nouveau bouton d'ajout
+                    const addEmptyFolderBtn = document.querySelector('.add-empty-folder-btn');
+                    if (addEmptyFolderBtn) {
+                        addEmptyFolderBtn.addEventListener('click', showCreationOverlay);
                     }
-                });
-            });
-        
-          
-          // Fonction pour ajuster la hauteur du conteneur tabs-content
-function adjustExplorerHeight() {
-    const explorerContainer = document.querySelector('.explorer-container');
-    const tabsContainer = document.querySelector('.tabs-container');
-    const bottomNav = document.querySelector('.bottom-nav');
-    const appBar = document.querySelector('.app-bar');
+                }
+            } else if (type === 'link') {
+                showToast(`Ouverture du lien: ${name}`);
+            } else if (type === 'text') {
+                showToast(`Ouverture du texte: ${name}`);
+            }
+        });
+    });
     
-    if (explorerContainer && tabsContainer) {
-        const windowHeight = window.innerHeight;
-        const bottomNavHeight = bottomNav ? bottomNav.offsetHeight : 0;
-        const appBarHeight = appBar ? appBar.offsetHeight : 0;
+    // Fonction pour ajuster la hauteur du conteneur tabs-content
+    function adjustExplorerHeight() {
+        const explorerContainer = document.querySelector('.explorer-container');
+        const tabsContainer = document.querySelector('.tabs-container');
+        const bottomNav = document.querySelector('.bottom-nav');
+        const appBar = document.querySelector('.app-bar');
         
-        // Calculer la hauteur disponible
-        const availableHeight = windowHeight - appBarHeight - bottomNavHeight - 20; // 20px pour les marges
-        
-        // Appliquer la hauteur
-        explorerContainer.style.maxHeight = `${availableHeight}px`;
-        tabsContainer.style.maxHeight = `${availableHeight - 60}px`; // 60px pour breadcrumb et autres éléments
+        if (explorerContainer && tabsContainer) {
+            const windowHeight = window.innerHeight;
+            const bottomNavHeight = bottomNav ? bottomNav.offsetHeight : 0;
+            const appBarHeight = appBar ? appBar.offsetHeight : 0;
+            
+            // Calculer la hauteur disponible
+            const availableHeight = windowHeight - appBarHeight - bottomNavHeight - 20; // 20px pour les marges
+            
+            // Appliquer la hauteur
+            explorerContainer.style.maxHeight = `${availableHeight}px`;
+            tabsContainer.style.maxHeight = `${availableHeight - 60}px`; // 60px pour breadcrumb et autres éléments
+        }
     }
-}
-
-// Appeler la fonction lors du chargement et du redimensionnement
-adjustExplorerHeight();
-window.addEventListener('resize', adjustExplorerHeight);
-
-// Appeler également lors du changement d'onglet dans l'explorateur
-document.querySelectorAll('.tab-item[data-tab]').forEach(tab => {
-    tab.addEventListener('click', () => {
-        setTimeout(adjustExplorerHeight, 100); // Délai pour permettre le rendu
+    
+    // Appeler la fonction lors du chargement et du redimensionnement
+    adjustExplorerHeight();
+    window.addEventListener('resize', adjustExplorerHeight);
+    
+    // Appeler également lors du changement d'onglet dans l'explorateur
+    document.querySelectorAll('.tab-item[data-tab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            setTimeout(adjustExplorerHeight, 100); // Délai pour permettre le rendu
+        });
     });
 });
 
-          
-        });
     </script>
 </body>
 </html>
